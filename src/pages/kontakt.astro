@@ -1,0 +1,262 @@
+---
+/**
+ * Kontaktseite mit Formular und direkten Kontaktmöglichkeiten.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import ContactForm from '../components/ContactForm.astro';
+import Icon from '../components/Icon.astro';
+import { CONTACT, SITE } from '../data/site.mjs';
+
+const title = 'Kontakt: Kostenloses Erstgespräch | Saugy Solutions';
+const description =
+  'Nehmen Sie Kontakt mit Saugy Solutions auf: telefonisch, per E-Mail oder über das Anfrageformular. Das Erstgespräch ist kostenlos und unverbindlich.';
+
+const schema = {
+  '@type': 'ContactPage',
+  name: 'Kontakt – Saugy Solutions',
+  url: `${SITE.url}/kontakt/`,
+  inLanguage: SITE.locale,
+  about: { '@id': `${SITE.url}/#organisation` },
+};
+---
+
+<BaseLayout title={title} description={description} path="/kontakt/" schema={[schema]}>
+  <section class="page-hero">
+    <span class="decor decor--dots" aria-hidden="true"></span>
+    <span class="decor decor--glow decor--drift page-hero__glow" aria-hidden="true"></span>
+
+    <div class="container page-hero__inner">
+      <Breadcrumbs items={[{ label: 'Kontakt' }]} />
+
+      <p class="eyebrow">Kontakt</p>
+      <h1 class="page-hero__title">
+        Erzählen Sie uns von Ihrem <span class="accent-text">Vorhaben</span>
+      </h1>
+      <p class="page-hero__lead">
+        Eine grobe Idee genügt für den Anfang. Das Erstgespräch ist kostenlos und unverbindlich –
+        danach wissen Sie, ob und wie wir Ihnen weiterhelfen können.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--tight" aria-labelledby="formular-titel">
+    <div class="container">
+      <div class="contact">
+        <!-- Formular -->
+        <div class="contact__form">
+          <h2 id="formular-titel" class="contact__title">Anfrage senden</h2>
+          <p class="contact__intro">
+            Je mehr wir über Ihr Vorhaben wissen, desto konkreter können wir antworten. Pflichtfelder
+            sind gekennzeichnet – alles Weitere ist freiwillig.
+          </p>
+
+          <ContactForm />
+        </div>
+
+        <!-- Direkter Kontakt -->
+        <aside class="contact__aside">
+          <div class="contact__card">
+            <h2 class="contact__card-title">Lieber direkt?</h2>
+            <p class="contact__card-text">
+              Sie erreichen uns auch ohne Formular. Für viele Fragen ist ein kurzes Telefonat
+              ohnehin der schnellste Weg.
+            </p>
+
+            <ul class="contact__list">
+              <li>
+                <span class="contact__label">Ansprechpartner</span>
+                <span class="contact__value">{CONTACT.person}</span>
+              </li>
+              <li>
+                <span class="contact__label">Telefon</span>
+                <a class="contact__value contact__value--link" href={CONTACT.phoneHref}>
+                  <Icon name="phone" size={18} />
+                  {CONTACT.phone}
+                </a>
+              </li>
+              <li>
+                <span class="contact__label">E-Mail</span>
+                <a class="contact__value contact__value--link" href={CONTACT.emailHref}>
+                  <Icon name="at" size={18} />
+                  {CONTACT.email}
+                </a>
+              </li>
+            </ul>
+
+            <p class="contact__note">
+              <Icon name="clock" size={17} />
+              <span>{CONTACT.responseNote}</span>
+            </p>
+          </div>
+
+          <div class="contact__card contact__card--muted">
+            <h2 class="contact__card-title">Was Sie erwartet</h2>
+            <ul class="check-list">
+              <li>Ein kostenloses und unverbindliches Erstgespräch</li>
+              <li>Eine ehrliche Einschätzung, auch wenn daraus kein Auftrag entsteht</li>
+              <li>Eine schriftliche Offerte mit klarem Leistungsumfang, falls es weitergeht</li>
+              <li>Keine Werbung und keine Weitergabe Ihrer Angaben an Dritte</li>
+            </ul>
+          </div>
+
+          <p class="contact__privacy">
+            Wie wir mit Ihren Angaben umgehen, steht in der
+            <a href="/datenschutz/">Datenschutzerklärung</a>.
+          </p>
+        </aside>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(2rem, 1rem + 4vw, 3.5rem) clamp(1.5rem, 1rem + 2.5vw, 2.5rem);
+  }
+
+  .page-hero__glow {
+    top: -52%;
+    right: -18%;
+  }
+
+  .page-hero__inner {
+    position: relative;
+    z-index: var(--z-content);
+  }
+
+  .page-hero__title {
+    max-width: 18ch;
+  }
+
+  .page-hero__lead {
+    margin-top: var(--sp-5);
+    max-width: 56ch;
+    font-size: var(--fs-lg);
+    color: var(--c-text-muted);
+  }
+
+  /* ------------------------------------------------------------ Layout */
+  .contact {
+    display: grid;
+    gap: var(--sp-7);
+    align-items: start;
+  }
+
+  .contact__title {
+    font-size: var(--fs-xl);
+  }
+
+  .contact__intro {
+    margin: var(--sp-3) 0 var(--sp-6);
+    color: var(--c-text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  /* ---------------------------------------------------- Direkter Kontakt */
+  .contact__aside {
+    display: grid;
+    gap: var(--sp-5);
+  }
+
+  .contact__card {
+    padding: var(--sp-6);
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-lg);
+    background: linear-gradient(160deg, var(--c-surface-raised), var(--c-bg-alt));
+  }
+
+  .contact__card--muted {
+    background: var(--c-surface);
+  }
+
+  .contact__card-title {
+    font-size: var(--fs-lg);
+    margin-bottom: var(--sp-3);
+  }
+
+  .contact__card-text {
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+  }
+
+  .contact__list {
+    display: grid;
+    gap: var(--sp-4);
+    margin: var(--sp-5) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .contact__label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--c-text-muted);
+  }
+
+  .contact__value {
+    font-size: var(--fs-base);
+    font-weight: 700;
+    color: var(--c-text);
+  }
+
+  .contact__value--link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+  }
+
+  .contact__value--link:hover {
+    color: var(--c-accent);
+  }
+
+  .contact__value--link :global(svg) {
+    color: var(--c-accent);
+    flex: none;
+  }
+
+  .contact__note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    margin-top: var(--sp-6);
+    padding-top: var(--sp-5);
+    border-top: 1px solid var(--c-line);
+    font-size: var(--fs-xs);
+    color: var(--c-text-muted);
+  }
+
+  .contact__note :global(svg) {
+    flex: none;
+    margin-top: 0.1rem;
+    color: var(--c-accent);
+  }
+
+  .contact__privacy {
+    font-size: var(--fs-xs);
+    color: var(--c-text-muted);
+  }
+
+  .contact__privacy a {
+    color: var(--c-accent);
+  }
+
+  @media (min-width: 64rem) {
+    .contact {
+      grid-template-columns: 1.35fr 0.75fr;
+      gap: var(--sp-8);
+    }
+
+    .contact__aside {
+      position: sticky;
+      top: 7rem;
+    }
+  }
+</style>

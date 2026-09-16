@@ -1,0 +1,82 @@
+---
+/**
+ * Grundgerüst aller Seiten.
+ *
+ * Enthält <head>, Sprungmarke, Header, Hauptbereich und Footer. Seiten liefern
+ * nur noch ihren Inhalt sowie die Metadaten für die SEO-Komponente.
+ */
+import '../styles/global.css';
+import Seo from '../components/Seo.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE } from '../data/site.mjs';
+
+interface Props {
+  title: string;
+  description: string;
+  path: string;
+  noindex?: boolean;
+  schema?: Record<string, unknown>[];
+  image?: string;
+  /** Blendet den Header-Schatten aus, wenn die Seite mit einem Hero beginnt. */
+  heroPage?: boolean;
+}
+
+const { title, description, path, noindex, schema, image, heroPage = false } = Astro.props;
+---
+
+<!doctype html>
+<html lang="de-CH" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!--
+      Setzt sofort die Klasse `js`. Nur dann werden Inhalte für das Einblenden
+      beim Scrollen zunächst ausgeblendet. Ohne JavaScript bleibt alles
+      sichtbar. Läuft vor dem ersten Rendering, damit nichts aufblitzt.
+    -->
+    <script is:inline>
+      document.documentElement.classList.remove('no-js');
+      document.documentElement.classList.add('js');
+    </script>
+
+    <Seo title={title} description={description} path={path} noindex={noindex} schema={schema} image={image} />
+
+    <!-- Schriften vorladen: einzige wirklich kritische Ressource. -->
+    <link
+      rel="preload"
+      href="/fonts/manrope-latin-var.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <!-- Favicons und App-Icons, abgeleitet aus dem bestehenden Logo. -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content={SITE.themeColor} />
+    <meta name="format-detection" content="telephone=no" />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#inhalt">Direkt zum Inhalt</a>
+
+    <Header heroPage={heroPage} />
+
+    <main id="inhalt">
+      <slot />
+    </main>
+
+    <Footer />
+
+    <script>
+      // Interaktionen der Website: mobile Navigation, Header-Zustand beim
+      // Scrollen und das Einblenden von Abschnitten. Bewusst schlankes
+      // Vanilla-JavaScript ohne Bibliothek.
+      import '../scripts/main.js';
+    </script>
+  </body>
+</html>

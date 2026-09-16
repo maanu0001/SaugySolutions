@@ -1,0 +1,426 @@
+---
+/**
+ * Seitenkopf mit Hauptnavigation.
+ *
+ * Auf Desktop eine waagrechte Navigation, auf Mobilgeräten ein Menü, das per
+ * Tastatur bedienbar ist (aria-expanded, Fokusfalle, Escape schliesst).
+ * Beim Scrollen wird der Header kompakter und setzt sich vom Inhalt ab.
+ */
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+import { NAV, NAV_CTA, CONTACT } from '../data/site.mjs';
+
+interface Props {
+  heroPage?: boolean;
+}
+
+const { heroPage = false } = Astro.props;
+
+/** Aktueller Pfad, normalisiert auf abschliessenden Schrägstrich. */
+const current = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : `${Astro.url.pathname}/`;
+
+/** Markiert auch Unterseiten (z. B. /projekte/swisshub/ unter „Projekte“). */
+function isActive(href: string) {
+  if (href === '/') return current === '/';
+  return current === href || current.startsWith(href);
+}
+---
+
+<header class:list={['site-header', { 'site-header--hero': heroPage }]} data-header>
+  <div class="site-header__inner container">
+    <a href="/" class="site-header__brand" aria-label="Saugy Solutions – zur Startseite">
+      <Logo size={40} />
+    </a>
+
+    <!-- Desktop-Navigation -->
+    <nav class="site-nav" aria-label="Hauptnavigation">
+      <ul class="site-nav__list">
+        {
+          NAV.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                class:list={['site-nav__link', { 'is-active': isActive(item.href) }]}
+                aria-current={isActive(item.href) ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="site-header__actions">
+      <a href={CONTACT.phoneHref} class="site-header__phone">
+        <Icon name="phone" size={17} />
+        <span>{CONTACT.phone}</span>
+      </a>
+      <a href={NAV_CTA.href} class="btn btn--primary site-header__cta">
+        {NAV_CTA.label}
+        <Icon name="arrow-right" size={17} class="btn__icon" />
+      </a>
+
+      <button
+        type="button"
+        class="nav-toggle"
+        data-nav-toggle
+        aria-expanded="false"
+        aria-controls="haupt-menue"
+        aria-label="Menü öffnen"
+      >
+        <span class="nav-toggle__icon" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobiles Menü -->
+  <div class="nav-panel" id="haupt-menue" data-nav-panel hidden>
+    <nav class="nav-panel__inner container" aria-label="Menü">
+      <ul class="nav-panel__list">
+        {
+          NAV.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                class:list={['nav-panel__link', { 'is-active': isActive(item.href) }]}
+                aria-current={isActive(item.href) ? 'page' : undefined}
+              >
+                <span>{item.label}</span>
+                <Icon name="arrow-right" size={18} />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <div class="nav-panel__footer">
+        <a href={NAV_CTA.href} class="btn btn--primary btn--block btn--lg">
+          {NAV_CTA.label}
+        </a>
+        <div class="nav-panel__contact">
+          <a href={CONTACT.phoneHref}>
+            <Icon name="phone" size={17} />
+            {CONTACT.phone}
+          </a>
+          <a href={CONTACT.emailHref}>
+            <Icon name="at" size={17} />
+            {CONTACT.email}
+          </a>
+        </div>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header);
+    border-bottom: 1px solid transparent;
+    transition: background-color var(--t-base) var(--ease-out),
+      border-color var(--t-base) var(--ease-out), backdrop-filter var(--t-base) var(--ease-out);
+  }
+
+  /* Beim Scrollen kompakter, leicht abgesetzt und hinterlegt. */
+  .site-header.is-scrolled {
+    background: color-mix(in srgb, var(--c-bg) 82%, transparent);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border-bottom-color: var(--c-line);
+  }
+
+  /* Browser ohne backdrop-filter erhalten eine deckende Fläche. */
+  @supports not (backdrop-filter: blur(4px)) {
+    .site-header.is-scrolled {
+      background: var(--c-bg);
+    }
+  }
+
+  .site-header__inner {
+    /* Die Kopfleiste darf breiter sein als der Textbereich (74rem), damit
+       Logo, Navigation und Handlungsaufruf nebeneinander Platz haben. */
+    max-width: 84rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    padding-block: 1.05rem;
+    transition: padding-block var(--t-base) var(--ease-out);
+  }
+
+  .site-header.is-scrolled .site-header__inner {
+    padding-block: 0.6rem;
+  }
+
+  .site-header__brand {
+    text-decoration: none;
+    flex: none;
+  }
+
+  /* --- Desktop-Navigation ------------------------------------------------ */
+  .site-nav {
+    display: none;
+  }
+
+  .site-nav__list {
+    display: flex;
+    align-items: center;
+    gap: 0.1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-nav__link {
+    position: relative;
+    display: block;
+    /* Im mittleren Bereich knapper, damit der Header bei 1024 px passt. */
+    padding: 0.5rem 0.6rem;
+    border-radius: var(--r-full);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--c-text-muted);
+    text-decoration: none;
+    transition: color var(--t-fast) var(--ease-out), background-color var(--t-fast) var(--ease-out);
+  }
+
+  .site-nav__link:hover {
+    color: var(--c-text);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .site-nav__link.is-active {
+    color: var(--c-text);
+  }
+
+  /* Aktive Seite zusätzlich über eine Linie gekennzeichnet – nicht nur farblich. */
+  .site-nav__link.is-active::after {
+    content: '';
+    position: absolute;
+    left: 0.6rem;
+    right: 0.6rem;
+    bottom: 0.1rem;
+    height: 2px;
+    border-radius: var(--r-full);
+    background: linear-gradient(to right, var(--c-accent), var(--c-accent-2));
+  }
+
+  /* --- Aktionen ----------------------------------------------------------- */
+  .site-header__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    flex: none;
+  }
+
+  .site-header__phone {
+    display: none;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--c-text-muted);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .site-header__phone:hover {
+    color: var(--c-accent);
+  }
+
+  .site-header__cta {
+    display: none;
+  }
+
+  /* --- Menüschaltfläche --------------------------------------------------- */
+  .nav-toggle {
+    display: grid;
+    place-items: center;
+    width: 2.85rem;
+    height: 2.85rem;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-md);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--c-text);
+    transition: border-color var(--t-fast) var(--ease-out),
+      background-color var(--t-fast) var(--ease-out);
+  }
+
+  .nav-toggle:hover {
+    border-color: var(--c-accent);
+    color: var(--c-accent);
+  }
+
+  .nav-toggle__icon {
+    display: grid;
+    gap: 5px;
+    width: 20px;
+  }
+
+  .nav-toggle__icon span {
+    display: block;
+    height: 2px;
+    width: 100%;
+    border-radius: var(--r-full);
+    background: currentColor;
+    transition: transform var(--t-base) var(--ease-out), opacity var(--t-fast) var(--ease-out);
+  }
+
+  /* Verwandelt das Menüsymbol beim Öffnen in ein Kreuz. */
+  .site-header.is-nav-open .nav-toggle__icon span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  .site-header.is-nav-open .nav-toggle__icon span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .site-header.is-nav-open .nav-toggle__icon span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  /* --- Mobiles Menü -------------------------------------------------------- */
+  .nav-panel {
+    position: fixed;
+    inset: 0;
+    top: var(--header-height, 4.4rem);
+    z-index: var(--z-overlay);
+    background: var(--c-bg);
+    border-top: 1px solid var(--c-line);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out);
+  }
+
+  .nav-panel[hidden] {
+    display: none;
+  }
+
+  .site-header.is-nav-open .nav-panel {
+    opacity: 1;
+    transform: none;
+  }
+
+  .nav-panel__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-6);
+    padding-block: var(--sp-6) var(--sp-8);
+    min-height: 100%;
+  }
+
+  .nav-panel__list {
+    display: grid;
+    gap: 0.2rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nav-panel__link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    padding: 1rem 0.25rem;
+    border-bottom: 1px solid var(--c-line);
+    font-size: var(--fs-lg);
+    font-weight: 600;
+    color: var(--c-text);
+    text-decoration: none;
+  }
+
+  .nav-panel__link :global(svg) {
+    color: var(--c-text-muted);
+    transition: transform var(--t-base) var(--ease-out), color var(--t-base) var(--ease-out);
+  }
+
+  .nav-panel__link:hover :global(svg),
+  .nav-panel__link:focus-visible :global(svg) {
+    transform: translateX(4px);
+    color: var(--c-accent);
+  }
+
+  .nav-panel__link.is-active {
+    color: var(--c-accent);
+  }
+
+  .nav-panel__footer {
+    display: grid;
+    gap: var(--sp-5);
+    margin-top: auto;
+  }
+
+  .nav-panel__contact {
+    display: grid;
+    gap: var(--sp-3);
+    font-size: var(--fs-sm);
+  }
+
+  .nav-panel__contact a {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--c-text-muted);
+    text-decoration: none;
+  }
+
+  .nav-panel__contact a:hover {
+    color: var(--c-accent);
+  }
+
+  /* --- Ab Tablet ----------------------------------------------------------- */
+  @media (min-width: 46rem) {
+    .site-header__cta {
+      display: inline-flex;
+    }
+  }
+
+  /* --- Ab Desktop ----------------------------------------------------------
+     62rem (992 px): erst ab hier hat die waagrechte Navigation zuverlässig
+     Platz neben Logo und Handlungsaufruf. Darunter greift das mobile Menü. */
+  @media (min-width: 62rem) {
+    .site-nav {
+      display: block;
+    }
+
+    .nav-toggle {
+      display: none;
+    }
+
+  }
+
+  @media (min-width: 72rem) {
+    .site-nav__list {
+      gap: 0.35rem;
+    }
+
+    .site-nav__link {
+      padding: 0.5rem 0.85rem;
+    }
+
+    .site-nav__link.is-active::after {
+      left: 0.85rem;
+      right: 0.85rem;
+    }
+  }
+
+  @media (min-width: 84rem) {
+    .site-header__phone {
+      display: inline-flex;
+    }
+
+    .site-header__inner {
+      gap: var(--sp-6);
+    }
+  }
+</style>

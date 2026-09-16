@@ -1,0 +1,8 @@
+/* ==========================================================================
+   GLOBALE STILE – Einstiegspunkt
+   Reihenfolge: Tokens -> Basis -> Komponenten -> Formulare
+   ========================================================================== */
+@import './tokens.css';
+@import './base.css';
+@import './components.css';
+@import './forms.css';

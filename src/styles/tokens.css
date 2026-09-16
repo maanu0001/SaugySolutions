@@ -1,0 +1,131 @@
+/* ==========================================================================
+   DESIGNSYSTEM – TOKENS
+   Alle Farben, Abstände, Schriftgrössen und Bewegungsregeln an einem Ort.
+   Änderungen hier wirken sich auf die gesamte Website aus.
+   ========================================================================== */
+
+:root {
+  /* --- Farben: Flächen ------------------------------------------------- */
+  --c-bg: #06110f;
+  --c-bg-alt: #091815;
+  --c-surface: #0d201c;
+  --c-surface-raised: #112823;
+
+  /* --- Farben: Schrift -------------------------------------------------- */
+  --c-text: #f3faf8;
+  --c-text-muted: #a6bbb5;
+  /* Kontrast gegen --c-bg: 9.5:1 – erfüllt WCAG AA auch für kleine Schrift. */
+
+  /* --- Farben: Akzente --------------------------------------------------- */
+  --c-accent: #24e6b2;
+  --c-accent-2: #28c7d7;
+  --c-accent-soft: rgba(36, 230, 178, 0.12);
+  --c-accent-2-soft: rgba(40, 199, 215, 0.12);
+  /* Schrift auf Akzentflächen – bewusst sehr dunkel für hohen Kontrast. */
+  --c-on-accent: #04100d;
+
+  /* --- Farben: Linien und Zustände --------------------------------------- */
+  --c-line: rgba(255, 255, 255, 0.09);
+  --c-line-strong: rgba(255, 255, 255, 0.16);
+  --c-focus: #7cf5d5;
+  --c-danger: #ff8f8f;
+  --c-success: var(--c-accent);
+
+  /* --- Typografie -------------------------------------------------------- */
+  --font-sans: 'Manrope Variable', 'Manrope', system-ui, -apple-system,
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  /* Fliessende Schriftgrössen: skalieren zwischen 320px und 1440px Viewport. */
+  --fs-xs: clamp(0.8125rem, 0.79rem + 0.12vw, 0.875rem);
+  --fs-sm: clamp(0.9rem, 0.87rem + 0.15vw, 0.975rem);
+  --fs-base: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+  --fs-lg: clamp(1.1rem, 1.03rem + 0.35vw, 1.3rem);
+  --fs-xl: clamp(1.35rem, 1.2rem + 0.72vw, 1.75rem);
+  --fs-2xl: clamp(1.6rem, 1.33rem + 1.32vw, 2.4rem);
+  --fs-3xl: clamp(2rem, 1.55rem + 2.2vw, 3.3rem);
+  --fs-4xl: clamp(2.3rem, 1.75rem + 2.6vw, 3.65rem);
+
+  --lh-tight: 1.1;
+  --lh-snug: 1.25;
+  --lh-normal: 1.65;
+
+  --ls-tight: -0.022em;
+  --ls-wide: 0.08em;
+
+  /* Maximale Lesebreiten. */
+  --measure: 68ch;
+  --measure-narrow: 54ch;
+
+  /* --- Abstände ---------------------------------------------------------- */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 2.75rem;
+  --sp-8: 3.5rem;
+  --sp-9: 5rem;
+  --sp-10: 7rem;
+
+  /* Vertikaler Rhythmus der Abschnitte. */
+  --section-y: clamp(3.5rem, 2rem + 6.5vw, 7rem);
+  --gutter: clamp(1.15rem, 0.7rem + 2.2vw, 2.5rem);
+  --container: 74rem;
+  --container-narrow: 52rem;
+
+  /* --- Radien ------------------------------------------------------------ */
+  --r-sm: 6px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --r-xl: 26px;
+  --r-full: 999px;
+
+  /* --- Schatten und Leuchten --------------------------------------------- */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 14px 34px -18px rgba(0, 0, 0, 0.9);
+  --shadow-lg: 0 34px 70px -34px rgba(0, 0, 0, 0.95);
+  --glow-accent: 0 0 0 1px rgba(36, 230, 178, 0.28), 0 18px 48px -26px rgba(36, 230, 178, 0.55);
+
+  /* --- Bewegung ----------------------------------------------------------- */
+  --ease-out: cubic-bezier(0.22, 0.75, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0.05, 0.36, 1);
+  --t-fast: 140ms;
+  --t-base: 260ms;
+  --t-slow: 520ms;
+
+  /* Wird bei prefers-reduced-motion auf 0.01ms gesetzt (siehe unten). */
+  --motion-scale: 1;
+
+  /* --- Ebenen ------------------------------------------------------------- */
+  --z-decor: 0;
+  --z-content: 1;
+  --z-header: 50;
+  --z-overlay: 90;
+  --z-skiplink: 100;
+
+  color-scheme: dark;
+}
+
+/* --------------------------------------------------------------------------
+   Reduzierte Bewegung
+   Nutzerinnen und Nutzer, die weniger Animation wünschen, erhalten dieselbe
+   Website – nur ohne Bewegung. Inhalte bleiben immer sichtbar.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-scale: 0;
+    --t-fast: 1ms;
+    --t-base: 1ms;
+    --t-slow: 1ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

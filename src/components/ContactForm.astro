@@ -1,0 +1,207 @@
+---
+/**
+ * Kontaktformular.
+ *
+ * Grundsatz: Das Formular funktioniert vollständig OHNE JavaScript. Es sendet
+ * dann ganz normal an den PHP-Endpunkt, der auf die Dankeseite weiterleitet.
+ * Mit JavaScript wird derselbe Endpunkt per fetch angesprochen; die Seite
+ * bleibt stehen und zeigt Lade-, Erfolgs- und Fehlerzustände an.
+ *
+ * Validierung erfolgt doppelt: im Browser (sofortige Rückmeldung) und im
+ * PHP-Endpunkt (verbindlich).
+ */
+import Field from './Field.astro';
+import Icon from './Icon.astro';
+import { FORM } from '../data/site.mjs';
+import {
+  REQUEST_TYPES,
+  SERVICE_CHOICES,
+  START_CHOICES,
+  BUDGET_CHOICES,
+} from '../data/form.mjs';
+---
+
+<form
+  class="form contact-form"
+  id="kontaktformular"
+  method="post"
+  action={FORM.action}
+  novalidate
+  data-contact-form
+  data-success-page={FORM.successPage}
+>
+  <!-- Ohne JavaScript leitet der Endpunkt auf diese Seiten weiter. -->
+  <input type="hidden" name="redirect_success" value={FORM.successPage} />
+  <input type="hidden" name="redirect_error" value="/kontakt/?status=fehler#kontaktformular" />
+
+  <!--
+    Bot-Schutz 1: Honeypot. Für Menschen unsichtbar und aus dem
+    Screenreader-Fluss genommen. Wird es ausgefüllt, wird die Anfrage verworfen.
+  -->
+  <div class="form__trap" aria-hidden="true">
+    <label for="kf-website">Bitte dieses Feld leer lassen</label>
+    <input type="text" id="kf-website" name="website" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <!-- Bot-Schutz 2: Zeitstempel, den das Skript beim Laden setzt. -->
+  <input type="hidden" name="loaded_at" value="" data-loaded-at />
+
+  <fieldset class="form__fieldset">
+    <legend class="form__legend">Ihre Kontaktangaben</legend>
+    <div class="form__grid">
+      <Field
+        id="kf-name"
+        name="name"
+        label="Vor- und Nachname"
+        required
+        autocomplete="name"
+        maxlength={120}
+        placeholder="Maria Muster"
+      />
+      <Field
+        id="kf-email"
+        name="email"
+        label="E-Mail-Adresse"
+        type="email"
+        required
+        autocomplete="email"
+        maxlength={180}
+        placeholder="maria.muster@beispiel.ch"
+      />
+      <Field
+        id="kf-telefon"
+        name="phone"
+        label="Telefonnummer"
+        type="tel"
+        autocomplete="tel"
+        maxlength={40}
+        placeholder="+41 xx xxx xx xx"
+        hint="Nur nötig, wenn Sie einen Rückruf bevorzugen."
+      />
+      <Field
+        id="kf-firma"
+        name="company"
+        label="Unternehmen oder Organisation"
+        autocomplete="organization"
+        maxlength={140}
+      />
+    </div>
+  </fieldset>
+
+  <fieldset class="form__fieldset">
+    <legend class="form__legend">Ihr Anliegen</legend>
+    <div class="form__grid">
+      <Field
+        id="kf-anliegen"
+        name="topic"
+        label="Art der Anfrage"
+        type="select"
+        required
+        options={REQUEST_TYPES}
+      />
+      <Field
+        id="kf-leistung"
+        name="service"
+        label="Gewünschte Leistung"
+        type="select"
+        required
+        options={SERVICE_CHOICES}
+        placeholderOption="Bitte wählen"
+      />
+      <Field
+        id="kf-start"
+        name="start"
+        label="Gewünschter Projektstart"
+        type="select"
+        options={START_CHOICES}
+        placeholderOption="Keine Angabe"
+      />
+      <Field
+        id="kf-budget"
+        name="budget"
+        label="Budgetrahmen"
+        type="select"
+        options={BUDGET_CHOICES}
+        placeholderOption="Keine Angabe"
+        hint="Hilft uns, einen passenden Vorschlag zu machen."
+      />
+      <Field
+        id="kf-nachricht"
+        name="message"
+        label="Projektbeschreibung"
+        type="textarea"
+        required
+        full
+        maxlength={FORM.messageMaxLength}
+        placeholder="Worum geht es? Eine grobe Beschreibung genügt."
+        hint="Was möchten Sie erreichen? Gibt es bereits eine Website, eine Domain oder ein Zeitfenster?"
+      />
+    </div>
+  </fieldset>
+
+  <!-- Datenschutz-Zustimmung (Pflichtfeld) -->
+  <div class="field">
+    <div class="checkbox">
+      <input
+        class="checkbox__input"
+        type="checkbox"
+        id="kf-datenschutz"
+        name="privacy"
+        value="ja"
+        required
+        aria-describedby="kf-datenschutz-fehler"
+      />
+      <label class="checkbox__label" for="kf-datenschutz">
+        Ich bin einverstanden, dass meine Angaben zur Bearbeitung meiner Anfrage verwendet werden.
+        Die Daten werden nicht an Dritte weitergegeben. Weitere Informationen in der
+        <a href="/datenschutz/">Datenschutzerklärung</a>.
+        <span class="field__required" aria-hidden="true">*</span>
+        <span class="visually-hidden"> (Pflichtfeld)</span>
+      </label>
+    </div>
+    <p class="field__error" id="kf-datenschutz-fehler" data-error-for="kf-datenschutz" aria-live="polite"></p>
+  </div>
+
+  <!--
+    Statusbereich. `aria-live` sorgt dafür, dass Erfolgs- und Fehlermeldungen
+    auch mit Screenreader wahrgenommen werden.
+  -->
+  <div class="form__status" data-form-status role="status" aria-live="polite" hidden></div>
+
+  <div class="form__submit-row">
+    <button type="submit" class="btn btn--primary btn--lg" data-submit>
+      <span class="btn__spinner" aria-hidden="true"></span>
+      <span data-submit-label>Anfrage senden</span>
+      <Icon name="arrow-right" size={17} class="btn__icon" />
+    </button>
+    <p class="contact-form__required-note">
+      Mit <span class="field__required" aria-hidden="true">*</span> gekennzeichnete Felder sind Pflichtfelder.
+    </p>
+  </div>
+
+  <noscript>
+    <p class="noscript-note">
+      JavaScript ist deaktiviert. Das Formular funktioniert trotzdem: Nach dem Absenden werden Sie
+      auf eine Bestätigungsseite weitergeleitet.
+    </p>
+  </noscript>
+</form>
+
+<script>
+  import '../scripts/contact-form.js';
+</script>
+
+<style>
+  .contact-form {
+    padding: clamp(1.4rem, 0.9rem + 2.2vw, 2.5rem);
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-lg);
+    background: linear-gradient(168deg, var(--c-surface), var(--c-bg-alt));
+  }
+
+  .contact-form__required-note {
+    margin: 0;
+    font-size: var(--fs-xs);
+    color: var(--c-text-muted);
+  }
+</style>

@@ -1,0 +1,161 @@
+---
+/**
+ * Eigene 404-Seite.
+ *
+ * Apache liefert sie über `ErrorDocument /404.html` aus (siehe .htaccess).
+ * Damit das funktioniert, wird sie im Build als Datei `404.html` erzeugt.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/Button.astro';
+import Icon from '../components/Icon.astro';
+import { NAV, CONTACT } from '../data/site.mjs';
+
+const title = 'Seite nicht gefunden | Saugy Solutions';
+const description = 'Die aufgerufene Seite existiert nicht oder wurde verschoben.';
+---
+
+<BaseLayout title={title} description={description} path="/404/" noindex>
+  <section class="notfound">
+    <span class="decor decor--dots" aria-hidden="true"></span>
+    <span class="decor decor--glow decor--drift notfound__glow" aria-hidden="true"></span>
+
+    <div class="container container--narrow notfound__inner">
+      <p class="notfound__code" aria-hidden="true">404</p>
+
+      <h1 class="notfound__title">Diese Seite gibt es nicht.</h1>
+      <p class="notfound__lead">
+        Die Adresse stimmt nicht, die Seite wurde verschoben oder der Link ist veraltet. Über die
+        folgenden Bereiche finden Sie weiter:
+      </p>
+
+      <nav class="notfound__nav" aria-label="Seitenbereiche">
+        <ul class="notfound__list">
+          {
+            NAV.filter((item) => item.href !== '/').map((item) => (
+              <li>
+                <a href={item.href} class="notfound__link">
+                  <span>{item.label}</span>
+                  <Icon name="arrow-right" size={17} />
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="btn-row btn-row--center notfound__actions">
+        <Button href="/" variant="primary">Zur Startseite</Button>
+      </div>
+
+      <p class="notfound__help">
+        Sie suchen etwas Bestimmtes? Melden Sie sich unter
+        <a href={CONTACT.emailHref}>{CONTACT.email}</a> – wir helfen gerne weiter.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .notfound {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(3rem, 1.5rem + 6vw, 6rem);
+  }
+
+  .notfound__glow {
+    top: -38%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .notfound__inner {
+    position: relative;
+    z-index: var(--z-content);
+    text-align: center;
+  }
+
+  .notfound__code {
+    font-size: clamp(4rem, 2rem + 9vw, 8rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    background: linear-gradient(120deg, var(--c-accent), var(--c-accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    opacity: 0.85;
+  }
+
+  .notfound__title {
+    margin-top: var(--sp-4);
+    font-size: var(--fs-2xl);
+  }
+
+  .notfound__lead {
+    max-width: 48ch;
+    margin: var(--sp-4) auto 0;
+    color: var(--c-text-muted);
+  }
+
+  .notfound__nav {
+    margin-top: var(--sp-7);
+  }
+
+  .notfound__list {
+    display: grid;
+    gap: var(--sp-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    text-align: left;
+  }
+
+  .notfound__link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    padding: var(--sp-4) var(--sp-5);
+    border: 1px solid var(--c-line);
+    border-radius: var(--r-md);
+    background: var(--c-surface);
+    font-weight: 600;
+    text-decoration: none;
+    transition: border-color var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out);
+  }
+
+  .notfound__link :global(svg) {
+    color: var(--c-accent);
+    transition: transform var(--t-base) var(--ease-out);
+  }
+
+  .notfound__link:hover {
+    border-color: var(--c-line-strong);
+    transform: translateX(calc(4px * var(--motion-scale)));
+  }
+
+  .notfound__link:hover :global(svg) {
+    transform: translateX(3px);
+  }
+
+  .notfound__actions {
+    margin-top: var(--sp-7);
+  }
+
+  .notfound__help {
+    max-width: none;
+    margin-top: var(--sp-6);
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+  }
+
+  .notfound__help a {
+    color: var(--c-accent);
+  }
+
+  @media (min-width: 40rem) {
+    .notfound__list {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

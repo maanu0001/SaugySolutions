@@ -1,0 +1,255 @@
+---
+/**
+ * Seitenfuss.
+ *
+ * Enthält Logo, Kurzbeschreibung, Navigation, Leistungen, Kontaktdaten und die
+ * rechtlichen Links. Alle Angaben stammen aus src/data/site.mjs – nichts wird
+ * hier fest eingetragen. Social-Media-Links erscheinen nur, wenn in SOCIAL
+ * echte Profile hinterlegt sind.
+ */
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+import { NAV, FOOTER_LEGAL, CONTACT, SITE, SOCIAL } from '../data/site.mjs';
+import { SERVICES } from '../data/services.mjs';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__grid">
+      <!-- Marke -->
+      <div class="site-footer__brand">
+        <a href="/" aria-label="Saugy Solutions – zur Startseite">
+          <Logo size={52} />
+        </a>
+        <p class="site-footer__intro">
+          Saugy Solutions entwickelt Websites und digitale Lösungen für kleine Unternehmen, lokale
+          Betriebe, Vereine und Selbstständige – persönlich betreut und verständlich erklärt.
+        </p>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="site-footer__col" aria-labelledby="footer-nav-titel">
+        <h2 class="site-footer__title" id="footer-nav-titel">Navigation</h2>
+        <ul class="site-footer__list">
+          {
+            NAV.map((item) => (
+              <li>
+                <a href={item.href}>{item.label}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <!-- Leistungen -->
+      <nav class="site-footer__col" aria-labelledby="footer-leistungen-titel">
+        <h2 class="site-footer__title" id="footer-leistungen-titel">Leistungen</h2>
+        <ul class="site-footer__list">
+          {
+            SERVICES.map((service) => (
+              <li>
+                <a href={`/leistungen/#${service.slug}`}>{service.title}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <!-- Kontakt -->
+      <div class="site-footer__col">
+        <h2 class="site-footer__title">Kontakt</h2>
+        <address class="site-footer__contact">
+          <span class="site-footer__person">{CONTACT.person}</span>
+          <a href={CONTACT.phoneHref}>
+            <Icon name="phone" size={17} />
+            <span>{CONTACT.phone}</span>
+          </a>
+          <a href={CONTACT.emailHref}>
+            <Icon name="at" size={17} />
+            <span>{CONTACT.email}</span>
+          </a>
+        </address>
+
+        {
+          SOCIAL.length > 0 && (
+            <ul class="site-footer__social">
+              {SOCIAL.map((profile) => (
+                <li>
+                  <a href={profile.href} rel="noopener noreferrer me" target="_blank">
+                    {profile.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </div>
+    </div>
+
+    <div class="site-footer__bottom">
+      <p class="site-footer__copy">© {year} {SITE.name}. Alle Rechte vorbehalten.</p>
+      <ul class="site-footer__legal">
+        {
+          FOOTER_LEGAL.map((item) => (
+            <li>
+              <a href={item.href}>{item.label}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    position: relative;
+    margin-top: var(--section-y);
+    padding-block: var(--sp-9) var(--sp-6);
+    border-top: 1px solid var(--c-line);
+    background: var(--c-bg-alt);
+    font-size: var(--fs-sm);
+  }
+
+  /* Feine Akzentlinie als Abschluss nach oben. */
+  .site-footer::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(36rem, 70%);
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--c-accent), transparent);
+    opacity: 0.4;
+  }
+
+  .site-footer__grid {
+    display: grid;
+    gap: var(--sp-7);
+    grid-template-columns: 1fr;
+  }
+
+  .site-footer__brand a {
+    display: inline-block;
+    text-decoration: none;
+  }
+
+  .site-footer__intro {
+    margin-top: var(--sp-4);
+    max-width: 34ch;
+    color: var(--c-text-muted);
+  }
+
+  .site-footer__title {
+    margin-bottom: var(--sp-4);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--c-text);
+  }
+
+  .site-footer__list {
+    display: grid;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-footer__list a {
+    color: var(--c-text-muted);
+    text-decoration: none;
+  }
+
+  .site-footer__list a:hover {
+    color: var(--c-accent);
+  }
+
+  .site-footer__contact {
+    display: grid;
+    gap: 0.7rem;
+    font-style: normal;
+  }
+
+  .site-footer__person {
+    font-weight: 700;
+    color: var(--c-text);
+  }
+
+  .site-footer__contact a {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    color: var(--c-text-muted);
+    text-decoration: none;
+  }
+
+  .site-footer__contact a:hover {
+    color: var(--c-accent);
+  }
+
+  .site-footer__social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-4);
+    margin: var(--sp-5) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-footer__social a {
+    color: var(--c-text-muted);
+  }
+
+  .site-footer__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    margin-top: var(--sp-8);
+    padding-top: var(--sp-5);
+    border-top: 1px solid var(--c-line);
+    color: var(--c-text-muted);
+    font-size: var(--fs-xs);
+  }
+
+  .site-footer__copy {
+    margin: 0;
+  }
+
+  .site-footer__legal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-footer__legal a {
+    color: var(--c-text-muted);
+    text-decoration: none;
+  }
+
+  .site-footer__legal a:hover {
+    color: var(--c-accent);
+  }
+
+  @media (min-width: 40rem) {
+    .site-footer__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .site-footer__grid {
+      grid-template-columns: 1.6fr 1fr 1.25fr 1.15fr;
+      gap: var(--sp-6);
+    }
+  }
+</style>

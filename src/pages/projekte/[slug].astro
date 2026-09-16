@@ -1,0 +1,392 @@
+---
+/**
+ * Projektdetailseite.
+ *
+ * Wird zur Bauzeit für jedes Projekt in src/data/projects.mjs erzeugt. Ein
+ * neues Projekt benötigt damit keine neue Datei – Eintrag in der Datendatei
+ * genügt.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import ProjectVisual from '../../components/ProjectVisual.astro';
+import Button from '../../components/Button.astro';
+import Icon from '../../components/Icon.astro';
+import CtaSection from '../../components/CtaSection.astro';
+import { PROJECTS } from '../../data/projects.mjs';
+import { SITE } from '../../data/site.mjs';
+
+export function getStaticPaths() {
+  return PROJECTS.map((project) => ({
+    params: { slug: project.slug },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+
+/** Vorheriges und nächstes Projekt für die Navigation am Seitenende. */
+const index = PROJECTS.findIndex((p) => p.slug === project.slug);
+const next = PROJECTS[(index + 1) % PROJECTS.length];
+
+// Eigener Titel aus der Datendatei, sonst als Rückfallebene zusammengesetzt.
+const title = project.metaTitle ?? `${project.name} – ${project.category} | Saugy Solutions`;
+const description = project.teaser;
+
+const schema = {
+  '@type': 'CreativeWork',
+  name: `Website ${project.name}`,
+  about: project.industry,
+  url: project.url,
+  description: project.teaser,
+  inLanguage: SITE.locale,
+  creator: { '@id': `${SITE.url}/#organisation` },
+};
+---
+
+<BaseLayout title={title} description={description} path={`/projekte/${project.slug}/`} schema={[schema]}>
+  <!-- ================================================= Kopfbereich -->
+  <section class="project-hero" style={`--project-accent:${project.accent}`}>
+    <span class="decor decor--dots" aria-hidden="true"></span>
+
+    <div class="container">
+      <Breadcrumbs items={[{ label: 'Projekte', href: '/projekte/' }, { label: project.name }]} />
+
+      <div class="project-hero__grid">
+        <div class="project-hero__text">
+          <div class="tag-list project-hero__tags">
+            <span class="tag tag--accent">{project.category}</span>
+            <span class="tag">{project.industry}</span>
+          </div>
+
+          <h1 class="project-hero__title">{project.name}</h1>
+          <p class="project-hero__intro">{project.intro}</p>
+
+          <div class="btn-row project-hero__actions">
+            <Button href={project.url} variant="secondary" external>
+              {project.domain} besuchen
+            </Button>
+          </div>
+        </div>
+
+        <div class="project-hero__visual">
+          <ProjectVisual project={project} eager />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================= Ausgangslage und Ziele -->
+  <section class="section section--alt" aria-labelledby="ausgangslage-titel">
+    <div class="container">
+      <div class="two-col">
+        <div data-reveal>
+          <h2 id="ausgangslage-titel" class="block-title">Ausgangslage</h2>
+          <p class="block-text">{project.situation}</p>
+        </div>
+
+        <div data-reveal data-reveal-delay="1">
+          <h2 class="block-title">Zielsetzung</h2>
+          <ul class="check-list">
+            {project.goals.map((goal) => <li>{goal}</li>)}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================= Umgesetzte Leistungen -->
+  <section class="section" aria-labelledby="leistungen-titel">
+    <div class="container">
+      <h2 id="leistungen-titel" class="block-title block-title--center">Umgesetzte Leistungen</h2>
+
+      <ul class="delivered">
+        {
+          project.delivered.map((item, i) => (
+            <li class="delivered__item" data-reveal data-reveal-delay={(i % 4) + 1}>
+              <Icon name="check" size={18} />
+              <span>{item}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================================================= Herausforderungen -->
+  <section class="section section--alt section--divided" aria-labelledby="herausforderungen-titel">
+    <div class="container">
+      <h2 id="herausforderungen-titel" class="block-title">Besondere Herausforderungen</h2>
+
+      <div class="grid grid--3 challenges">
+        {
+          project.challenges.map((challenge, i) => (
+            <article class="card" data-reveal data-reveal-delay={(i % 3) + 1}>
+              <h3 class="card__title">{challenge.title}</h3>
+              <p class="card__text">{challenge.text}</p>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================= Ergebnis -->
+  <section class="section" aria-labelledby="ergebnis-titel">
+    <div class="container">
+      <div class="result" data-reveal>
+        <div class="result__text">
+          <p class="eyebrow">Ergebnis</p>
+          <h2 id="ergebnis-titel" class="result__title">{project.result}</h2>
+          <Button href={project.url} variant="primary" external class="result__cta">
+            Website ansehen
+          </Button>
+        </div>
+
+        <div class="result__meta">
+          <dl>
+            <div>
+              <dt>Projekt</dt>
+              <dd>{project.name}</dd>
+            </div>
+            <div>
+              <dt>Bereich</dt>
+              <dd>{project.industry}</dd>
+            </div>
+            <div>
+              <dt>Adresse</dt>
+              <dd>
+                <a href={project.url} rel="noopener noreferrer" target="_blank">{project.domain}</a>
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+
+      <!-- Weiter zum nächsten Projekt -->
+      <nav class="project-next" aria-label="Weiteres Projekt">
+        <a href={`/projekte/${next.slug}/`} class="project-next__link">
+          <span class="project-next__label">Nächstes Projekt</span>
+          <span class="project-next__name">
+            {next.name}
+            <Icon name="arrow-right" size={20} />
+          </span>
+        </a>
+      </nav>
+    </div>
+  </section>
+
+  <CtaSection
+    title={`Ein Projekt wie ${project.name} im Kopf?`}
+    text="Schildern Sie uns kurz Ihre Ausgangslage. Im kostenlosen Erstgespräch klären wir, was für Ihren Betrieb sinnvoll ist."
+  />
+</BaseLayout>
+
+<style>
+  /* ------------------------------------------------------- Kopfbereich */
+  .project-hero {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(2rem, 1rem + 4vw, 3.5rem) clamp(2.5rem, 1.2rem + 4.5vw, 4.5rem);
+  }
+
+  .project-hero__grid {
+    position: relative;
+    z-index: var(--z-content);
+    display: grid;
+    gap: var(--sp-7);
+    align-items: center;
+  }
+
+  .project-hero__tags {
+    margin-bottom: var(--sp-5);
+  }
+
+  .project-hero__tags .tag--accent {
+    border-color: color-mix(in srgb, var(--project-accent) 40%, transparent);
+    background: color-mix(in srgb, var(--project-accent) 12%, transparent);
+    color: var(--project-accent);
+  }
+
+  .project-hero__title {
+    font-size: var(--fs-3xl);
+  }
+
+  .project-hero__intro {
+    margin-top: var(--sp-5);
+    font-size: var(--fs-lg);
+    color: var(--c-text-muted);
+  }
+
+  .project-hero__actions {
+    margin-top: var(--sp-6);
+  }
+
+  @media (min-width: 62rem) {
+    .project-hero__grid {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-8);
+    }
+  }
+
+  /* ----------------------------------------------------- Textbausteine */
+  .block-title {
+    font-size: var(--fs-xl);
+    margin-bottom: var(--sp-5);
+  }
+
+  .block-title--center {
+    text-align: center;
+    margin-bottom: var(--sp-7);
+  }
+
+  .block-text {
+    color: var(--c-text-muted);
+  }
+
+  .two-col {
+    display: grid;
+    gap: var(--sp-7);
+  }
+
+  @media (min-width: 52rem) {
+    .two-col {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-8);
+    }
+  }
+
+  /* ------------------------------------------------ Umgesetzte Leistungen */
+  .delivered {
+    display: grid;
+    gap: var(--sp-3);
+    max-width: 56rem;
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+  }
+
+  .delivered__item {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    padding: var(--sp-4) var(--sp-5);
+    border: 1px solid var(--c-line);
+    border-radius: var(--r-md);
+    background: var(--c-surface);
+    font-size: var(--fs-sm);
+    transition: border-color var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out);
+  }
+
+  .delivered__item:hover {
+    border-color: var(--c-line-strong);
+    transform: translateX(calc(4px * var(--motion-scale)));
+  }
+
+  .delivered__item :global(svg) {
+    flex: none;
+    color: var(--project-accent, var(--c-accent));
+  }
+
+  /* ------------------------------------------------------- Ergebnis */
+  .result {
+    display: grid;
+    gap: var(--sp-7);
+    padding: clamp(1.6rem, 1rem + 2.6vw, 3rem);
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-xl);
+    background: linear-gradient(150deg, var(--c-surface-raised), var(--c-bg-alt) 65%);
+  }
+
+  .result__title {
+    font-size: var(--fs-xl);
+    font-weight: 600;
+    line-height: var(--lh-snug);
+    letter-spacing: normal;
+  }
+
+  .result :global(.result__cta) {
+    margin-top: var(--sp-6);
+  }
+
+  .result__meta dl {
+    display: grid;
+    gap: var(--sp-4);
+    margin: 0;
+  }
+
+  .result__meta dt {
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--c-text-muted);
+  }
+
+  .result__meta dd {
+    margin: 0.3rem 0 0;
+    font-size: var(--fs-sm);
+    color: var(--c-text);
+  }
+
+  .result__meta a {
+    color: var(--c-accent);
+  }
+
+  @media (min-width: 58rem) {
+    .result {
+      grid-template-columns: 1.6fr 1fr;
+      gap: var(--sp-8);
+      align-items: start;
+    }
+
+    .result__meta {
+      padding-left: var(--sp-7);
+      border-left: 1px solid var(--c-line);
+    }
+  }
+
+  /* ------------------------------------------------- Nächstes Projekt */
+  .project-next {
+    margin-top: var(--sp-7);
+    padding-top: var(--sp-6);
+    border-top: 1px solid var(--c-line);
+  }
+
+  .project-next__link {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    text-decoration: none;
+  }
+
+  .project-next__label {
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--c-text-muted);
+  }
+
+  .project-next__name {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: var(--fs-xl);
+    font-weight: 700;
+    letter-spacing: var(--ls-tight);
+    color: var(--c-text);
+  }
+
+  .project-next__name :global(svg) {
+    color: var(--c-accent);
+    transition: transform var(--t-base) var(--ease-out);
+  }
+
+  .project-next__link:hover .project-next__name {
+    color: var(--c-accent);
+  }
+
+  .project-next__link:hover .project-next__name :global(svg) {
+    transform: translateX(5px);
+  }
+</style>

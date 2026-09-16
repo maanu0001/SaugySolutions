@@ -1,0 +1,27 @@
+---
+/**
+ * Einheitlicher Abschnittskopf: kleine Auszeichnung, Überschrift, Lead-Text.
+ *
+ * `level` steuert die Überschriftenebene, damit die Struktur auf jeder Seite
+ * semantisch korrekt bleibt (genau eine h1 pro Seite).
+ */
+interface Props {
+  eyebrow?: string;
+  title: string;
+  lead?: string;
+  level?: 2 | 3;
+  center?: boolean;
+  id?: string;
+  class?: string;
+}
+
+const { eyebrow, title, lead, level = 2, center = false, id, class: className } = Astro.props;
+const Heading = `h${level}` as 'h2' | 'h3';
+---
+
+<div class:list={['section-head', center && 'section-head--center', className]}>
+  {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+  <Heading id={id} set:html={title} />
+  {lead && <p class="section-head__lead">{lead}</p>}
+  <slot />
+</div>

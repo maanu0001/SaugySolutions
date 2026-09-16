@@ -1,0 +1,281 @@
+---
+/**
+ * Über uns.
+ *
+ * Persönliche Vorstellung ohne erfundene Jobtitel oder Berufsjahre. Es werden
+ * ausschliesslich Angaben verwendet, die belegt sind.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import SectionHead from '../components/SectionHead.astro';
+import TeamCard from '../components/TeamCard.astro';
+import Icon from '../components/Icon.astro';
+import CtaSection from '../components/CtaSection.astro';
+import { TEAM } from '../data/team.mjs';
+
+const title = 'Über uns: Manuel und Michael Saugy | Saugy Solutions';
+const description =
+  'Saugy Solutions wird von Manuel und Michael Saugy geführt – beide ausgebildete Informatiker EFZ. Persönliche IT-Lösungen für kleinere Unternehmen in der Schweiz.';
+
+/** Werte, nach denen gearbeitet wird. */
+const VALUES = [
+  {
+    icon: 'user',
+    title: 'Persönliche Betreuung',
+    text: 'Sie haben eine feste Ansprechperson – vom ersten Gespräch bis lange nach dem Aufschalten.',
+  },
+  {
+    icon: 'chat',
+    title: 'Verständliche Kommunikation',
+    text: 'Wir erklären in normaler Sprache, was wir tun und weshalb. Rückfragen sind ausdrücklich erwünscht.',
+  },
+  {
+    icon: 'rocket',
+    title: 'Zügige Umsetzung',
+    text: 'Kurze Wege statt langer Abstimmungsketten: Entscheidungen fallen direkt zwischen Ihnen und uns.',
+  },
+  {
+    icon: 'receipt',
+    title: 'Faire, transparente Preise',
+    text: 'Was etwas kostet, steht vor Projektbeginn schriftlich fest – inklusive allfälliger laufender Kosten.',
+  },
+  {
+    icon: 'target',
+    title: 'Passend zum Bedarf',
+    text: 'Wir bauen, was Ihr Betrieb wirklich braucht, und raten von allem ab, was keinen Nutzen bringt.',
+  },
+  {
+    icon: 'stack',
+    title: 'Alles aus einer Hand',
+    text: 'Website, Hosting, E-Mail und Datenablage kommen von derselben Stelle – ohne Anbieter-Pingpong.',
+  },
+];
+---
+
+<BaseLayout title={title} description={description} path="/ueber-uns/">
+  <!-- ================================================= Kopfbereich -->
+  <section class="page-hero">
+    <span class="decor decor--dots" aria-hidden="true"></span>
+    <span class="decor decor--glow decor--drift page-hero__glow" aria-hidden="true"></span>
+
+    <div class="container page-hero__inner">
+      <Breadcrumbs items={[{ label: 'Über uns' }]} />
+
+      <p class="eyebrow">Über uns</p>
+      <h1 class="page-hero__title">
+        Persönliche IT-Lösungen ohne <span class="accent-text">unnötige Umwege</span>
+      </h1>
+      <p class="page-hero__lead">
+        Saugy Solutions wird von Manuel und Michael Saugy geführt. Als ausgebildete Informatiker
+        verbinden wir technische Erfahrung mit persönlicher Beratung. Unser Ziel ist es,
+        professionelles Webdesign und zuverlässige digitale Lösungen auch für kleinere Unternehmen
+        verständlich und zugänglich zu machen.
+      </p>
+    </div>
+  </section>
+
+  <!-- ================================================= Team -->
+  <section class="section section--alt section--tight" aria-labelledby="team-titel">
+    <div class="container">
+      <SectionHead
+        eyebrow="Das Team"
+        title="Zwei Brüder, zwei Schwerpunkte"
+        lead="Beide haben die Lehre als Informatiker EFZ in Applikationsentwicklung abgeschlossen und studieren heute an der FHNW beziehungsweise an der PH FHNW in Windisch."
+        id="team-titel"
+      />
+
+      <div class="grid grid--2 team-grid">
+        {TEAM.map((person, index) => <TeamCard person={person} delay={index + 1} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================= Weshalb -->
+  <section class="section" aria-labelledby="weshalb-titel">
+    <div class="container">
+      <div class="story">
+        <div class="story__text">
+          <SectionHead
+            eyebrow="Weshalb es Saugy Solutions gibt"
+            title="Gute Technik sollte nicht an der Betriebsgrösse scheitern"
+            id="weshalb-titel"
+          />
+
+          <div class="flow story__body">
+            <p>
+              Grosse Agenturen richten sich meist an Unternehmen mit eigenem Marketingbudget und
+              eigener IT-Abteilung. Kleine Betriebe, Vereine und Selbstständige fallen dabei oft
+              durchs Raster: Entweder ist das Angebot deutlich zu umfangreich, oder es bleibt nur
+              ein Baukasten, mit dem man am Ende doch allein dasteht.
+            </p>
+            <p>
+              Genau dort setzen wir an. Wir arbeiten mit denselben technischen Grundlagen wie bei
+              grösseren Projekten, halten den Umfang aber bei dem, was Ihr Betrieb tatsächlich
+              braucht. Und wir bleiben ansprechbar, wenn nach der Veröffentlichung Fragen auftauchen.
+            </p>
+            <p>
+              Dass wir Brüder sind, hat einen praktischen Vorteil: Abstimmungen laufen kurz und
+              direkt. Für Sie bedeutet das eine Ansprechperson – und trotzdem zwei Personen, die das
+              Projekt kennen.
+            </p>
+          </div>
+        </div>
+
+        <aside class="story__aside" data-reveal>
+          <h2 class="story__aside-title">So läuft die Zusammenarbeit</h2>
+          <ol class="story__list">
+            <li>
+              <strong>Sie schildern Ihr Anliegen.</strong> Eine grobe Idee genügt – Fachbegriffe sind
+              nicht nötig.
+            </li>
+            <li>
+              <strong>Wir hören zu und ordnen ein.</strong> Im Gespräch klären wir, was sinnvoll ist
+              und was nicht.
+            </li>
+            <li>
+              <strong>Sie entscheiden auf einer klaren Grundlage.</strong> Umfang und Kosten stehen
+              vorher schriftlich fest.
+            </li>
+            <li>
+              <strong>Wir setzen um und zeigen Zwischenstände.</strong> Sie sehen den Fortschritt,
+              nicht erst das Endergebnis.
+            </li>
+            <li>
+              <strong>Wir bleiben erreichbar.</strong> Auch nach dem Aufschalten wenden Sie sich an
+              dieselbe Person.
+            </li>
+          </ol>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================= Werte -->
+  <section class="section section--alt section--divided" aria-labelledby="werte-titel">
+    <div class="container">
+      <SectionHead
+        eyebrow="Unsere Arbeitsweise"
+        title="Worauf Sie sich bei uns verlassen können"
+        id="werte-titel"
+        center
+      />
+
+      <div class="grid grid--3">
+        {
+          VALUES.map((value, index) => (
+            <article class="card card--interactive" data-reveal data-reveal-delay={(index % 3) + 1}>
+              <span class="icon-badge">
+                <Icon name={value.icon} size={22} />
+              </span>
+              <h3 class="card__title">{value.title}</h3>
+              <p class="card__text">{value.text}</p>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <CtaSection
+    title="Lernen wir uns kennen."
+    text="Am einfachsten klärt sich alles in einem kurzen Gespräch. Rufen Sie an oder schreiben Sie uns – wir melden uns persönlich zurück."
+  />
+</BaseLayout>
+
+<style>
+  .page-hero {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(2rem, 1rem + 4vw, 3.5rem) clamp(2.5rem, 1.2rem + 4.5vw, 4rem);
+  }
+
+  .page-hero__glow {
+    top: -50%;
+    left: -15%;
+  }
+
+  .page-hero__inner {
+    position: relative;
+    z-index: var(--z-content);
+  }
+
+  .page-hero__title {
+    max-width: 20ch;
+  }
+
+  .page-hero__lead {
+    margin-top: var(--sp-5);
+    max-width: 62ch;
+    font-size: var(--fs-lg);
+    color: var(--c-text-muted);
+  }
+
+  .team-grid {
+    max-width: 64rem;
+  }
+
+  /* -------------------------------------------------------------- Story */
+  .story {
+    display: grid;
+    gap: var(--sp-7);
+  }
+
+  .story__body {
+    color: var(--c-text-muted);
+  }
+
+  .story__aside {
+    align-self: start;
+    padding: var(--sp-6);
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-lg);
+    background: linear-gradient(160deg, var(--c-surface), var(--c-bg-alt));
+  }
+
+  .story__aside-title {
+    margin-bottom: var(--sp-5);
+    font-size: var(--fs-lg);
+  }
+
+  .story__list {
+    display: grid;
+    gap: var(--sp-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: story;
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+  }
+
+  .story__list li {
+    position: relative;
+    padding-left: 2.2rem;
+    counter-increment: story;
+  }
+
+  .story__list li::before {
+    content: counter(story);
+    position: absolute;
+    left: 0;
+    top: 0.05rem;
+    display: grid;
+    place-items: center;
+    width: 1.55rem;
+    height: 1.55rem;
+    border: 1px solid rgba(36, 230, 178, 0.35);
+    border-radius: var(--r-sm);
+    background: var(--c-accent-soft);
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--c-accent);
+  }
+
+  @media (min-width: 62rem) {
+    .story {
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: var(--sp-8);
+      align-items: start;
+    }
+  }
+</style>

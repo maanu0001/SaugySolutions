@@ -1,0 +1,239 @@
+# ============================================================================
+#  SAUGY SOLUTIONS – APACHE-KONFIGURATION
+# ============================================================================
+#
+#  Diese Datei wird beim Deployment-Build als `.htaccess` in den Ordner dist/
+#  kopiert und gehört damit ins Wurzelverzeichnis des Webspace.
+#
+#  HINWEIS ZU SHARED HOSTING
+#  -------------------------
+#  Alle Blöcke sind in <IfModule> gekapselt. Fehlt ein Modul, wird der Block
+#  übersprungen – die Website funktioniert weiterhin. Sollte der Server dennoch
+#  mit „500 Internal Server Error“ antworten, ist meist AllowOverride
+#  eingeschränkt. In diesem Fall die betroffenen Abschnitte einzeln
+#  auskommentieren, um die Ursache einzugrenzen (siehe README).
+# ============================================================================
+
+
+# ----------------------------------------------------------------------------
+#  Grundlagen
+# ----------------------------------------------------------------------------
+
+# Verzeichnisinhalte nie auflisten.
+Options -Indexes
+
+# Symbolische Links nur innerhalb des eigenen Bereichs folgen.
+Options +SymLinksIfOwnerMatch
+
+# Standard-Zeichensatz.
+AddDefaultCharset UTF-8
+
+# Eigene Fehlerseite.
+ErrorDocument 404 /404.html
+
+
+# ----------------------------------------------------------------------------
+#  Weiterleitungen und saubere Adressen
+# ----------------------------------------------------------------------------
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # --- HTTPS erzwingen -----------------------------------------------------
+    # Hinter einem Proxy oder Loadbalancer greift die zweite Bedingung.
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https
+    # Interne Aufrufe des Hosters nicht umleiten.
+    RewriteCond %{HTTP_HOST} !^localhost [NC]
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L,QSA]
+
+    # --- Auf die Hauptdomain vereinheitlichen --------------------------------
+    # Standard: OHNE www. Wer www bevorzugt, kommentiert diesen Block aus und
+    # aktiviert stattdessen den darunterliegenden.
+    RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+    RewriteRule ^(.*)$ https://%1/$1 [R=301,L,QSA]
+
+    # Variante MIT www (bei Bedarf aktivieren):
+    # RewriteCond %{HTTP_HOST} !^www\. [NC]
+    # RewriteCond %{HTTP_HOST} !^localhost [NC]
+    # RewriteRule ^(.*)$ https://www.%{HTTP_HOST}/$1 [R=301,L,QSA]
+
+    # --- index.html aus der Adresse entfernen --------------------------------
+    RewriteCond %{THE_REQUEST} \s/(.*/)?index\.html[\s?] [NC]
+    RewriteRule ^(.*/)?index\.html$ /$1 [R=301,L]
+
+    # --- Abschliessenden Schrägstrich ergänzen --------------------------------
+    # Die Seiten liegen als /leistungen/index.html vor.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} !\.[a-zA-Z0-9]{1,6}$
+    RewriteCond %{REQUEST_URI} !/$
+    RewriteRule ^(.*)$ /$1/ [R=301,L,QSA]
+</IfModule>
+
+
+# ----------------------------------------------------------------------------
+#  Sicherheitskopfzeilen
+# ----------------------------------------------------------------------------
+
+<IfModule mod_headers.c>
+
+    # Verhindert, dass Browser den Dateityp erraten.
+    Header always set X-Content-Type-Options "nosniff"
+
+    # Die Seite darf nicht in fremde Rahmen eingebettet werden.
+    Header always set X-Frame-Options "DENY"
+
+    # Weitergabe der Herkunftsadresse einschränken.
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # Nicht benötigte Browserfunktionen abschalten.
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+
+    # Nur über HTTPS aufrufen (zwei Jahre).
+    # ACHTUNG: Erst aktivieren, wenn HTTPS dauerhaft und für alle Subdomains
+    # eingerichtet ist – die Vorgabe lässt sich nicht kurzfristig zurücknehmen.
+    # Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" env=HTTPS
+
+    # --- Content Security Policy --------------------------------------------
+    # Die Website lädt AUSSCHLIESSLICH eigene Inhalte: keine externen Skripte,
+    # Schriften, Bilder oder Analysedienste.
+    #
+    # 'unsafe-inline' ist nötig für:
+    #   - das kleine Inline-Skript im <head> (setzt die Klasse „js“)
+    #   - die strukturierten Daten (application/ld+json)
+    #   - einzelne style-Attribute (z. B. Projektfarben)
+    # Da keinerlei fremde oder von Nutzenden erzeugte Inhalte ausgegeben
+    # werden, ist das Restrisiko gering. Wer die Vorgabe verschärfen möchte,
+    # findet in der README einen Hinweis dazu.
+    Header always set Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data:; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; manifest-src 'self'; upgrade-insecure-requests"
+
+    # Kopfzeile mit der PHP-Version entfernen, sofern möglich.
+    Header always unset X-Powered-By
+
+    # --- Zwischenspeicherung -------------------------------------------------
+
+    # Versionierte Dateien (mit Inhalts-Hash im Namen) dürfen lange bleiben.
+    <FilesMatch "\.(js|css)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+
+    # Schriften ändern sich praktisch nie.
+    <FilesMatch "\.(woff2|woff)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+
+    # Bilder und Icons.
+    <FilesMatch "\.(png|jpe?g|webp|avif|svg|ico)$">
+        Header set Cache-Control "public, max-age=2592000"
+    </FilesMatch>
+
+    # HTML immer neu prüfen, damit Änderungen sofort sichtbar werden.
+    <FilesMatch "\.html$">
+        Header set Cache-Control "public, max-age=0, must-revalidate"
+    </FilesMatch>
+
+    # Antworten des Formulars nie zwischenspeichern.
+    <FilesMatch "\.php$">
+        Header set Cache-Control "no-store, no-cache, must-revalidate"
+    </FilesMatch>
+</IfModule>
+
+
+# ----------------------------------------------------------------------------
+#  Komprimierung
+# ----------------------------------------------------------------------------
+
+# Brotli, falls verfügbar (spart gegenüber Gzip nochmals deutlich).
+<IfModule mod_brotli.c>
+    AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css text/xml
+    AddOutputFilterByType BROTLI_COMPRESS text/javascript application/javascript
+    AddOutputFilterByType BROTLI_COMPRESS application/json application/manifest+json
+    AddOutputFilterByType BROTLI_COMPRESS application/xml image/svg+xml
+</IfModule>
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
+    AddOutputFilterByType DEFLATE text/javascript application/javascript
+    AddOutputFilterByType DEFLATE application/json application/manifest+json
+    AddOutputFilterByType DEFLATE application/xml image/svg+xml
+
+    # Bereits komprimierte Formate nicht erneut komprimieren.
+    SetEnvIfNoCase Request_URI \.(?:woff2?|png|jpe?g|webp|avif|ico|gz|zip)$ no-gzip dont-vary
+</IfModule>
+
+
+# ----------------------------------------------------------------------------
+#  Ablaufzeiten (Fallback, falls mod_headers fehlt)
+# ----------------------------------------------------------------------------
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault                              "access plus 1 month"
+    ExpiresByType text/html                     "access plus 0 seconds"
+    ExpiresByType text/css                      "access plus 1 year"
+    ExpiresByType text/javascript               "access plus 1 year"
+    ExpiresByType application/javascript        "access plus 1 year"
+    ExpiresByType font/woff2                    "access plus 1 year"
+    ExpiresByType image/png                     "access plus 1 month"
+    ExpiresByType image/webp                    "access plus 1 month"
+    ExpiresByType image/avif                    "access plus 1 month"
+    ExpiresByType image/svg+xml                 "access plus 1 month"
+    ExpiresByType image/x-icon                  "access plus 1 month"
+    ExpiresByType application/manifest+json     "access plus 1 week"
+    ExpiresByType application/xml               "access plus 1 hour"
+</IfModule>
+
+
+# ----------------------------------------------------------------------------
+#  MIME-Typen
+# ----------------------------------------------------------------------------
+
+<IfModule mod_mime.c>
+    AddType font/woff2                      .woff2
+    AddType image/webp                      .webp
+    AddType image/avif                      .avif
+    AddType image/svg+xml                   .svg
+    AddType application/manifest+json       .webmanifest
+</IfModule>
+
+
+# ----------------------------------------------------------------------------
+#  Zugriffsschutz
+# ----------------------------------------------------------------------------
+
+# Versteckte Dateien (.env, .git, .htaccess …) sperren.
+<FilesMatch "^\.">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Konfigurations-, Abhängigkeits- und Quelldateien sperren.
+<FilesMatch "\.(json|lock|md|yml|yaml|ini|log|sql|bak|dist|example)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Ausnahme: Das Web-App-Manifest muss erreichbar bleiben.
+<Files "site.webmanifest">
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Allow from all
+    </IfModule>
+</Files>
+
+# Serversignatur ausblenden.
+ServerSignature Off

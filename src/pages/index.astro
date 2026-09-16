@@ -1,0 +1,552 @@
+---
+/**
+ * Startseite.
+ *
+ * Aufbau: Hero – Vorteile – Leistungen – Projekte – Ablauf – Team –
+ * Qualität/Vertrauen – FAQ – Abschluss-CTA.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionHead from '../components/SectionHead.astro';
+import Button from '../components/Button.astro';
+import Icon from '../components/Icon.astro';
+import ServiceCard from '../components/ServiceCard.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import ProcessSteps from '../components/ProcessSteps.astro';
+import TeamCard from '../components/TeamCard.astro';
+import Faq from '../components/Faq.astro';
+import CtaSection from '../components/CtaSection.astro';
+import HeroVisual from '../components/HeroVisual.astro';
+
+import { SERVICES } from '../data/services.mjs';
+import { PROJECTS } from '../data/projects.mjs';
+import { PROCESS } from '../data/process.mjs';
+import { BENEFITS } from '../data/benefits.mjs';
+import { TEAM } from '../data/team.mjs';
+import { FAQ_HOME } from '../data/faq.mjs';
+
+const title = 'Webdesign und digitale Lösungen für Schweizer KMU | Saugy Solutions';
+const description =
+  'Saugy Solutions entwickelt moderne Websites und bietet Hosting, Wartung, E-Mail und Cloud-Lösungen für Schweizer KMU – persönlich und verständlich.';
+
+/** FAQ als strukturierte Daten, damit die Fragen auch in der Suche erscheinen können. */
+const faqSchema = {
+  '@type': 'FAQPage',
+  mainEntity: FAQ_HOME.map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: { '@type': 'Answer', text: item.a },
+  })),
+};
+---
+
+<BaseLayout title={title} description={description} path="/" schema={[faqSchema]} heroPage>
+  <!-- ==================================================================
+       HERO
+       ================================================================== -->
+  <section class="hero" aria-labelledby="hero-titel">
+    <span class="decor decor--dots" aria-hidden="true"></span>
+    <span class="decor decor--glow decor--drift hero__glow-1" aria-hidden="true"></span>
+    <span class="decor decor--glow decor--glow-2 decor--drift-slow hero__glow-2" aria-hidden="true"></span>
+
+    <div class="container hero__inner">
+      <div class="hero__content">
+        <p class="hero__eyebrow">
+          <span class="hero__pulse" aria-hidden="true"></span>
+          Webdesign und IT für kleine Unternehmen in der Schweiz
+        </p>
+
+        <h1 id="hero-titel" class="hero__title">
+          Websites und digitale Lösungen, die Ihr Unternehmen <span class="accent-text">weiterbringen</span>.
+        </h1>
+
+        <p class="hero__lead">
+          Saugy Solutions entwickelt moderne Websites, übernimmt Hosting und Wartung und unterstützt
+          Schweizer KMU mit persönlichen, verständlichen IT-Lösungen.
+        </p>
+
+        <div class="btn-row hero__actions">
+          <Button href="/kontakt/" variant="primary" size="lg">Kostenloses Erstgespräch</Button>
+          <Button href="/projekte/" variant="secondary" size="lg">Projekte ansehen</Button>
+        </div>
+
+        <ul class="hero__facts">
+          <li>
+            <Icon name="user" size={18} />
+            <span>Ein direkter Ansprechpartner</span>
+          </li>
+          <li>
+            <Icon name="stack" size={18} />
+            <span>Website, Hosting und E-Mail aus einer Hand</span>
+          </li>
+          <li>
+            <Icon name="chat" size={18} />
+            <span>Technik verständlich erklärt</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="hero__visual">
+        <HeroVisual />
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================================================================
+       VORTEILE
+       ================================================================== -->
+  <section class="section section--alt" aria-labelledby="vorteile-titel">
+    <div class="container">
+      <SectionHead
+        eyebrow="Weshalb Saugy Solutions"
+        title="Persönlich statt anonym – und immer nachvollziehbar"
+        lead="Wir sind kein grosses Agenturnetzwerk. Genau das ist der Punkt: Sie sprechen direkt mit den Personen, die Ihr Projekt umsetzen."
+        id="vorteile-titel"
+      />
+
+      <div class="grid grid--3">
+        {
+          BENEFITS.map((benefit, index) => (
+            <article class="card card--interactive" data-reveal data-reveal-delay={(index % 3) + 1}>
+              <span class="icon-badge">
+                <Icon name={benefit.icon} size={22} />
+              </span>
+              <h3 class="card__title">{benefit.title}</h3>
+              <p class="card__text">{benefit.text}</p>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================================================================
+       LEISTUNGEN
+       ================================================================== -->
+  <section class="section" aria-labelledby="leistungen-titel">
+    <div class="container">
+      <div class="split-head">
+        <SectionHead
+          eyebrow="Leistungen"
+          title="Alles, was Ihr Unternehmen online braucht"
+          lead="Von der Website über E-Mail und Hosting bis zur sicheren Datenablage – abgestimmt auf das, was Ihr Betrieb tatsächlich benötigt."
+          id="leistungen-titel"
+          class="split-head__text"
+        />
+        <Button href="/leistungen/" variant="secondary" class="split-head__action">
+          Alle Leistungen
+        </Button>
+      </div>
+
+      <div class="grid grid--3">
+        {SERVICES.map((service, index) => <ServiceCard service={service} delay={(index % 3) + 1} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================================================================
+       PROJEKTE
+       ================================================================== -->
+  <section class="section section--alt section--divided" aria-labelledby="projekte-titel">
+    <div class="container">
+      <div class="split-head">
+        <SectionHead
+          eyebrow="Projekte"
+          title="Websites, die im Alltag funktionieren"
+          lead="Drei Auftritte für ganz unterschiedliche Auftraggeber – vom Familienbetrieb über die öffentliche Einrichtung bis zur Online-Community."
+          id="projekte-titel"
+          class="split-head__text"
+        />
+        <Button href="/projekte/" variant="secondary" class="split-head__action">
+          Alle Projekte
+        </Button>
+      </div>
+
+      <div class="grid grid--3">
+        {PROJECTS.map((project) => <ProjectCard project={project} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================================================================
+       ABLAUF
+       ================================================================== -->
+  <section class="section" aria-labelledby="ablauf-titel">
+    <div class="container">
+      <div class="process-layout">
+        <div class="process-layout__intro">
+          <SectionHead
+            eyebrow="Ablauf"
+            title="So entsteht Ihr Projekt"
+            lead="Sieben überschaubare Schritte von der ersten Anfrage bis zum laufenden Betrieb. Technische Vorkenntnisse brauchen Sie dafür nicht."
+            id="ablauf-titel"
+          />
+          <Button href="/ablauf/" variant="secondary">Ablauf im Detail</Button>
+        </div>
+
+        <div class="process-layout__steps">
+          <ProcessSteps steps={PROCESS.slice(0, 5)} />
+          <p class="process-layout__more">
+            Danach folgen Veröffentlichung und – auf Wunsch – die laufende Betreuung.
+            <a href="/ablauf/">Alle Schritte ansehen</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================================================================
+       TEAM
+       ================================================================== -->
+  <section class="section section--alt" aria-labelledby="team-titel">
+    <div class="container">
+      <SectionHead
+        eyebrow="Wer dahintersteht"
+        title="Zwei Informatiker, ein Ansprechpartner"
+        lead="Saugy Solutions wird von Manuel und Michael Saugy geführt. Beide sind ausgebildete Informatiker EFZ in Applikationsentwicklung."
+        id="team-titel"
+        center
+      />
+
+      <div class="grid grid--2 team-grid">
+        {TEAM.map((person, index) => <TeamCard person={person} delay={index + 1} />)}
+      </div>
+
+      <p class="team-note" data-reveal>
+        <a href="/ueber-uns/">Mehr über uns und unsere Arbeitsweise</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ==================================================================
+       QUALITÄT UND VERTRAUEN
+       ================================================================== -->
+  <section class="section" aria-labelledby="qualitaet-titel">
+    <div class="container">
+      <div class="trust">
+        <div class="trust__text">
+          <SectionHead
+            eyebrow="Qualität"
+            title="Worauf wir bei jedem Projekt achten"
+            lead="Eine Website ist erst gut, wenn sie auch auf dem Mobiltelefon, bei langsamer Verbindung und für Menschen mit Einschränkungen funktioniert."
+            id="qualitaet-titel"
+          />
+
+          <ul class="check-list trust__list">
+            <li>Darstellung geprüft auf Mobiltelefon, Tablet und Desktop</li>
+            <li>Kurze Ladezeiten durch schlanke Umsetzung und optimierte Bilder</li>
+            <li>Verschlüsselte Übertragung und aktuelle Sicherheitseinstellungen</li>
+            <li>Lesbare Schrift, ausreichende Kontraste und Bedienung per Tastatur</li>
+            <li>Saubere technische Grundlagen für die Auffindbarkeit in Suchmaschinen</li>
+            <li>Keine unnötigen externen Dienste und kein Tracking ohne Notwendigkeit</li>
+          </ul>
+        </div>
+
+        <aside class="trust__aside" data-reveal>
+          <h3 class="trust__aside-title">Was wir nicht tun</h3>
+          <ul class="trust__aside-list">
+            <li>
+              <strong>Keine Versprechen ins Blaue.</strong> Wir sagen vorher, was möglich ist – und was nicht.
+            </li>
+            <li>
+              <strong>Keine unnötigen Zusatzpakete.</strong> Wenn Sie etwas nicht brauchen, schlagen wir es nicht vor.
+            </li>
+            <li>
+              <strong>Keine Abhängigkeit.</strong> Domain und Inhalte gehören Ihnen – auch wenn Sie später wechseln möchten.
+            </li>
+          </ul>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================================================================
+       FAQ
+       ================================================================== -->
+  <section class="section section--alt section--tight" aria-labelledby="faq-titel">
+    <div class="container">
+      <div class="faq-layout">
+        <SectionHead
+          eyebrow="Häufige Fragen"
+          title="Fragen, die uns oft gestellt werden"
+          lead="Weitere Antworten – etwa zu Kosten, Dauer und Inhalten – finden Sie bei den Leistungen."
+          id="faq-titel"
+        />
+        <div>
+          <Faq items={FAQ_HOME} openFirst />
+          <p class="faq-layout__more">
+            <a href="/leistungen/#fragen">Alle häufigen Fragen ansehen</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CtaSection />
+</BaseLayout>
+
+<style>
+  /* ---------------------------------------------------------------- Hero */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(2.5rem, 1rem + 6vw, 5.5rem) clamp(3rem, 1.5rem + 6vw, 6rem);
+  }
+
+  .hero__glow-1 {
+    top: -32%;
+    right: -18%;
+  }
+
+  .hero__glow-2 {
+    bottom: -42%;
+    left: -22%;
+  }
+
+  .hero__inner {
+    position: relative;
+    z-index: var(--z-content);
+    display: grid;
+    gap: clamp(2.5rem, 1rem + 5vw, 4rem);
+    align-items: center;
+  }
+
+  .hero__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: var(--sp-5);
+    padding: 0.42rem 0.95rem 0.42rem 0.7rem;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-full);
+    background: rgba(255, 255, 255, 0.03);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--c-text-muted);
+  }
+
+  .hero__pulse {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--c-accent);
+    box-shadow: 0 0 0 0 rgba(36, 230, 178, 0.6);
+    flex: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero__pulse {
+      animation: pulse 2.8s var(--ease-out) infinite;
+    }
+  }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(36, 230, 178, 0.55);
+    }
+    70% {
+      box-shadow: 0 0 0 0.6rem rgba(36, 230, 178, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(36, 230, 178, 0);
+    }
+  }
+
+  .hero__title {
+    max-width: 19ch;
+  }
+
+  .hero__lead {
+    margin-top: var(--sp-5);
+    max-width: 52ch;
+    font-size: var(--fs-lg);
+    color: var(--c-text-muted);
+  }
+
+  .hero__actions {
+    margin-top: var(--sp-7);
+  }
+
+  .hero__facts {
+    display: grid;
+    gap: var(--sp-3);
+    margin: var(--sp-7) 0 0;
+    padding: var(--sp-5) 0 0;
+    border-top: 1px solid var(--c-line);
+    list-style: none;
+  }
+
+  .hero__facts li {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+  }
+
+  .hero__facts :global(svg) {
+    flex: none;
+    color: var(--c-accent);
+  }
+
+  @media (min-width: 62rem) {
+    .hero__inner {
+      grid-template-columns: 1.12fr 0.88fr;
+    }
+
+    .hero__facts {
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-5);
+    }
+
+    .hero__facts li {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
+
+  /* ------------------------------------------------- Abschnitt mit Aktion */
+  .split-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--sp-5);
+    margin-bottom: var(--sp-8);
+  }
+
+  .split-head :global(.split-head__text) {
+    margin-bottom: 0;
+    flex: 1 1 26rem;
+  }
+
+  .split-head :global(.split-head__action) {
+    flex: none;
+  }
+
+  /* -------------------------------------------------------------- Ablauf */
+  .process-layout {
+    display: grid;
+    gap: var(--sp-8);
+  }
+
+  .process-layout__more {
+    margin-top: var(--sp-6);
+    padding-top: var(--sp-5);
+    border-top: 1px solid var(--c-line);
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+  }
+
+  .process-layout__more a {
+    color: var(--c-accent);
+    margin-left: 0.35rem;
+  }
+
+  @media (min-width: 62rem) {
+    .process-layout {
+      grid-template-columns: 0.85fr 1.15fr;
+      gap: var(--sp-9);
+      align-items: start;
+    }
+
+    .process-layout__intro {
+      position: sticky;
+      top: 7rem;
+    }
+  }
+
+  /* ---------------------------------------------------------------- Team */
+  .team-grid {
+    max-width: 62rem;
+    margin-inline: auto;
+  }
+
+  .team-note {
+    margin: var(--sp-6) auto 0;
+    text-align: center;
+    font-size: var(--fs-sm);
+  }
+
+  .team-note a {
+    color: var(--c-accent);
+  }
+
+  /* ------------------------------------------------------------ Qualität */
+  .trust {
+    display: grid;
+    gap: var(--sp-7);
+  }
+
+  .trust__list {
+    margin-top: var(--sp-6);
+  }
+
+  .trust__aside {
+    align-self: start;
+    padding: var(--sp-6);
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-lg);
+    background: linear-gradient(160deg, var(--c-surface), var(--c-bg-alt));
+  }
+
+  .trust__aside-title {
+    margin-bottom: var(--sp-5);
+    font-size: var(--fs-lg);
+  }
+
+  .trust__aside-list {
+    display: grid;
+    gap: var(--sp-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+  }
+
+  .trust__aside-list li {
+    padding-left: var(--sp-5);
+    border-left: 2px solid var(--c-accent);
+  }
+
+  @media (min-width: 62rem) {
+    .trust {
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: var(--sp-8);
+      align-items: start;
+    }
+  }
+
+  /* ----------------------------------------------------------------- FAQ */
+  .faq-layout {
+    display: grid;
+    gap: var(--sp-6);
+  }
+
+  .faq-layout :global(.section-head) {
+    margin-bottom: 0;
+  }
+
+  .faq-layout__more {
+    margin-top: var(--sp-5);
+    font-size: var(--fs-sm);
+  }
+
+  .faq-layout__more a {
+    color: var(--c-accent);
+  }
+
+  @media (min-width: 62rem) {
+    .faq-layout {
+      grid-template-columns: 0.8fr 1.2fr;
+      gap: var(--sp-8);
+      align-items: start;
+    }
+
+    .faq-layout :global(.section-head) {
+      position: sticky;
+      top: 7rem;
+    }
+  }
+</style>

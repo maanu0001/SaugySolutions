@@ -1,0 +1,157 @@
+---
+/**
+ * Bestätigungsseite nach erfolgreichem Versand des Kontaktformulars.
+ *
+ * Wird vom PHP-Endpunkt angesteuert, wenn JavaScript deaktiviert ist. Mit
+ * JavaScript bleibt die Kontaktseite stehen und zeigt die Bestätigung direkt
+ * im Formular an. Die Seite wird nicht indexiert.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/Button.astro';
+import Icon from '../components/Icon.astro';
+import { CONTACT } from '../data/site.mjs';
+
+const title = 'Vielen Dank für Ihre Anfrage | Saugy Solutions';
+const description = 'Ihre Anfrage bei Saugy Solutions ist eingegangen.';
+---
+
+<BaseLayout title={title} description={description} path="/danke/" noindex>
+  <section class="thanks">
+    <span class="decor decor--dots" aria-hidden="true"></span>
+    <span class="decor decor--glow decor--drift thanks__glow" aria-hidden="true"></span>
+
+    <div class="container container--narrow thanks__inner">
+      <span class="thanks__icon" aria-hidden="true">
+        <Icon name="check" size={34} />
+      </span>
+
+      <h1 class="thanks__title">Vielen Dank für Ihre Anfrage.</h1>
+
+      <p class="thanks__lead">
+        Ihre Nachricht ist bei uns eingegangen. {CONTACT.person} schaut sie sich persönlich an und
+        meldet sich bei Ihnen zurück.
+      </p>
+
+      <div class="thanks__box">
+        <h2 class="thanks__box-title">Wie es weitergeht</h2>
+        <ol class="thanks__steps">
+          <li>Wir lesen Ihre Anfrage und ordnen ein, worum es geht.</li>
+          <li>Bei Rückfragen melden wir uns kurz per E-Mail oder Telefon.</li>
+          <li>Anschliessend schlagen wir einen Termin für das kostenlose Erstgespräch vor.</li>
+        </ol>
+        <p class="thanks__note">{CONTACT.responseNote}</p>
+      </div>
+
+      <div class="thanks__urgent">
+        <p>
+          Dringend? Sie erreichen uns direkt unter
+          <a href={CONTACT.phoneHref}>{CONTACT.phone}</a> oder
+          <a href={CONTACT.emailHref}>{CONTACT.email}</a>.
+        </p>
+      </div>
+
+      <div class="btn-row btn-row--center thanks__actions">
+        <Button href="/" variant="primary">Zur Startseite</Button>
+        <Button href="/projekte/" variant="secondary">Projekte ansehen</Button>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .thanks {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(3rem, 1.5rem + 6vw, 6rem);
+  }
+
+  .thanks__glow {
+    top: -40%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .thanks__inner {
+    position: relative;
+    z-index: var(--z-content);
+    text-align: center;
+  }
+
+  .thanks__icon {
+    display: grid;
+    place-items: center;
+    width: 4.4rem;
+    height: 4.4rem;
+    margin: 0 auto var(--sp-6);
+    border: 1px solid rgba(36, 230, 178, 0.4);
+    border-radius: var(--r-lg);
+    background: var(--c-accent-soft);
+    color: var(--c-accent);
+  }
+
+  .thanks__title {
+    font-size: var(--fs-3xl);
+  }
+
+  .thanks__lead {
+    max-width: 50ch;
+    margin: var(--sp-5) auto 0;
+    font-size: var(--fs-lg);
+    color: var(--c-text-muted);
+  }
+
+  .thanks__box {
+    margin-top: var(--sp-8);
+    padding: var(--sp-6);
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-lg);
+    background: linear-gradient(160deg, var(--c-surface-raised), var(--c-bg-alt));
+    text-align: left;
+  }
+
+  .thanks__box-title {
+    margin-bottom: var(--sp-5);
+    font-size: var(--fs-lg);
+  }
+
+  .thanks__steps {
+    display: grid;
+    gap: var(--sp-3);
+    margin: 0;
+    padding-left: 1.2rem;
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+  }
+
+  .thanks__steps li::marker {
+    color: var(--c-accent);
+    font-weight: 700;
+  }
+
+  .thanks__note {
+    margin-top: var(--sp-5);
+    padding-top: var(--sp-4);
+    border-top: 1px solid var(--c-line);
+    font-size: var(--fs-xs);
+    color: var(--c-text-muted);
+  }
+
+  .thanks__urgent {
+    margin-top: var(--sp-6);
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+  }
+
+  .thanks__urgent p {
+    max-width: none;
+  }
+
+  .thanks__urgent a {
+    color: var(--c-accent);
+    white-space: nowrap;
+  }
+
+  .thanks__actions {
+    margin-top: var(--sp-7);
+  }
+</style>

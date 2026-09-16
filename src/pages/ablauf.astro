@@ -1,0 +1,190 @@
+---
+/**
+ * Ablaufseite: Sieben Schritte von der Anfrage bis zum laufenden Betrieb.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import ProcessSteps from '../components/ProcessSteps.astro';
+import SectionHead from '../components/SectionHead.astro';
+import Icon from '../components/Icon.astro';
+import CtaSection from '../components/CtaSection.astro';
+import { PROCESS, PROCESS_NOTES } from '../data/process.mjs';
+
+const title = 'Ablauf: So entsteht Ihre Website | Saugy Solutions';
+const description =
+  'Von der unverbindlichen Anfrage über Offerte und Umsetzung bis zur Veröffentlichung: der Projektablauf bei Saugy Solutions – nachvollziehbar erklärt.';
+
+/** Ablauf als strukturierte Daten (HowTo). */
+const schema = {
+  '@type': 'HowTo',
+  name: 'Ablauf eines Webprojekts bei Saugy Solutions',
+  description:
+    'Sieben Schritte von der ersten Anfrage bis zum laufenden Betrieb einer Website.',
+  step: PROCESS.map((step, index) => ({
+    '@type': 'HowToStep',
+    position: index + 1,
+    name: step.title,
+    text: step.whatHappens,
+  })),
+};
+---
+
+<BaseLayout title={title} description={description} path="/ablauf/" schema={[schema]}>
+  <section class="page-hero">
+    <span class="decor decor--dots" aria-hidden="true"></span>
+    <span class="decor decor--glow decor--drift page-hero__glow" aria-hidden="true"></span>
+
+    <div class="container page-hero__inner">
+      <Breadcrumbs items={[{ label: 'Ablauf' }]} />
+
+      <p class="eyebrow">Ablauf</p>
+      <h1 class="page-hero__title">
+        Von der Idee zur fertigen Website – <span class="accent-text">Schritt für Schritt</span>
+      </h1>
+      <p class="page-hero__lead">
+        Viele Kundinnen und Kunden haben noch nie ein Webprojekt begleitet. Deshalb zeigen wir hier
+        offen, was in welchem Schritt passiert, was Sie dazu beitragen und was am Ende jedes
+        Schritts vorliegt.
+      </p>
+
+      <ul class="notes">
+        {
+          PROCESS_NOTES.map((note) => (
+            <li class="notes__item">
+              <Icon name="check" size={17} />
+              <span>{note}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section--alt section--divided" aria-labelledby="schritte-titel">
+    <div class="container">
+      <SectionHead
+        eyebrow="Die sieben Schritte"
+        title="Was in welchem Schritt passiert"
+        lead="Kein Schritt beginnt, bevor der vorherige abgeschlossen ist. Sie wissen jederzeit, wo das Projekt steht."
+        id="schritte-titel"
+      />
+
+      <div class="steps-wrap">
+        <ProcessSteps steps={PROCESS} detailed />
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="mitwirkung-titel">
+    <div class="container">
+      <div class="two-col">
+        <div data-reveal>
+          <SectionHead
+            eyebrow="Ihre Rolle"
+            title="Was wir von Ihnen brauchen"
+            id="mitwirkung-titel"
+          />
+          <ul class="check-list">
+            <li>Eine Vorstellung davon, was die Website leisten soll – stichwortartig genügt</li>
+            <li>Vorhandene Inhalte wie Texte, Bilder, Logo oder Unterlagen</li>
+            <li>Angaben zu bestehender Domain, E-Mail oder Hosting, sofern vorhanden</li>
+            <li>Rückmeldungen zu den Zwischenständen in Ihren eigenen Worten</li>
+            <li>Eine Person, die im Projekt entscheiden kann</li>
+          </ul>
+        </div>
+
+        <div data-reveal data-reveal-delay="1">
+          <SectionHead eyebrow="Unsere Rolle" title="Was wir übernehmen" />
+          <ul class="check-list">
+            <li>Beratung, Konzept und eine nachvollziehbare Offerte</li>
+            <li>Gestaltung und technische Umsetzung der gesamten Website</li>
+            <li>Aufbereitung Ihrer Inhalte für die Darstellung im Web</li>
+            <li>Einrichtung von Hosting, Domain und E-Mail auf Wunsch</li>
+            <li>Prüfung auf verschiedenen Geräten vor der Veröffentlichung</li>
+            <li>Laufende Betreuung nach dem Aufschalten, wenn Sie das möchten</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CtaSection
+    title="Bereit für den ersten Schritt?"
+    text="Schritt eins ist eine kurze Nachricht. Alles Weitere besprechen wir gemeinsam – kostenlos und unverbindlich."
+    primaryLabel="Anfrage starten"
+  />
+</BaseLayout>
+
+<style>
+  .page-hero {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(2rem, 1rem + 4vw, 3.5rem) clamp(2.5rem, 1.2rem + 4.5vw, 4rem);
+  }
+
+  .page-hero__glow {
+    top: -48%;
+    right: -18%;
+  }
+
+  .page-hero__inner {
+    position: relative;
+    z-index: var(--z-content);
+  }
+
+  .page-hero__title {
+    max-width: 21ch;
+  }
+
+  .page-hero__lead {
+    margin-top: var(--sp-5);
+    max-width: 60ch;
+    font-size: var(--fs-lg);
+    color: var(--c-text-muted);
+  }
+
+  .notes {
+    display: grid;
+    gap: var(--sp-3);
+    margin: var(--sp-7) 0 0;
+    padding: var(--sp-5) 0 0;
+    border-top: 1px solid var(--c-line);
+    list-style: none;
+  }
+
+  .notes__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+  }
+
+  .notes__item :global(svg) {
+    flex: none;
+    margin-top: 0.22rem;
+    color: var(--c-accent);
+  }
+
+  @media (min-width: 58rem) {
+    .notes {
+      grid-template-columns: 1fr 1fr;
+      column-gap: var(--sp-6);
+    }
+  }
+
+  .steps-wrap {
+    max-width: 58rem;
+  }
+
+  .two-col {
+    display: grid;
+    gap: var(--sp-8);
+  }
+
+  @media (min-width: 52rem) {
+    .two-col {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

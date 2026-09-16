@@ -1,0 +1,160 @@
+---
+/**
+ * Projektablauf als nummerierte Liste.
+ *
+ * `detailed` steuert, ob nur die Kurzfassung (Startseite) oder alle Angaben
+ * inklusive Beitrag der Kundschaft und Ergebnis (Ablaufseite) erscheinen.
+ */
+interface Props {
+  steps: {
+    title: string;
+    summary: string;
+    whatHappens?: string;
+    yourPart?: string;
+    outcome?: string;
+  }[];
+  detailed?: boolean;
+}
+
+const { steps, detailed = false } = Astro.props;
+---
+
+<ol class:list={['steps', detailed && 'steps--detailed']}>
+  {
+    steps.map((step, index) => (
+      <li class="steps__item" data-reveal>
+        <div class="steps__marker" aria-hidden="true">
+          <span class="steps__number">{String(index + 1).padStart(2, '0')}</span>
+        </div>
+
+        <div class="steps__body">
+          <h3 class="steps__title">
+            <span class="visually-hidden">Schritt {index + 1}: </span>
+            {step.title}
+          </h3>
+          <p class="steps__summary">{detailed ? step.whatHappens : step.summary}</p>
+
+          {detailed && (
+            <dl class="steps__meta">
+              <div>
+                <dt>Ihr Beitrag</dt>
+                <dd>{step.yourPart}</dd>
+              </div>
+              <div>
+                <dt>Ergebnis</dt>
+                <dd>{step.outcome}</dd>
+              </div>
+            </dl>
+          )}
+        </div>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .steps {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+  }
+
+  .steps__item {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--sp-5);
+    padding-bottom: var(--sp-7);
+  }
+
+  /* Verbindungslinie zwischen den Schritten. */
+  .steps__item::before {
+    content: '';
+    position: absolute;
+    left: 1.4rem;
+    top: 3rem;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--c-line-strong), transparent);
+  }
+
+  .steps__item:last-child {
+    padding-bottom: 0;
+  }
+
+  .steps__item:last-child::before {
+    display: none;
+  }
+
+  .steps__marker {
+    display: grid;
+    place-items: center;
+    width: 2.8rem;
+    height: 2.8rem;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-md);
+    background: var(--c-surface);
+    transition: border-color var(--t-base) var(--ease-out),
+      background-color var(--t-base) var(--ease-out);
+  }
+
+  .steps__item:hover .steps__marker {
+    border-color: rgba(36, 230, 178, 0.45);
+    background: var(--c-accent-soft);
+  }
+
+  .steps__number {
+    font-size: var(--fs-sm);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--c-accent);
+  }
+
+  .steps__body {
+    padding-top: 0.25rem;
+  }
+
+  .steps__title {
+    font-size: var(--fs-lg);
+  }
+
+  .steps__summary {
+    margin-top: var(--sp-3);
+    color: var(--c-text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  .steps__meta {
+    display: grid;
+    gap: var(--sp-4);
+    margin-top: var(--sp-5);
+    padding: var(--sp-5);
+    border: 1px solid var(--c-line);
+    border-radius: var(--r-md);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .steps__meta dt {
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--c-accent);
+  }
+
+  .steps__meta dd {
+    margin: 0.4rem 0 0;
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+  }
+
+  @media (min-width: 46rem) {
+    .steps__meta {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-6);
+    }
+  }
+</style>

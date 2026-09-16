@@ -1,0 +1,33 @@
+{
+  "name": "saugy-solutions-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Statische Unternehmenswebsite von Saugy Solutions (Astro, static output).",
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "deploy:build": "node scripts/build-deploy.mjs",
+    "serve:dist": "node scripts/serve-dist.mjs",
+    "qa": "node scripts/qa.mjs",
+    "qa:browser": "node scripts/browser-qa.mjs",
+    "check": "astro check",
+    "assets:logo": "node scripts/generate-logo-assets.mjs",
+    "assets:og": "node scripts/generate-og-image.mjs",
+    "assets:screenshots": "node scripts/capture-screenshots.mjs"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "astro": "^7.3.3"
+  },
+  "devDependencies": {
+    "@fontsource-variable/manrope": "^5.3.0",
+    "playwright": "^1.63.0",
+    "sharp": "^0.34.5"
+  }
+}

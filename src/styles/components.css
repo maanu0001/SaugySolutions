@@ -1,0 +1,474 @@
+/* ==========================================================================
+   WIEDERVERWENDBARE KOMPONENTEN-KLASSEN
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Abschnittskopf
+   -------------------------------------------------------------------------- */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: var(--sp-4);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--c-accent);
+}
+
+.eyebrow::before {
+  content: '';
+  width: 1.75rem;
+  height: 2px;
+  border-radius: var(--r-full);
+  background: linear-gradient(to right, var(--c-accent), var(--c-accent-2));
+}
+
+.section-head {
+  max-width: var(--measure);
+  margin-bottom: var(--sp-8);
+}
+
+.section-head--center {
+  margin-inline: auto;
+  text-align: center;
+}
+
+.section-head--center .eyebrow {
+  justify-content: center;
+}
+
+.section-head__lead {
+  margin-top: var(--sp-4);
+  font-size: var(--fs-lg);
+  color: var(--c-text-muted);
+}
+
+.section-head--center .section-head__lead {
+  margin-inline: auto;
+}
+
+/* Akzentuierte Wörter in Überschriften. */
+.accent-text {
+  background: linear-gradient(104deg, var(--c-accent), var(--c-accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* --------------------------------------------------------------------------
+   Buttons
+   -------------------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.85rem 1.6rem;
+  border: 1px solid transparent;
+  border-radius: var(--r-full);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: transform var(--t-fast) var(--ease-out),
+    background-color var(--t-base) var(--ease-out),
+    border-color var(--t-base) var(--ease-out), color var(--t-base) var(--ease-out),
+    box-shadow var(--t-base) var(--ease-out);
+}
+
+.btn__icon {
+  flex: none;
+  transition: transform var(--t-base) var(--ease-out);
+}
+
+.btn:hover .btn__icon {
+  transform: translateX(3px);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn[aria-disabled='true'],
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Primär – gefüllte Akzentfläche, Kontrast 11.9:1 */
+.btn--primary {
+  background: linear-gradient(120deg, var(--c-accent), #4cf0c5);
+  color: var(--c-on-accent);
+  box-shadow: 0 16px 38px -22px rgba(36, 230, 178, 0.85);
+}
+
+.btn--primary:hover {
+  color: var(--c-on-accent);
+  background: linear-gradient(120deg, #3ef0c1, #63f5d0);
+  box-shadow: 0 20px 44px -20px rgba(36, 230, 178, 0.95);
+}
+
+/* Sekundär – dezente Kontur */
+.btn--secondary {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--c-line-strong);
+  color: var(--c-text);
+}
+
+.btn--secondary:hover {
+  border-color: var(--c-accent);
+  color: var(--c-accent);
+  background: var(--c-accent-soft);
+}
+
+/* Schlicht – reiner Textlink im Buttonformat */
+.btn--ghost {
+  padding-inline: 0.4rem;
+  color: var(--c-accent);
+}
+
+.btn--ghost:hover {
+  color: var(--c-text);
+}
+
+.btn--block {
+  width: 100%;
+}
+
+.btn--lg {
+  padding: 1rem 1.9rem;
+  font-size: var(--fs-base);
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+}
+
+.btn-row--center {
+  justify-content: center;
+}
+
+/* --------------------------------------------------------------------------
+   Karten
+   -------------------------------------------------------------------------- */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: var(--sp-6);
+  border: 1px solid var(--c-line);
+  border-radius: var(--r-lg);
+  background: linear-gradient(168deg, var(--c-surface), var(--c-bg-alt));
+  transition: border-color var(--t-base) var(--ease-out),
+    transform var(--t-base) var(--ease-out), box-shadow var(--t-base) var(--ease-out);
+}
+
+/* Feine Akzentlinie, die beim Hover von links einläuft. */
+.card--interactive::after {
+  content: '';
+  position: absolute;
+  left: var(--sp-6);
+  right: var(--sp-6);
+  bottom: 0;
+  height: 2px;
+  border-radius: var(--r-full);
+  background: linear-gradient(to right, var(--c-accent), var(--c-accent-2));
+  transform: scaleX(0);
+  transform-origin: left;
+  opacity: 0;
+  transition: transform var(--t-slow) var(--ease-out), opacity var(--t-base) var(--ease-out);
+}
+
+.card--interactive:hover,
+.card--interactive:focus-within {
+  border-color: var(--c-line-strong);
+  transform: translateY(calc(-4px * var(--motion-scale)));
+  box-shadow: var(--shadow-md);
+}
+
+.card--interactive:hover::after,
+.card--interactive:focus-within::after {
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+.card__title {
+  margin-bottom: var(--sp-3);
+}
+
+.card__text {
+  color: var(--c-text-muted);
+  font-size: var(--fs-sm);
+}
+
+/* Karte, die vollständig klickbar ist – der Link deckt die Fläche ab. */
+.card__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+/* --------------------------------------------------------------------------
+   Icon-Fläche
+   -------------------------------------------------------------------------- */
+.icon-badge {
+  display: grid;
+  place-items: center;
+  width: 2.9rem;
+  height: 2.9rem;
+  margin-bottom: var(--sp-5);
+  border: 1px solid var(--c-line-strong);
+  border-radius: var(--r-md);
+  background: var(--c-accent-soft);
+  color: var(--c-accent);
+  transition: background-color var(--t-base) var(--ease-out),
+    border-color var(--t-base) var(--ease-out);
+}
+
+.card--interactive:hover .icon-badge {
+  background: rgba(36, 230, 178, 0.2);
+  border-color: rgba(36, 230, 178, 0.4);
+}
+
+/* --------------------------------------------------------------------------
+   Raster
+   -------------------------------------------------------------------------- */
+.grid {
+  display: grid;
+  gap: var(--sp-5);
+}
+
+.grid--2 {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+}
+
+.grid--3 {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16.5rem), 1fr));
+}
+
+/* --------------------------------------------------------------------------
+   Kennzeichnungen
+   -------------------------------------------------------------------------- */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--c-line-strong);
+  border-radius: var(--r-full);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--c-text-muted);
+}
+
+.tag--accent {
+  border-color: rgba(36, 230, 178, 0.35);
+  background: var(--c-accent-soft);
+  color: var(--c-accent);
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+/* --------------------------------------------------------------------------
+   Listen mit Häkchen
+   -------------------------------------------------------------------------- */
+.check-list {
+  display: grid;
+  gap: var(--sp-3);
+  padding: 0;
+  list-style: none;
+}
+
+.check-list li {
+  position: relative;
+  padding-left: 1.9rem;
+  color: var(--c-text-muted);
+  font-size: var(--fs-sm);
+}
+
+/* Das Häkchen ist rein dekorativ – die Information steht im Text. */
+.check-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 0.75rem;
+  height: 0.42rem;
+  border-left: 2px solid var(--c-accent);
+  border-bottom: 2px solid var(--c-accent);
+  transform: rotate(-45deg);
+}
+
+/* --------------------------------------------------------------------------
+   Fliesstext-Bereiche (Rechtstexte, Projektdetails)
+   -------------------------------------------------------------------------- */
+.prose {
+  max-width: var(--measure);
+  color: var(--c-text-muted);
+}
+
+.prose > * + * {
+  margin-top: var(--sp-4);
+}
+
+.prose h2 {
+  margin-top: var(--sp-8);
+  font-size: var(--fs-xl);
+  color: var(--c-text);
+}
+
+.prose h2:first-child {
+  margin-top: 0;
+}
+
+.prose h3 {
+  margin-top: var(--sp-6);
+  font-size: var(--fs-lg);
+  color: var(--c-text);
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.2rem;
+  display: grid;
+  gap: var(--sp-2);
+}
+
+.prose li::marker {
+  color: var(--c-accent);
+}
+
+.prose a {
+  color: var(--c-accent);
+}
+
+.prose dl {
+  display: grid;
+  gap: var(--sp-3);
+}
+
+.prose dt {
+  font-weight: 700;
+  color: var(--c-text);
+}
+
+/* Platzhalter für noch nicht bestätigte Angaben – deutlich sichtbar. */
+.pending-value {
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  padding: 0.1rem 0.45rem;
+  border: 1px dashed var(--c-danger);
+  border-radius: var(--r-sm);
+  color: var(--c-danger);
+  font-size: 0.92em;
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   Dekoration – zurückhaltende Hintergrundstrukturen
+   -------------------------------------------------------------------------- */
+.decor {
+  position: absolute;
+  z-index: var(--z-decor);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Feines Punktraster. */
+.decor--dots {
+  inset: 0;
+  background-image: radial-gradient(circle at center, var(--c-line) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: radial-gradient(ellipse 78% 62% at 50% 0%, #000 8%, transparent 72%);
+  -webkit-mask-image: radial-gradient(ellipse 78% 62% at 50% 0%, #000 8%, transparent 72%);
+}
+
+/* Weicher Farbschein. */
+.decor--glow {
+  width: min(46rem, 88vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.2;
+  background: radial-gradient(circle, var(--c-accent) 0%, transparent 68%);
+}
+
+.decor--glow-2 {
+  background: radial-gradient(circle, var(--c-accent-2) 0%, transparent 68%);
+  opacity: 0.16;
+}
+
+/* Sehr langsame, kaum wahrnehmbare Bewegung der Farbschleier. */
+@media (prefers-reduced-motion: no-preference) {
+  .decor--drift {
+    animation: decor-drift 26s var(--ease-in-out) infinite alternate;
+  }
+
+  .decor--drift-slow {
+    animation: decor-drift 38s var(--ease-in-out) infinite alternate-reverse;
+  }
+}
+
+@keyframes decor-drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(3%, -4%, 0) scale(1.07);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Einblenden beim Scrollen
+   Ohne JavaScript (.no-js) sind alle Inhalte sofort sichtbar.
+   -------------------------------------------------------------------------- */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity var(--t-slow) var(--ease-out), transform var(--t-slow) var(--ease-out);
+}
+
+.js [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Gestaffeltes Einblenden von Gruppen. */
+.js [data-reveal][data-reveal-delay='1'] {
+  transition-delay: 70ms;
+}
+.js [data-reveal][data-reveal-delay='2'] {
+  transition-delay: 140ms;
+}
+.js [data-reveal][data-reveal-delay='3'] {
+  transition-delay: 210ms;
+}
+.js [data-reveal][data-reveal-delay='4'] {
+  transition-delay: 280ms;
+}
+.js [data-reveal][data-reveal-delay='5'] {
+  transition-delay: 350ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

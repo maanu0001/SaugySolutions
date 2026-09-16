@@ -1,0 +1,91 @@
+---
+/**
+ * Projektübersicht.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import CtaSection from '../../components/CtaSection.astro';
+import { PROJECTS } from '../../data/projects.mjs';
+
+const title = 'Projekte: Websites für KMU und Vereine | Saugy Solutions';
+const description =
+  'Referenzen von Saugy Solutions: Webauftritte für einen Bio-Familienbetrieb, eine öffentliche Bibliothek und eine Schweizer Gaming-Community.';
+---
+
+<BaseLayout title={title} description={description} path="/projekte/">
+  <section class="page-hero">
+    <span class="decor decor--dots" aria-hidden="true"></span>
+    <span class="decor decor--glow decor--glow-2 decor--drift page-hero__glow" aria-hidden="true"></span>
+
+    <div class="container page-hero__inner">
+      <Breadcrumbs items={[{ label: 'Projekte' }]} />
+
+      <p class="eyebrow">Projekte</p>
+      <h1 class="page-hero__title">
+        Websites für ganz <span class="accent-text">unterschiedliche</span> Auftraggeber
+      </h1>
+      <p class="page-hero__lead">
+        Ein Familienbetrieb mit Hofladen, eine öffentliche Bibliothek und eine Online-Community: So
+        verschieden die Ausgangslagen sind, so ähnlich ist die Aufgabe – die wichtigsten
+        Informationen müssen schnell und verständlich auffindbar sein.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--tight" aria-label="Übersicht der Projekte">
+    <div class="container">
+      <div class="grid grid--3">
+        {PROJECTS.map((project, index) => <ProjectCard project={project} eager={index === 0} level={2} />)}
+      </div>
+
+      <p class="projects-note" data-reveal>
+        Die abgebildeten Vorschauen sind schematische Darstellungen. Die Projekte selbst sind über
+        die verlinkten Adressen öffentlich erreichbar.
+      </p>
+    </div>
+  </section>
+
+  <CtaSection
+    title="Ein ähnliches Projekt im Kopf?"
+    text="Ob erster Webauftritt, Erneuerung einer bestehenden Website oder Übernahme des Betriebs – schildern Sie uns kurz Ihre Situation."
+  />
+</BaseLayout>
+
+<style>
+  .page-hero {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(2rem, 1rem + 4vw, 3.5rem) clamp(2rem, 1rem + 3.5vw, 3.5rem);
+  }
+
+  .page-hero__glow {
+    top: -50%;
+    left: -22%;
+  }
+
+  .page-hero__inner {
+    position: relative;
+    z-index: var(--z-content);
+  }
+
+  .page-hero__title {
+    max-width: 20ch;
+  }
+
+  .page-hero__lead {
+    margin-top: var(--sp-5);
+    max-width: 62ch;
+    font-size: var(--fs-lg);
+    color: var(--c-text-muted);
+  }
+
+  .projects-note {
+    max-width: var(--measure);
+    margin-top: var(--sp-7);
+    padding-top: var(--sp-5);
+    border-top: 1px solid var(--c-line);
+    font-size: var(--fs-xs);
+    color: var(--c-text-muted);
+  }
+</style>

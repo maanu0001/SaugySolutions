@@ -1,0 +1,162 @@
+---
+/**
+ * Abschliessender Handlungsaufruf. Wird auf fast allen Seiten verwendet.
+ */
+import Button from './Button.astro';
+import Icon from './Icon.astro';
+import { CONTACT, NAV_CTA } from '../data/site.mjs';
+
+interface Props {
+  title?: string;
+  text?: string;
+  primaryLabel?: string;
+  primaryHref?: string;
+}
+
+const {
+  title = 'Erzählen Sie uns von Ihrem Vorhaben.',
+  text = 'Eine grobe Idee genügt. Im kostenlosen Erstgespräch klären wir gemeinsam, was sinnvoll ist – unverbindlich und ohne Fachjargon.',
+  primaryLabel = NAV_CTA.label,
+  primaryHref = NAV_CTA.href,
+} = Astro.props;
+---
+
+<section class="cta section" aria-labelledby="cta-titel">
+  <span class="decor decor--glow decor--drift cta__glow" aria-hidden="true"></span>
+
+  <div class="container">
+    <div class="cta__box" data-reveal>
+      <div class="cta__content">
+        <p class="eyebrow">Nächster Schritt</p>
+        <h2 id="cta-titel" class="cta__title">{title}</h2>
+        <p class="cta__text">{text}</p>
+
+        <div class="btn-row cta__actions">
+          <Button href={primaryHref} variant="primary" size="lg">{primaryLabel}</Button>
+          <Button href={CONTACT.phoneHref} variant="secondary" size="lg" icon="phone">
+            {CONTACT.phone}
+          </Button>
+        </div>
+      </div>
+
+      <div class="cta__aside">
+        <p class="cta__aside-title">Direkter Kontakt</p>
+        <p class="cta__person">{CONTACT.person}</p>
+        <ul class="cta__list">
+          <li>
+            <a href={CONTACT.phoneHref}>
+              <Icon name="phone" size={17} />
+              <span>{CONTACT.phone}</span>
+            </a>
+          </li>
+          <li>
+            <a href={CONTACT.emailHref}>
+              <Icon name="at" size={17} />
+              <span>{CONTACT.email}</span>
+            </a>
+          </li>
+        </ul>
+        <p class="cta__note">{CONTACT.responseNote}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta__glow {
+    left: 50%;
+    top: 20%;
+    transform: translateX(-50%);
+    opacity: 0.14;
+  }
+
+  .cta__box {
+    position: relative;
+    display: grid;
+    gap: var(--sp-7);
+    padding: clamp(1.75rem, 1rem + 3.4vw, 3.5rem);
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-xl);
+    background: linear-gradient(150deg, var(--c-surface-raised), var(--c-bg-alt) 62%);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .cta__title {
+    font-size: var(--fs-2xl);
+  }
+
+  .cta__text {
+    margin-top: var(--sp-4);
+    color: var(--c-text-muted);
+  }
+
+  .cta__actions {
+    margin-top: var(--sp-6);
+  }
+
+  .cta__aside {
+    padding-top: var(--sp-6);
+    border-top: 1px solid var(--c-line);
+  }
+
+  .cta__aside-title {
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--c-accent);
+  }
+
+  .cta__person {
+    margin-top: var(--sp-3);
+    font-size: var(--fs-lg);
+    font-weight: 700;
+  }
+
+  .cta__list {
+    display: grid;
+    gap: var(--sp-3);
+    margin: var(--sp-4) 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--fs-sm);
+  }
+
+  .cta__list a {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    color: var(--c-text-muted);
+    text-decoration: none;
+  }
+
+  .cta__list a:hover {
+    color: var(--c-accent);
+  }
+
+  .cta__note {
+    margin-top: var(--sp-5);
+    font-size: var(--fs-xs);
+    color: var(--c-text-muted);
+  }
+
+  @media (min-width: 58rem) {
+    .cta__box {
+      grid-template-columns: 1.55fr 1fr;
+      gap: var(--sp-8);
+      align-items: start;
+    }
+
+    .cta__aside {
+      padding-top: 0;
+      padding-left: var(--sp-7);
+      border-top: none;
+      border-left: 1px solid var(--c-line);
+    }
+  }
+</style>

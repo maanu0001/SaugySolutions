@@ -1,0 +1,222 @@
+---
+/**
+ * Datenschutzerklärung.
+ *
+ * Der Text beschreibt ausschliesslich das, was diese Website tatsächlich tut:
+ * Server-Logdaten, Kontaktformular, E-Mail-Kommunikation, lokal gehostete
+ * Schriften. Es werden keine Analyse-, Marketing- oder Trackingdienste
+ * eingesetzt und keine Cookies gesetzt.
+ *
+ * HINWEIS: Dieser Text ist eine Vorlage. Er sollte vor der Veröffentlichung
+ * fachlich geprüft werden (siehe README).
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import LegalValue from '../components/LegalValue.astro';
+import { LEGAL, CONTACT, SITE } from '../data/site.mjs';
+
+const title = 'Datenschutzerklärung | Saugy Solutions';
+const description =
+  'Wie Saugy Solutions mit Ihren Daten umgeht: Kontaktformular, Server-Logdaten, E-Mail. Kein Tracking, keine Marketing-Cookies, keine externen Schriftanbieter.';
+---
+
+<BaseLayout title={title} description={description} path="/datenschutz/">
+  <section class="legal">
+    <div class="container container--narrow">
+      <Breadcrumbs items={[{ label: 'Datenschutz' }]} />
+
+      <h1 class="legal__title">Datenschutzerklärung</h1>
+      <p class="legal__meta">
+        Diese Erklärung beschreibt, welche Daten beim Besuch dieser Website bearbeitet werden und
+        wozu. Sie richtet sich nach dem schweizerischen Datenschutzgesetz (DSG); soweit anwendbar,
+        wird auch die europäische Datenschutz-Grundverordnung (DSGVO) berücksichtigt.
+      </p>
+
+      <div class="prose">
+        <h2>1. Verantwortliche Stelle</h2>
+        <p>Verantwortlich für die Bearbeitung von Personendaten auf dieser Website ist:</p>
+        <dl>
+          <div>
+            <dt>{LEGAL.provider}</dt>
+            <dd>{LEGAL.responsible}</dd>
+          </div>
+          <div>
+            <dt>Adresse</dt>
+            <dd><LegalValue value={LEGAL.address} /></dd>
+          </div>
+          <div>
+            <dt>E-Mail</dt>
+            <dd><a href={CONTACT.emailHref}>{CONTACT.email}</a></dd>
+          </div>
+          <div>
+            <dt>Telefon</dt>
+            <dd><a href={CONTACT.phoneHref}>{CONTACT.phone}</a></dd>
+          </div>
+        </dl>
+
+        <h2>2. Grundsatz</h2>
+        <p>
+          Wir bearbeiten Personendaten nur, soweit das für den Betrieb dieser Website und die
+          Beantwortung von Anfragen nötig ist. Diese Website verwendet <strong>keine
+          Analysewerkzeuge, keine Werbenetzwerke und kein Tracking</strong>. Es werden keine Profile
+          erstellt und keine Daten zu Werbezwecken weitergegeben.
+        </p>
+
+        <h2>3. Server-Logdaten</h2>
+        <p>
+          Beim Aufruf dieser Website übermittelt Ihr Browser technisch notwendige Angaben, die der
+          Webserver in Protokolldateien speichert. Dazu gehören in der Regel:
+        </p>
+        <ul>
+          <li>IP-Adresse des anfragenden Geräts</li>
+          <li>Datum und Uhrzeit des Zugriffs</li>
+          <li>Name und URL der abgerufenen Datei</li>
+          <li>übertragene Datenmenge und Meldung über den Erfolg des Abrufs</li>
+          <li>verwendeter Browser und Betriebssystem</li>
+          <li>zuvor besuchte Seite (Referrer), sofern übermittelt</li>
+        </ul>
+        <p>
+          Diese Daten dienen dem sicheren und stabilen Betrieb der Website sowie der Abwehr von
+          Angriffen. Sie werden nicht mit anderen Datenquellen zusammengeführt und nicht dazu
+          verwendet, einzelne Personen zu identifizieren. Rechtsgrundlage ist unser berechtigtes
+          Interesse am technisch fehlerfreien Betrieb. Die Protokolldateien werden vom
+          Hostinganbieter nach kurzer Zeit automatisch gelöscht.
+        </p>
+
+        <h2>4. Hosting</h2>
+        <p>
+          Diese Website wird bei <LegalValue value={LEGAL.hostingProvider} /> betrieben.
+          Serverstandort: <LegalValue value={LEGAL.hostingLocation} />. Der Hostinganbieter
+          bearbeitet die oben genannten Server-Logdaten in unserem Auftrag und ist vertraglich zur
+          Vertraulichkeit verpflichtet.
+        </p>
+
+        <h2>5. Kontaktformular</h2>
+        <p>
+          Wenn Sie uns über das Formular auf der <a href="/kontakt/">Kontaktseite</a> schreiben,
+          bearbeiten wir die von Ihnen eingegebenen Angaben, um Ihre Anfrage zu beantworten.
+        </p>
+
+        <h3>Welche Angaben erhoben werden</h3>
+        <ul>
+          <li><strong>Pflichtangaben:</strong> Name, E-Mail-Adresse, Art der Anfrage, gewünschte Leistung und Ihre Projektbeschreibung</li>
+          <li><strong>Freiwillige Angaben:</strong> Telefonnummer, Unternehmen oder Organisation, gewünschter Projektstart und Budgetrahmen</li>
+        </ul>
+
+        <h3>Wie die Angaben verwendet werden</h3>
+        <p>
+          Die Angaben werden per E-Mail an unsere Geschäftsadresse übermittelt und dort bearbeitet.
+          Sie dienen ausschliesslich der Beantwortung Ihrer Anfrage sowie einer allfälligen
+          Anschlusskommunikation. Eine Weitergabe an Dritte findet nicht statt. Eine Nutzung für
+          Werbung erfolgt nicht.
+        </p>
+        <p>
+          Rechtsgrundlage ist Ihre Einwilligung, die Sie mit dem Absenden des Formulars erteilen,
+          sowie unser Interesse an der Beantwortung Ihres Anliegens. Sie können Ihre Einwilligung
+          jederzeit formlos widerrufen, zum Beispiel per E-Mail an
+          <a href={CONTACT.emailHref}>{CONTACT.email}</a>.
+        </p>
+
+        <h3>Schutz vor automatisierten Anfragen</h3>
+        <p>
+          Zum Schutz vor Werbe- und Spamnachrichten verwendet das Formular technische Massnahmen:
+          ein für Sie unsichtbares Zusatzfeld, eine Plausibilitätsprüfung der Ausfülldauer sowie eine
+          Begrenzung der Anzahl Anfragen pro Zeitraum. Für die Begrenzung wird Ihre IP-Adresse
+          <strong> ausschliesslich in verkürzter und verschlüsselter Form</strong> für kurze Zeit auf
+          dem Server hinterlegt. Ein Rückschluss auf Ihre Person ist daraus nicht möglich. Es kommen
+          keine externen Captcha-Dienste zum Einsatz.
+        </p>
+
+        <h3>Aufbewahrung</h3>
+        <p>
+          Wir bewahren Anfragen so lange auf, wie das zur Bearbeitung nötig ist. Entsteht daraus ein
+          Auftrag, gelten die gesetzlichen Aufbewahrungsfristen. Anfragen, aus denen kein Auftrag
+          entsteht, löschen wir, sobald sie nicht mehr benötigt werden.
+        </p>
+
+        <h2>6. E-Mail-Kommunikation</h2>
+        <p>
+          Wenn Sie uns per E-Mail schreiben, werden Ihre Angaben zur Bearbeitung der Anfrage
+          gespeichert. Bitte beachten Sie, dass die Übertragung von E-Mails über das Internet
+          Sicherheitslücken aufweisen kann. Für besonders vertrauliche Inhalte vereinbaren wir gerne
+          einen anderen Übermittlungsweg. Der Versand der Formularnachrichten erfolgt über
+          <LegalValue value={LEGAL.mailProvider} />.
+        </p>
+
+        <h2>7. Cookies</h2>
+        <p>
+          Diese Website setzt <strong>keine Cookies</strong> und speichert keine Daten im lokalen
+          Speicher Ihres Browsers. Aus diesem Grund gibt es auch keinen Einwilligungsbanner – es
+          gibt schlicht nichts, dem zugestimmt werden müsste.
+        </p>
+
+        <h2>8. Schriftarten und externe Inhalte</h2>
+        <p>
+          Die verwendete Schriftart wird <strong>lokal von unserem eigenen Server ausgeliefert</strong>.
+          Es besteht keine Verbindung zu Google Fonts oder einem anderen externen Schriftanbieter.
+          Ebenso werden keine externen Skripte, Kartendienste, Videoplattformen oder Social-Media-Elemente
+          eingebunden. Beim Besuch dieser Website werden somit keine Daten an Dritte übertragen.
+        </p>
+        <p>
+          Wenn Sie auf einen Link zu einer fremden Website klicken – etwa zu einem der im
+          Projektbereich genannten Auftritte – gilt dort die Datenschutzerklärung des jeweiligen
+          Anbieters.
+        </p>
+
+        <h2>9. Verschlüsselte Übertragung</h2>
+        <p>
+          Diese Website wird über eine verschlüsselte Verbindung (HTTPS/TLS) ausgeliefert. Sie
+          erkennen das an der Adresszeile Ihres Browsers. Dadurch können die von Ihnen übermittelten
+          Daten nicht von Dritten mitgelesen werden.
+        </p>
+
+        <h2>10. Ihre Rechte</h2>
+        <p>Sie haben im Rahmen der geltenden Gesetze insbesondere das Recht:</p>
+        <ul>
+          <li>Auskunft über die zu Ihnen bearbeiteten Personendaten zu verlangen</li>
+          <li>die Berichtigung unrichtiger Daten zu verlangen</li>
+          <li>die Löschung Ihrer Daten zu verlangen, soweit keine Aufbewahrungspflicht besteht</li>
+          <li>der Bearbeitung zu widersprechen oder eine erteilte Einwilligung zu widerrufen</li>
+          <li>die Herausgabe Ihrer Daten in einem gängigen Format zu verlangen</li>
+        </ul>
+        <p>
+          Wenden Sie sich dazu an <a href={CONTACT.emailHref}>{CONTACT.email}</a>. Zudem haben Sie
+          das Recht, sich bei der zuständigen Aufsichtsbehörde zu beschweren – in der Schweiz beim
+          Eidgenössischen Datenschutz- und Öffentlichkeitsbeauftragten (EDÖB).
+        </p>
+
+        <h2>11. Änderungen dieser Erklärung</h2>
+        <p>
+          Wir passen diese Datenschutzerklärung an, wenn sich die Funktionen dieser Website oder die
+          rechtlichen Vorgaben ändern. Es gilt jeweils die hier veröffentlichte Fassung.
+        </p>
+
+        <p class="legal__updated">
+          Stand: {LEGAL.lastUpdated} · Gültig für <a href={`${SITE.url}/`}>{SITE.url.replace('https://', '')}</a>
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .legal {
+    padding-block: clamp(2rem, 1rem + 4vw, 3.5rem) var(--section-y);
+  }
+
+  .legal__title {
+    font-size: var(--fs-3xl);
+  }
+
+  .legal__meta {
+    margin: var(--sp-3) 0 var(--sp-7);
+    color: var(--c-text-muted);
+  }
+
+  .legal__updated {
+    margin-top: var(--sp-8);
+    padding-top: var(--sp-5);
+    border-top: 1px solid var(--c-line);
+    font-size: var(--fs-xs);
+  }
+</style>

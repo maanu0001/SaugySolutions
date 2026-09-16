@@ -1,0 +1,61 @@
+---
+/**
+ * Leistungskarte für die Startseite und Übersichten.
+ */
+import Icon from './Icon.astro';
+
+interface Props {
+  service: { slug: string; icon: string; title: string; teaser: string };
+  delay?: number;
+}
+
+const { service, delay = 0 } = Astro.props;
+---
+
+<article class="card card--interactive service-card" data-reveal data-reveal-delay={delay || undefined}>
+  <span class="icon-badge">
+    <Icon name={service.icon} size={22} />
+  </span>
+  <h3 class="card__title service-card__title">
+    <a href={`/leistungen/#${service.slug}`} class="card__link">{service.title}</a>
+  </h3>
+  <p class="card__text">{service.teaser}</p>
+  <p class="service-card__more">
+    <span>Mehr dazu</span>
+    <Icon name="arrow-right" size={16} />
+  </p>
+</article>
+
+<style>
+  .service-card {
+    height: 100%;
+  }
+
+  .service-card__title {
+    font-size: var(--fs-lg);
+  }
+
+  .service-card__title a {
+    text-decoration: none;
+  }
+
+  .service-card__more {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: auto;
+    padding-top: var(--sp-5);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--c-accent);
+  }
+
+  .service-card__more :global(svg) {
+    transition: transform var(--t-base) var(--ease-out);
+  }
+
+  .service-card:hover .service-card__more :global(svg),
+  .service-card:focus-within .service-card__more :global(svg) {
+    transform: translateX(4px);
+  }
+</style>

@@ -1,0 +1,23 @@
+# Abhaengigkeiten
+node_modules/
+
+# Build-Ergebnisse
+dist/
+.astro/
+
+# Lokale Konfiguration und Geheimnisse – NIEMALS einchecken
+server/config/config.php
+server/config/.env
+.env
+.env.local
+
+# Laufzeitdaten des Kontaktformulars
+server/var/
+storage/
+
+# Betriebssystem / Editor
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/

@@ -1,0 +1,250 @@
+---
+/**
+ * Projektvorschau in einem stilisierten Browserfenster.
+ *
+ * Liegt ein echter Screenshot vor (Feld `shotDesktop` bzw. `shotMobile` in
+ * src/data/projects.mjs), wird dieser angezeigt. Andernfalls erscheint eine
+ * bewusst abstrahierte Darstellung: Sie zeigt die Adresse des Projekts und
+ * eine schematische Seitenstruktur. So wird kein Screenshot vorgetäuscht.
+ *
+ * Screenshots erzeugen: `node scripts/capture-screenshots.mjs`
+ */
+interface Props {
+  project: {
+    name: string;
+    domain: string;
+    accent: string;
+    shotDesktop?: string | null;
+    teaser?: string;
+  };
+  /** Bild sofort laden (nur für Darstellungen im sichtbaren Bereich). */
+  eager?: boolean;
+  class?: string;
+}
+
+const { project, eager = false, class: className } = Astro.props;
+const shot = project.shotDesktop;
+---
+
+<div class:list={['shot', className]} style={`--project-accent:${project.accent}`}>
+  <div class="shot__chrome" aria-hidden="true">
+    <span class="shot__dot"></span>
+    <span class="shot__dot"></span>
+    <span class="shot__dot"></span>
+    <span class="shot__address">{project.domain}</span>
+  </div>
+
+  <div class="shot__viewport">
+    {
+      shot ? (
+        <img
+          src={shot}
+          alt={`Ansicht der Website von ${project.name}`}
+          width="1280"
+          height="800"
+          loading={eager ? 'eager' : 'lazy'}
+          decoding="async"
+        />
+      ) : (
+        /*
+          Schematische Darstellung. Rein dekorativ – alle Informationen zum
+          Projekt stehen im umgebenden Text.
+        */
+        <div class="shot__scheme" aria-hidden="true">
+          <div class="shot__scheme-bar">
+            <span class="shot__scheme-mark" />
+            <span class="shot__scheme-nav" />
+            <span class="shot__scheme-nav" />
+            <span class="shot__scheme-nav shot__scheme-nav--cta" />
+          </div>
+          <div class="shot__scheme-hero">
+            <span class="shot__scheme-line shot__scheme-line--xl" />
+            <span class="shot__scheme-line shot__scheme-line--lg" />
+            <span class="shot__scheme-line shot__scheme-line--sm" />
+            <span class="shot__scheme-pill" />
+          </div>
+          <div class="shot__scheme-grid">
+            <span />
+            <span />
+            <span />
+          </div>
+        </div>
+      )
+    }
+  </div>
+</div>
+
+<style>
+  .shot {
+    position: relative;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-lg);
+    background: var(--c-bg-alt);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    transition: transform var(--t-base) var(--ease-out),
+      border-color var(--t-base) var(--ease-out), box-shadow var(--t-base) var(--ease-out);
+  }
+
+  /* --- Browserleiste ------------------------------------------------------ */
+  .shot__chrome {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.62rem 0.85rem;
+    border-bottom: 1px solid var(--c-line);
+    background: rgba(255, 255, 255, 0.035);
+  }
+
+  .shot__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--c-line-strong);
+    flex: none;
+  }
+
+  .shot__dot:first-child {
+    background: color-mix(in srgb, var(--project-accent) 65%, transparent);
+  }
+
+  .shot__address {
+    margin-left: 0.6rem;
+    padding: 0.16rem 0.7rem;
+    border-radius: var(--r-full);
+    background: rgba(0, 0, 0, 0.35);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--c-text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* --- Inhaltsfläche ------------------------------------------------------ */
+  .shot__viewport {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    background: linear-gradient(160deg, var(--c-surface), var(--c-bg));
+  }
+
+  .shot__viewport img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+  }
+
+  /* --- Schematische Darstellung ------------------------------------------- */
+  .shot__scheme {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6%;
+    padding: 7% 8%;
+  }
+
+  /* Farbschein in der Projektfarbe. */
+  .shot__scheme::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -18%;
+    width: 60%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--project-accent) 0%, transparent 68%);
+    opacity: 0.22;
+    filter: blur(38px);
+  }
+
+  .shot__scheme > * {
+    position: relative;
+  }
+
+  .shot__scheme-bar {
+    display: flex;
+    align-items: center;
+    gap: 5%;
+  }
+
+  .shot__scheme-mark {
+    width: 11%;
+    height: 0.62rem;
+    border-radius: var(--r-sm);
+    background: var(--project-accent);
+    opacity: 0.85;
+  }
+
+  .shot__scheme-nav {
+    width: 8%;
+    height: 0.34rem;
+    border-radius: var(--r-full);
+    background: var(--c-line-strong);
+  }
+
+  .shot__scheme-nav--cta {
+    margin-left: auto;
+    width: 14%;
+    height: 0.72rem;
+    border-radius: var(--r-full);
+    background: color-mix(in srgb, var(--project-accent) 45%, transparent);
+  }
+
+  .shot__scheme-hero {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .shot__scheme-line {
+    height: 0.46rem;
+    border-radius: var(--r-full);
+    background: var(--c-line-strong);
+  }
+
+  .shot__scheme-line--xl {
+    width: 74%;
+    height: 0.95rem;
+    background: color-mix(in srgb, var(--c-text) 45%, transparent);
+  }
+
+  .shot__scheme-line--lg {
+    width: 58%;
+    height: 0.95rem;
+    background: color-mix(in srgb, var(--c-text) 26%, transparent);
+  }
+
+  .shot__scheme-line--sm {
+    width: 42%;
+  }
+
+  .shot__scheme-pill {
+    width: 22%;
+    height: 1.05rem;
+    margin-top: 0.4rem;
+    border-radius: var(--r-full);
+    background: var(--project-accent);
+    opacity: 0.8;
+  }
+
+  .shot__scheme-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4%;
+    margin-top: auto;
+  }
+
+  .shot__scheme-grid span {
+    height: 3.2rem;
+    border: 1px solid var(--c-line);
+    border-radius: var(--r-md);
+    background: rgba(255, 255, 255, 0.035);
+  }
+
+  .shot__scheme-grid span:first-child {
+    border-color: color-mix(in srgb, var(--project-accent) 35%, transparent);
+  }
+</style>

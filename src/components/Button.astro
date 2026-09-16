@@ -1,0 +1,55 @@
+---
+/**
+ * Schaltfläche bzw. Link im Buttonformat.
+ * Rendert ein <a>, wenn `href` gesetzt ist, sonst ein <button>.
+ */
+import Icon from './Icon.astro';
+
+interface Props {
+  href?: string;
+  variant?: 'primary' | 'secondary' | 'ghost';
+  size?: 'md' | 'lg';
+  block?: boolean;
+  icon?: string | false;
+  type?: 'button' | 'submit';
+  external?: boolean;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  href,
+  variant = 'primary',
+  size = 'md',
+  block = false,
+  icon = 'arrow-right',
+  type = 'button',
+  external = false,
+  class: className,
+  ...rest
+} = Astro.props;
+
+const classes = [
+  'btn',
+  `btn--${variant}`,
+  size === 'lg' && 'btn--lg',
+  block && 'btn--block',
+  className,
+];
+
+const externalAttrs = external ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+---
+
+{
+  href ? (
+    <a href={href} class:list={classes} {...externalAttrs} {...rest}>
+      <slot />
+      {icon && <Icon name={external ? 'arrow-up-right' : icon} size={17} class="btn__icon" />}
+    </a>
+  ) : (
+    <button type={type} class:list={classes} {...rest}>
+      <slot />
+      {icon && <Icon name={icon} size={17} class="btn__icon" />}
+    </button>
+  )
+}

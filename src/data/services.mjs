@@ -1,0 +1,208 @@
+/**
+ * Leistungen von Saugy Solutions.
+ *
+ * Jede Leistung wird auf der Leistungsseite als eigener Abschnitt und auf der
+ * Startseite als Karte ausgegeben. Neue Leistungen können hier ergänzt werden,
+ * ohne dass eine Seite angepasst werden muss.
+ *
+ * Felder:
+ *   slug        – Anker-ID auf /leistungen/
+ *   icon        – Name eines Icons aus src/components/Icon.astro
+ *   title       – Titel der Leistung
+ *   teaser      – Kurzfassung für Startseite und Übersichten
+ *   lead        – Einleitender Absatz auf der Leistungsseite
+ *   benefit     – Konkreter Kundennutzen (eine Aussage, kein Marketingtext)
+ *   includes    – Was konkret dazugehört
+ *   useCases    – Typische Einsatzbeispiele
+ */
+
+export const SERVICES = [
+  {
+    slug: 'webdesign-webentwicklung',
+    icon: 'layout',
+    title: 'Website und Webentwicklung',
+    teaser:
+      'Individuelle Unternehmenswebsites, die auf jedem Gerät funktionieren, schnell laden und Besucherinnen und Besucher gezielt zur Kontaktaufnahme führen.',
+    lead: 'Wir entwickeln Websites, die zu Ihrem Betrieb passen – nicht umgekehrt. Statt einer zugekauften Vorlage entsteht ein Aufbau, der Ihre Leistungen verständlich erklärt und Interessierte zum nächsten Schritt führt.',
+    benefit:
+      'Sie erhalten einen Auftritt, der Ihr Unternehmen korrekt darstellt und den Sie im Alltag nicht betreuen müssen.',
+    includes: [
+      {
+        title: 'Individuelle Unternehmenswebsites',
+        text: 'Aufbau, Gestaltung und Texte richten sich nach Ihrem Angebot und Ihrer Zielgruppe – kein aufgeblähtes Baukastensystem.',
+      },
+      {
+        title: 'Darstellung auf allen Geräten',
+        text: 'Die Website wird für Mobiltelefon, Tablet und Desktop gleichermassen entwickelt und auf verschiedenen Bildschirmgrössen geprüft.',
+      },
+      {
+        title: 'Klare Nutzerführung',
+        text: 'Navigation, Seitenstruktur und Handlungsaufforderungen sind so aufgebaut, dass Besuchende schnell finden, was sie suchen.',
+      },
+      {
+        title: 'Performante Umsetzung',
+        text: 'Schlanker Code, optimierte Bilder und wenig JavaScript sorgen für kurze Ladezeiten – auch bei langsamer Mobilverbindung.',
+      },
+      {
+        title: 'Suchmaschinen-Grundoptimierung',
+        text: 'Saubere Seitentitel, Beschreibungen, Überschriftenstruktur und technische Grundlagen, damit Ihre Website gefunden werden kann.',
+      },
+      {
+        title: 'Überarbeitung bestehender Websites',
+        text: 'Ein bestehender Auftritt wird analysiert und gezielt erneuert – gestalterisch, technisch oder beides.',
+      },
+      {
+        title: 'Formulare und individuelle Funktionen',
+        text: 'Kontakt- und Anfrageformulare, Downloadbereiche oder kleinere Sonderfunktionen passend zu Ihren Abläufen.',
+      },
+    ],
+    useCases: [
+      'Erster professioneller Webauftritt für einen lokalen Betrieb',
+      'Ablösung einer veralteten oder nicht mehr gepflegten Website',
+      'Vereinswebsite mit Terminen, Angebot und Kontaktmöglichkeit',
+    ],
+  },
+  {
+    slug: 'hosting-wartung',
+    icon: 'shield',
+    title: 'Hosting, Wartung und Sicherheit',
+    teaser:
+      'Ihre Website läuft auf einer betreuten Umgebung. Updates, Sicherungen und technische Kontrolle übernehmen wir – Sie müssen sich nicht darum kümmern.',
+    lead: 'Eine Website ist mit der Veröffentlichung nicht fertig. Damit sie zuverlässig erreichbar und technisch aktuell bleibt, übernehmen wir den laufenden Betrieb.',
+    benefit:
+      'Sie haben eine Ansprechperson für den technischen Betrieb und müssen sich nicht selbst mit Servern, Updates oder Sicherungen befassen.',
+    includes: [
+      {
+        title: 'Zuverlässiges Hosting',
+        text: 'Wir richten die Hosting-Umgebung ein, verbinden die Domain und kümmern uns um Zertifikate für die verschlüsselte Übertragung.',
+      },
+      {
+        title: 'Updates',
+        text: 'Verwendete Komponenten werden aktuell gehalten, damit bekannte Sicherheitslücken geschlossen bleiben.',
+      },
+      {
+        title: 'Sicherungen',
+        text: 'Regelmässige Backups der Website und ihrer Daten, damit ein Zustand im Notfall wiederhergestellt werden kann.',
+      },
+      {
+        title: 'Technische Überwachung',
+        text: 'Erreichbarkeit und offensichtliche Fehlerzustände werden im Auge behalten, damit Probleme nicht erst bei einer Kundenmeldung auffallen.',
+      },
+      {
+        title: 'Laufende Wartung',
+        text: 'Kleine Anpassungen, neue Inhalte oder technische Korrekturen im vereinbarten Rahmen.',
+      },
+      {
+        title: 'Persönliche Unterstützung',
+        text: 'Wenn etwas nicht funktioniert, melden Sie sich direkt bei uns – ohne Ticketsystem und ohne Warteschleife.',
+      },
+    ],
+    useCases: [
+      'Betrieb einer neu erstellten Website inklusive Domain und E-Mail',
+      'Übernahme einer bestehenden Website, die technisch niemand mehr betreut',
+      'Regelmässige inhaltliche Aktualisierungen ohne eigenes Redaktionsteam',
+    ],
+  },
+  {
+    slug: 'email-loesungen',
+    icon: 'mail',
+    title: 'Geschäftliche E-Mail-Lösungen',
+    teaser:
+      'E-Mail-Adressen mit Ihrer eigenen Domain – eingerichtet auf allen Geräten und mit Unterstützung beim Wechsel vom bisherigen Anbieter.',
+    lead: 'Eine Adresse mit der eigenen Domain wirkt professioneller als eine private Freemail-Adresse und gehört zum seriösen Auftritt eines Betriebs.',
+    benefit:
+      'Ihre Korrespondenz läuft über Ihre eigene Domain und ist auf allen Geräten gleich eingerichtet.',
+    includes: [
+      {
+        title: 'Adressen mit eigener Domain',
+        text: 'Adressen wie info@ihr-betrieb.ch, inklusive Verteilern und Sammeladressen, wo das sinnvoll ist.',
+      },
+      {
+        title: 'Einrichtung auf Ihren Geräten',
+        text: 'Wir richten die Konten auf Mobiltelefon, Tablet und Computer ein, damit Sie überall auf dieselben Nachrichten zugreifen.',
+      },
+      {
+        title: 'Sichere und zuverlässige Nutzung',
+        text: 'Verschlüsselte Verbindungen und korrekt gesetzte Einträge, damit Ihre Nachrichten zuverlässig zugestellt werden.',
+      },
+      {
+        title: 'Unterstützung bei der Migration',
+        text: 'Bestehende Nachrichten und Adressbücher werden beim Wechsel des Anbieters übernommen.',
+      },
+    ],
+    useCases: [
+      'Umstellung von einer privaten Freemail-Adresse auf die eigene Domain',
+      'Gemeinsame Adressen für ein kleines Team oder einen Vorstand',
+      'Wechsel des E-Mail-Anbieters ohne Verlust bestehender Nachrichten',
+    ],
+  },
+  {
+    slug: 'nextcloud',
+    icon: 'cloud',
+    title: 'Nextcloud und sichere Datenablage',
+    teaser:
+      'Eine zentrale Ablage für Dokumente, auf die Ihr Team von überall zugreift – mit Freigaben, die Sie selbst kontrollieren.',
+    lead: 'Mit Nextcloud liegen Dateien an einem Ort statt verteilt auf privaten Geräten und in E-Mail-Anhängen. Sie behalten die Kontrolle darüber, wer worauf Zugriff hat.',
+    benefit:
+      'Alle Beteiligten arbeiten mit demselben aktuellen Stand, und Sie bestimmen, welche Inhalte geteilt werden.',
+    includes: [
+      {
+        title: 'Zentrale Dateiablage',
+        text: 'Dokumente, Bilder und Unterlagen liegen strukturiert an einem Ort statt in einzelnen Postfächern.',
+      },
+      {
+        title: 'Gemeinsames Arbeiten',
+        text: 'Mehrere Personen arbeiten auf demselben Stand, ohne Dateien hin- und herzuschicken.',
+      },
+      {
+        title: 'Zugriff über verschiedene Geräte',
+        text: 'Zugriff über Browser, Desktop-Programm oder Mobilgerät – je nachdem, wie Sie arbeiten.',
+      },
+      {
+        title: 'Kontrollierte Freigaben',
+        text: 'Inhalte lassen sich gezielt für einzelne Personen oder befristet nach aussen freigeben.',
+      },
+    ],
+    useCases: [
+      'Gemeinsame Ablage für ein kleines Team statt verteilter Ordner',
+      'Vereinsunterlagen, auf die ein wechselnder Vorstand zugreifen muss',
+      'Austausch grösserer Dateien mit Kundschaft ohne E-Mail-Anhänge',
+    ],
+  },
+  {
+    slug: 'individuelle-loesungen',
+    icon: 'spark',
+    title: 'Individuelle digitale Lösungen',
+    teaser:
+      'Wenn eine Standardlösung nicht passt: kleinere Weblösungen und Verbindungen zwischen Systemen, zugeschnitten auf Ihren Ablauf.',
+    lead: 'Nicht jede Aufgabe lässt sich mit einer klassischen Website lösen. Als ausgebildete Applikationsentwickler setzen wir auch kleinere individuelle Weblösungen um, wenn das für Ihren Ablauf sinnvoll ist.',
+    benefit:
+      'Wiederkehrende Handarbeit lässt sich vereinfachen, ohne gleich eine grosse Software einzuführen.',
+    includes: [
+      {
+        title: 'Kleinere Webanwendungen',
+        text: 'Übersichten, Formulare oder geschützte Bereiche, die über eine reine Informationsseite hinausgehen.',
+      },
+      {
+        title: 'Verbindung bestehender Dienste',
+        text: 'Anbindung an Werkzeuge, die Sie bereits verwenden, damit Daten nicht mehrfach erfasst werden müssen.',
+      },
+      {
+        title: 'Pflegbare Inhalte',
+        text: 'Bereiche, die sich regelmässig ändern, werden so aufgebaut, dass Sie oder wir sie einfach aktualisieren können.',
+      },
+      {
+        title: 'Ehrliche Einschätzung',
+        text: 'Wenn eine bestehende Standardlösung günstiger und besser passt, sagen wir das – auch wenn kein Auftrag daraus entsteht.',
+      },
+    ],
+    useCases: [
+      'Formularbasierte Abläufe, die heute über Papier oder E-Mail laufen',
+      'Geschützter Bereich für Mitglieder oder Mitarbeitende',
+      'Übersichtsseite, die regelmässig aktualisierte Informationen bündelt',
+    ],
+  },
+];
+
+/** Kurzform für Auswahllisten im Kontaktformular und im Footer. */
+export const SERVICE_OPTIONS = SERVICES.map((s) => s.title);

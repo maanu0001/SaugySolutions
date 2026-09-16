@@ -1,0 +1,333 @@
+---
+/**
+ * Leistungsseite.
+ *
+ * Jede Leistung erhält einen eigenen Abschnitt mit Erklärung, Kundennutzen,
+ * Umfang, Einsatzbeispielen und einem Handlungsaufruf. Abgeschlossen wird die
+ * Seite mit den häufigen Fragen.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import SectionHead from '../components/SectionHead.astro';
+import Button from '../components/Button.astro';
+import Icon from '../components/Icon.astro';
+import Faq from '../components/Faq.astro';
+import CtaSection from '../components/CtaSection.astro';
+
+import { SERVICES } from '../data/services.mjs';
+import { FAQ_SERVICES } from '../data/faq.mjs';
+
+const title = 'Leistungen: Website, Hosting, E-Mail und Cloud | Saugy Solutions';
+const description =
+  'Websites und Webentwicklung, Hosting und Wartung, geschäftliche E-Mail-Lösungen, Nextcloud und individuelle Weblösungen für kleine Unternehmen in der Schweiz.';
+
+const faqSchema = {
+  '@type': 'FAQPage',
+  mainEntity: FAQ_SERVICES.map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: { '@type': 'Answer', text: item.a },
+  })),
+};
+---
+
+<BaseLayout title={title} description={description} path="/leistungen/" schema={[faqSchema]}>
+  <!-- ================================================= Seitenkopf -->
+  <section class="page-hero">
+    <span class="decor decor--dots" aria-hidden="true"></span>
+    <span class="decor decor--glow decor--drift page-hero__glow" aria-hidden="true"></span>
+
+    <div class="container page-hero__inner">
+      <Breadcrumbs items={[{ label: 'Leistungen' }]} />
+
+      <p class="eyebrow">Leistungen</p>
+      <h1 class="page-hero__title">
+        Alles für Ihren digitalen Auftritt – <span class="accent-text">aus einer Hand</span>
+      </h1>
+      <p class="page-hero__lead">
+        Website, Hosting, E-Mail und Datenablage greifen ineinander. Wenn alles von derselben Stelle
+        kommt, entfällt die Abstimmung zwischen mehreren Anbietern – und Sie wissen immer, an wen Sie
+        sich wenden können.
+      </p>
+
+      <!-- Sprungnavigation zu den einzelnen Leistungen -->
+      <nav class="jump" aria-label="Leistungen auf dieser Seite">
+        <ul class="jump__list">
+          {
+            SERVICES.map((service) => (
+              <li>
+                <a href={`#${service.slug}`} class="jump__link">
+                  <Icon name={service.icon} size={17} />
+                  <span>{service.title}</span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+    </div>
+  </section>
+
+  <!-- ================================================= Leistungen -->
+  {
+    SERVICES.map((service, index) => (
+      <section
+        class:list={['service', index % 2 === 1 && 'section--alt']}
+        id={service.slug}
+        aria-labelledby={`${service.slug}-titel`}
+      >
+        <div class="container">
+          <div class="service__grid">
+            <div class="service__intro">
+              <span class="icon-badge">
+                <Icon name={service.icon} size={22} />
+              </span>
+              <h2 id={`${service.slug}-titel`} class="service__title">
+                {service.title}
+              </h2>
+              <p class="service__lead">{service.lead}</p>
+
+              <p class="service__benefit">
+                <span class="service__benefit-label">Ihr Nutzen</span>
+                {service.benefit}
+              </p>
+
+              <div class="service__use-cases">
+                <h3 class="service__sub">Typische Einsatzbeispiele</h3>
+                <ul class="check-list">
+                  {service.useCases.map((useCase) => (
+                    <li>{useCase}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <Button href="/kontakt/" variant="primary" class="service__cta">
+                Projekt anfragen
+              </Button>
+            </div>
+
+            <div class="service__details">
+              <h3 class="service__sub service__sub--details">Was dazugehört</h3>
+              <ul class="service__list">
+                {service.includes.map((item, i) => (
+                  <li class="service__item" data-reveal data-reveal-delay={(i % 4) + 1}>
+                    <h4 class="service__item-title">{item.title}</h4>
+                    <p class="service__item-text">{item.text}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    ))
+  }
+
+  <!-- ================================================= FAQ -->
+  <section class="section section--divided" id="fragen" aria-labelledby="fragen-titel">
+    <div class="container">
+      <SectionHead
+        eyebrow="Häufige Fragen"
+        title="Was Kundinnen und Kunden vor einem Projekt wissen möchten"
+        lead="Ehrliche Antworten ohne Pauschalpreise: Umfang und Kosten hängen vom Projekt ab und werden vorher schriftlich festgehalten."
+        id="fragen-titel"
+        center
+      />
+
+      <div class="faq-wrap">
+        <Faq items={FAQ_SERVICES} openFirst />
+      </div>
+    </div>
+  </section>
+
+  <CtaSection
+    title="Unsicher, welche Leistung Sie brauchen?"
+    text="Das ist der Normalfall. Im kostenlosen Erstgespräch schauen wir uns Ihre Situation an und sagen Ihnen ehrlich, was sinnvoll ist – und was nicht."
+  />
+</BaseLayout>
+
+<style>
+  /* ------------------------------------------------------- Seitenkopf */
+  .page-hero {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(2rem, 1rem + 4vw, 3.5rem) clamp(2.5rem, 1.2rem + 4.5vw, 4.5rem);
+  }
+
+  .page-hero__glow {
+    top: -46%;
+    right: -20%;
+  }
+
+  .page-hero__inner {
+    position: relative;
+    z-index: var(--z-content);
+  }
+
+  .page-hero__title {
+    max-width: 22ch;
+  }
+
+  .page-hero__lead {
+    margin-top: var(--sp-5);
+    max-width: 58ch;
+    font-size: var(--fs-lg);
+    color: var(--c-text-muted);
+  }
+
+  /* --------------------------------------------------- Sprungnavigation */
+  .jump {
+    margin-top: var(--sp-7);
+    padding-top: var(--sp-5);
+    border-top: 1px solid var(--c-line);
+  }
+
+  .jump__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .jump__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.95rem;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-full);
+    background: rgba(255, 255, 255, 0.03);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--c-text-muted);
+    text-decoration: none;
+    transition: border-color var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out),
+      background-color var(--t-fast) var(--ease-out);
+  }
+
+  .jump__link :global(svg) {
+    color: var(--c-accent);
+  }
+
+  .jump__link:hover {
+    border-color: var(--c-accent);
+    background: var(--c-accent-soft);
+    color: var(--c-text);
+  }
+
+  /* ------------------------------------------------------- Leistungen */
+  .service {
+    padding-block: var(--section-y);
+    /* Anker-Sprünge sollen nicht unter dem Header landen. */
+    scroll-margin-top: 5rem;
+  }
+
+  .service__grid {
+    display: grid;
+    gap: var(--sp-7);
+  }
+
+  .service__title {
+    font-size: var(--fs-2xl);
+  }
+
+  .service__lead {
+    margin-top: var(--sp-4);
+    color: var(--c-text-muted);
+  }
+
+  .service__benefit {
+    margin-top: var(--sp-5);
+    padding: var(--sp-4) var(--sp-5);
+    border-left: 2px solid var(--c-accent);
+    border-radius: 0 var(--r-md) var(--r-md) 0;
+    background: var(--c-accent-soft);
+    font-size: var(--fs-sm);
+    color: var(--c-text);
+  }
+
+  .service__benefit-label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--c-accent);
+  }
+
+  .service__sub {
+    margin-bottom: var(--sp-4);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--c-text-muted);
+  }
+
+  .service__use-cases {
+    margin-top: var(--sp-6);
+  }
+
+  .service :global(.service__cta) {
+    margin-top: var(--sp-6);
+  }
+
+  .service__list {
+    display: grid;
+    gap: var(--sp-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .service__item {
+    padding: var(--sp-5);
+    border: 1px solid var(--c-line);
+    border-radius: var(--r-md);
+    background: var(--c-surface);
+    transition: border-color var(--t-base) var(--ease-out),
+      background-color var(--t-base) var(--ease-out);
+  }
+
+  .service__item:hover {
+    border-color: var(--c-line-strong);
+    background: var(--c-surface-raised);
+  }
+
+  .service__item-title {
+    font-size: var(--fs-base);
+    font-weight: 700;
+  }
+
+  .service__item-text {
+    margin-top: 0.45rem;
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+  }
+
+  @media (min-width: 62rem) {
+    .service__grid {
+      grid-template-columns: 0.92fr 1.08fr;
+      gap: var(--sp-9);
+      align-items: start;
+    }
+
+    .service__intro {
+      position: sticky;
+      top: 7rem;
+    }
+  }
+
+  /* -------------------------------------------------------------- FAQ */
+  .faq-wrap {
+    max-width: var(--container-narrow);
+    margin-inline: auto;
+  }
+
+  .faq-wrap :global(.faq) {
+    max-width: none;
+  }
+</style>

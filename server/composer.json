@@ -1,0 +1,14 @@
+{
+    "name": "saugy-solutions/kontaktformular",
+    "description": "PHP-Endpunkt für das Kontaktformular von Saugy Solutions.",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.1",
+        "phpmailer/phpmailer": "^6.9"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}

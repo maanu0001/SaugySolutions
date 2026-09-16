@@ -1,0 +1,106 @@
+---
+/**
+ * Metadaten im <head>.
+ *
+ * Jede Seite liefert eigenen Titel und eigene Beschreibung. Canonical-URLs,
+ * Open-Graph-Daten und strukturierte Daten werden hier zentral erzeugt, damit
+ * sie nicht auf jeder Seite wiederholt werden müssen.
+ */
+import { SITE, CONTACT, LEGAL, isPending } from '../data/site.mjs';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Pfad der aktuellen Seite, immer mit Schrägstrich am Ende. */
+  path: string;
+  /** Seiten, die nicht indexiert werden sollen (z. B. Dankeseite, 404). */
+  noindex?: boolean;
+  /** Zusätzliche JSON-LD-Objekte dieser Seite. */
+  schema?: Record<string, unknown>[];
+  /** Abweichendes Vorschaubild. */
+  image?: string;
+}
+
+const { title, description, path, noindex = false, schema = [], image } = Astro.props;
+
+const canonical = new URL(path, SITE.url).href;
+const ogImage = new URL(image ?? SITE.ogImage, SITE.url).href;
+
+/**
+ * Grunddaten des Unternehmens als strukturierte Daten.
+ * Die Geschäftsadresse wird bewusst erst ausgegeben, wenn sie in
+ * src/data/site.mjs hinterlegt ist – es wird keine Adresse erfunden.
+ */
+const organisation: Record<string, unknown> = {
+  '@type': 'ProfessionalService',
+  '@id': `${SITE.url}/#organisation`,
+  name: SITE.name,
+  url: `${SITE.url}/`,
+  description:
+    'Saugy Solutions entwickelt Websites und digitale Lösungen für kleine Unternehmen, lokale Betriebe, Vereine und Selbstständige in der Schweiz.',
+  slogan: SITE.claim,
+  email: CONTACT.email,
+  telephone: CONTACT.phone,
+  image: new URL(SITE.ogImage, SITE.url).href,
+  logo: new URL('/img/logo-saugy-solutions.png', SITE.url).href,
+  inLanguage: SITE.locale,
+  areaServed: { '@type': 'Country', name: 'Schweiz' },
+  knowsLanguage: ['de-CH'],
+  founder: [
+    { '@type': 'Person', name: 'Manuel Saugy' },
+    { '@type': 'Person', name: 'Michael Saugy' },
+  ],
+  serviceType: [
+    'Webdesign',
+    'Webentwicklung',
+    'Website-Hosting und Wartung',
+    'Geschäftliche E-Mail-Lösungen',
+    'Nextcloud und Datenablage',
+  ],
+};
+
+if (!isPending(LEGAL.address)) {
+  organisation.address = { '@type': 'PostalAddress', streetAddress: LEGAL.address, addressCountry: 'CH' };
+}
+
+const website = {
+  '@type': 'WebSite',
+  '@id': `${SITE.url}/#website`,
+  url: `${SITE.url}/`,
+  name: SITE.name,
+  inLanguage: SITE.locale,
+  publisher: { '@id': `${SITE.url}/#organisation` },
+};
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [organisation, website, ...schema],
+};
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+
+{noindex ? <meta name="robots" content="noindex, follow" /> : <meta name="robots" content="index, follow, max-image-preview:large" />}
+
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={SITE.name} />
+<meta property="og:locale" content="de_CH" />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:width" content={String(SITE.ogImageWidth)} />
+<meta property="og:image:height" content={String(SITE.ogImageHeight)} />
+<meta property="og:image:alt" content={`${SITE.name} – ${SITE.claim}`} />
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+
+<!-- Strukturierte Daten -->
+<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline />

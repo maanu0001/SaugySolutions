@@ -1,0 +1,105 @@
+---
+/**
+ * Projektkarte für Übersichten. Die ganze Karte ist klickbar; der eigentliche
+ * Link liegt auf dem Projekttitel, damit der Linktext aussagekräftig bleibt.
+ */
+import ProjectVisual from './ProjectVisual.astro';
+import Icon from './Icon.astro';
+
+interface Props {
+  project: {
+    slug: string;
+    name: string;
+    domain: string;
+    category: string;
+    teaser: string;
+    accent: string;
+    shotDesktop?: string | null;
+  };
+  eager?: boolean;
+  /**
+   * Überschriftenebene des Projekttitels. Auf der Projektübersicht stehen die
+   * Karten direkt unter der h1 (also h2); auf der Startseite unter einer
+   * Abschnitts-h2 (also h3).
+   */
+  level?: 2 | 3;
+}
+
+const { project, eager = false, level = 3 } = Astro.props;
+const Heading = `h${level}` as 'h2' | 'h3';
+---
+
+<article class="project-card card card--interactive" data-reveal>
+  <ProjectVisual project={project} eager={eager} class="project-card__shot" />
+
+  <div class="project-card__body">
+    <p class="tag tag--accent project-card__category">{project.category}</p>
+    <Heading class="project-card__title">
+      <a href={`/projekte/${project.slug}/`} class="card__link">{project.name}</a>
+    </Heading>
+    <p class="card__text">{project.teaser}</p>
+    <p class="project-card__more">
+      <span>Projekt ansehen</span>
+      <Icon name="arrow-right" size={17} />
+    </p>
+  </div>
+</article>
+
+<style>
+  .project-card {
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .project-card :global(.project-card__shot) {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .project-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    padding: var(--sp-5) var(--sp-5) var(--sp-6);
+  }
+
+  .project-card__category {
+    align-self: flex-start;
+  }
+
+  .project-card__title {
+    font-size: var(--fs-lg);
+  }
+
+  .project-card__title a {
+    text-decoration: none;
+  }
+
+  .project-card__more {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-top: auto;
+    padding-top: var(--sp-2);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--c-accent);
+  }
+
+  .project-card__more :global(svg) {
+    transition: transform var(--t-base) var(--ease-out);
+  }
+
+  .project-card:hover .project-card__more :global(svg),
+  .project-card:focus-within .project-card__more :global(svg) {
+    transform: translateX(4px);
+  }
+
+  /* Die untere Akzentlinie der Karte sitzt bündig am Rand. */
+  .project-card.card--interactive::after {
+    left: 0;
+    right: 0;
+    border-radius: 0;
+  }
+</style>

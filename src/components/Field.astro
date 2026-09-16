@@ -1,0 +1,115 @@
+---
+/**
+ * Einzelnes Formularfeld.
+ *
+ * Jedes Feld besitzt ein echtes <label>, eine optionale Hilfestellung und
+ * einen Bereich für Fehlermeldungen. Hilfetext und Fehlermeldung werden über
+ * aria-describedby mit dem Feld verknüpft, damit Screenreader sie vorlesen.
+ */
+interface Props {
+  id: string;
+  name: string;
+  label: string;
+  type?: 'text' | 'email' | 'tel' | 'textarea' | 'select';
+  required?: boolean;
+  autocomplete?: string;
+  placeholder?: string;
+  hint?: string;
+  options?: string[];
+  /** Erster Eintrag einer Auswahlliste, der noch keine Wahl darstellt. */
+  placeholderOption?: string;
+  maxlength?: number;
+  rows?: number;
+  full?: boolean;
+  value?: string;
+}
+
+const {
+  id,
+  name,
+  label,
+  type = 'text',
+  required = false,
+  autocomplete,
+  placeholder,
+  hint,
+  options = [],
+  placeholderOption = 'Bitte wählen',
+  maxlength,
+  rows = 6,
+  full = false,
+  value,
+} = Astro.props;
+
+const hintId = hint ? `${id}-hinweis` : undefined;
+const errorId = `${id}-fehler`;
+// Der Fehlerbereich ist immer verknüpft; er bleibt leer, solange alles stimmt.
+const describedBy = [hintId, errorId].filter(Boolean).join(' ');
+---
+
+<div class:list={['field', full && 'field--full']}>
+  <label class="field__label" for={id}>
+    {label}
+    {
+      required ? (
+        <>
+          <span class="field__required" aria-hidden="true">*</span>
+          <span class="visually-hidden"> (Pflichtfeld)</span>
+        </>
+      ) : (
+        <span class="field__optional">(optional)</span>
+      )
+    }
+  </label>
+
+  {hint && <p class="field__hint" id={hintId}>{hint}</p>}
+
+  {
+    type === 'textarea' ? (
+      <textarea
+        class="field__control"
+        id={id}
+        name={name}
+        rows={rows}
+        required={required}
+        maxlength={maxlength}
+        placeholder={placeholder}
+        autocomplete={autocomplete}
+        aria-describedby={describedBy}
+        set:text={value}
+      />
+    ) : type === 'select' ? (
+      <select
+        class="field__control"
+        id={id}
+        name={name}
+        required={required}
+        autocomplete={autocomplete}
+        aria-describedby={describedBy}
+      >
+        <option value="">{placeholderOption}</option>
+        {options.map((option) => (
+          <option value={option} selected={value === option}>
+            {option}
+          </option>
+        ))}
+      </select>
+    ) : (
+      <input
+        class="field__control"
+        type={type}
+        id={id}
+        name={name}
+        required={required}
+        maxlength={maxlength}
+        placeholder={placeholder}
+        autocomplete={autocomplete}
+        aria-describedby={describedBy}
+        value={value}
+      />
+    )
+  }
+
+  <!-- Fehlermeldung: wird per JavaScript befüllt, bleibt sonst leer. -->
+  <p class="field__error" id={errorId} data-error-for={id} aria-live="polite"></p>
+</div>

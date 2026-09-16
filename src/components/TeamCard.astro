@@ -1,0 +1,174 @@
+---
+/**
+ * Teamkarte.
+ *
+ * Liegt kein authentisches Foto vor, wird eine typografische Darstellung mit
+ * den Initialen verwendet. Es werden bewusst keine künstlich erzeugten
+ * Porträts eingesetzt.
+ */
+interface Props {
+  person: {
+    name: string;
+    initials: string;
+    role: string;
+    education: string;
+    current: string;
+    photo?: string | null;
+    accent?: 'primary' | 'secondary';
+    text: string;
+    focus: string[];
+  };
+  delay?: number;
+}
+
+const { person, delay = 0 } = Astro.props;
+---
+
+<article class="team-card card" data-reveal data-reveal-delay={delay || undefined}>
+  <header class="team-card__head">
+    {
+      person.photo ? (
+        <img
+          class="team-card__photo"
+          src={person.photo}
+          alt={`Porträtfoto von ${person.name}`}
+          width="112"
+          height="112"
+          loading="lazy"
+          decoding="async"
+        />
+      ) : (
+        <span
+          class:list={['team-card__initials', person.accent === 'secondary' && 'team-card__initials--alt']}
+          aria-hidden="true"
+        >
+          {person.initials}
+        </span>
+      )
+    }
+
+    <div>
+      <h3 class="team-card__name">{person.name}</h3>
+      <p class="team-card__role">{person.role}</p>
+    </div>
+  </header>
+
+  <dl class="team-card__facts">
+    <div>
+      <dt>Ausbildung</dt>
+      <dd>{person.education}</dd>
+    </div>
+    <div>
+      <dt>Aktuell</dt>
+      <dd>{person.current}</dd>
+    </div>
+  </dl>
+
+  <p class="team-card__text">{person.text}</p>
+
+  <div class="team-card__focus">
+    <h4 class="team-card__focus-title">Schwerpunkte</h4>
+    <ul class="tag-list">
+      {person.focus.map((item) => <li class="tag">{item}</li>)}
+    </ul>
+  </div>
+</article>
+
+<style>
+  .team-card {
+    gap: var(--sp-5);
+    height: 100%;
+  }
+
+  .team-card__head {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+  }
+
+  .team-card__photo {
+    width: 4.4rem;
+    height: 4.4rem;
+    border-radius: var(--r-md);
+    object-fit: cover;
+    flex: none;
+  }
+
+  /* Typografische Darstellung anstelle eines Fotos. */
+  .team-card__initials {
+    display: grid;
+    place-items: center;
+    width: 4.4rem;
+    height: 4.4rem;
+    flex: none;
+    border: 1px solid rgba(36, 230, 178, 0.3);
+    border-radius: var(--r-md);
+    background: linear-gradient(145deg, var(--c-accent-soft), var(--c-accent-2-soft));
+    font-size: 1.32rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--c-accent);
+  }
+
+  .team-card__initials--alt {
+    border-color: rgba(40, 199, 215, 0.32);
+    background: linear-gradient(145deg, var(--c-accent-2-soft), var(--c-accent-soft));
+    color: var(--c-accent-2);
+  }
+
+  .team-card__name {
+    font-size: var(--fs-xl);
+  }
+
+  .team-card__role {
+    margin-top: 0.2rem;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--c-accent);
+  }
+
+  .team-card:has(.team-card__initials--alt) .team-card__role {
+    color: var(--c-accent-2);
+  }
+
+  .team-card__facts {
+    display: grid;
+    gap: var(--sp-3);
+    padding: var(--sp-4) var(--sp-5);
+    border: 1px solid var(--c-line);
+    border-radius: var(--r-md);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .team-card__facts dt {
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--c-text-muted);
+  }
+
+  .team-card__facts dd {
+    margin: 0.25rem 0 0;
+    font-size: var(--fs-sm);
+    color: var(--c-text);
+  }
+
+  .team-card__text {
+    color: var(--c-text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  .team-card__focus {
+    margin-top: auto;
+  }
+
+  .team-card__focus-title {
+    margin-bottom: var(--sp-3);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--c-text-muted);
+  }
+</style>

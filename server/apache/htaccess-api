@@ -1,0 +1,26 @@
+# ============================================================================
+#  SCHUTZ DES FORMULAR-ENDPUNKTS
+#  Wird beim Deployment-Build als /api/.htaccess abgelegt.
+# ============================================================================
+
+Options -Indexes
+
+# Nur kontakt.php darf direkt aufgerufen werden. Alles andere in diesem Ordner
+# (Hilfsklassen, Abhängigkeiten, Konfiguration, Laufzeitdaten) ist gesperrt.
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>
+
+<Files "kontakt.php">
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Allow from all
+    </IfModule>
+</Files>

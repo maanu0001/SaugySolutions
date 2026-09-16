@@ -1,0 +1,27 @@
+---
+/**
+ * Gibt eine rechtliche Angabe aus src/data/site.mjs aus.
+ *
+ * Ist die Angabe noch nicht bestätigt (Platzhalter), wird sie deutlich sichtbar
+ * als offene Angabe markiert. So wird verhindert, dass versehentlich erfundene
+ * Firmendaten veröffentlicht werden.
+ */
+import { isPending } from '../data/site.mjs';
+
+interface Props {
+  value: string;
+}
+
+const { value } = Astro.props;
+const pending = isPending(value);
+---
+
+{
+  pending ? (
+    <span class="pending-value" title="Diese Angabe muss vor der Veröffentlichung ergänzt werden.">
+      {value}
+    </span>
+  ) : (
+    <span>{value}</span>
+  )
+}
