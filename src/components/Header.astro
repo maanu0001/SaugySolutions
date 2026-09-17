@@ -1,10 +1,17 @@
 ---
 /**
- * Seitenkopf mit Hauptnavigation.
+ * Globale Kopfleiste (Navigations-Header).
  *
- * Auf Desktop eine waagrechte Navigation, auf Mobilgeräten ein Menü, das per
- * Tastatur bedienbar ist (aria-expanded, Fokusfalle, Escape schliesst).
- * Beim Scrollen wird der Header kompakter und setzt sich vom Inhalt ab.
+ * Abzugrenzen vom Hero-Bereich der Startseite: Der Hero ist zentriert, die
+ * Kopfleiste bleibt eine funktionale Leiste mit Logo links und Aktionen
+ * rechts. Beide verwenden dasselbe Logo aus der zentralen Konfiguration.
+ *
+ * Verhalten:
+ *   - dauerhaft sichtbar beim Scrollen (position: sticky)
+ *   - auf Mobilgeräten immer mit abgesetztem Hintergrund, damit der
+ *     Menübutton jederzeit erkennbar bleibt
+ *   - Aussparungen moderner Geräte (iPhone) werden berücksichtigt
+ *   - auf Mobilgeräten öffnet ein Drawer mit Fokusfalle und Scroll-Sperre
  */
 import Logo from './Logo.astro';
 import Icon from './Icon.astro';
@@ -27,12 +34,12 @@ function isActive(href: string) {
 ---
 
 <header class:list={['site-header', { 'site-header--hero': heroPage }]} data-header>
-  <div class="site-header__inner container">
-    <a href="/" class="site-header__brand" aria-label="Saugy Solutions – zur Startseite">
-      <Logo size={40} />
+  <div class="site-header__inner">
+    <a href="/" class="site-header__brand" aria-label={`${NAV[0]?.label ?? 'Startseite'} – Saugy Solutions`}>
+      <Logo size={38} />
     </a>
 
-    <!-- Desktop-Navigation -->
+    <!-- Waagrechte Navigation ab Desktopbreite -->
     <nav class="site-nav" aria-label="Hauptnavigation">
       <ul class="site-nav__list">
         {
@@ -56,6 +63,7 @@ function isActive(href: string) {
         <Icon name="phone" size={17} />
         <span>{CONTACT.phone}</span>
       </a>
+
       <a href={NAV_CTA.href} class="btn btn--primary site-header__cta">
         {NAV_CTA.label}
         <Icon name="arrow-right" size={17} class="btn__icon" />
@@ -77,17 +85,33 @@ function isActive(href: string) {
       </button>
     </div>
   </div>
+</header>
 
-  <!-- Mobiles Menü -->
-  <div class="nav-panel" id="haupt-menue" data-nav-panel hidden>
-    <nav class="nav-panel__inner container" aria-label="Menü">
-      <ul class="nav-panel__list">
+<!--
+  Mobiles Menü als Drawer. Liegt ausserhalb des <header>, damit es den
+  gesamten Bildschirm einnehmen kann, ohne vom Sticky-Kontext beschnitten zu
+  werden.
+-->
+<div class="nav-drawer" id="haupt-menue" data-nav-panel hidden>
+  <div class="nav-drawer__backdrop" data-nav-backdrop></div>
+
+  <div class="nav-drawer__panel" role="dialog" aria-modal="true" aria-label="Menü">
+    <div class="nav-drawer__head">
+      <Logo size={34} />
+      <button type="button" class="nav-drawer__close" data-nav-close>
+        <Icon name="close" size={20} />
+        <span>Schliessen</span>
+      </button>
+    </div>
+
+    <nav class="nav-drawer__body" aria-label="Menü">
+      <ul class="nav-drawer__list">
         {
           NAV.map((item) => (
             <li>
               <a
                 href={item.href}
-                class:list={['nav-panel__link', { 'is-active': isActive(item.href) }]}
+                class:list={['nav-drawer__link', { 'is-active': isActive(item.href) }]}
                 aria-current={isActive(item.href) ? 'page' : undefined}
               >
                 <span>{item.label}</span>
@@ -97,73 +121,78 @@ function isActive(href: string) {
           ))
         }
       </ul>
-
-      <div class="nav-panel__footer">
-        <a href={NAV_CTA.href} class="btn btn--primary btn--block btn--lg">
-          {NAV_CTA.label}
-        </a>
-        <div class="nav-panel__contact">
-          <a href={CONTACT.phoneHref}>
-            <Icon name="phone" size={17} />
-            {CONTACT.phone}
-          </a>
-          <a href={CONTACT.emailHref}>
-            <Icon name="at" size={17} />
-            {CONTACT.email}
-          </a>
-        </div>
-      </div>
     </nav>
+
+    <div class="nav-drawer__foot">
+      <a href={NAV_CTA.href} class="btn btn--primary btn--block btn--lg">{NAV_CTA.label}</a>
+
+      <div class="nav-drawer__contact">
+        <a href={CONTACT.phoneHref}>
+          <Icon name="phone" size={17} />
+          {CONTACT.phone}
+        </a>
+        <a href={CONTACT.emailHref}>
+          <Icon name="at" size={17} />
+          {CONTACT.email}
+        </a>
+      </div>
+    </div>
   </div>
-</header>
+</div>
 
 <style>
+  /* ====================================================== Kopfleiste */
   .site-header {
     position: sticky;
     top: 0;
     z-index: var(--z-header);
-    border-bottom: 1px solid transparent;
-    transition: background-color var(--t-base) var(--ease-out),
-      border-color var(--t-base) var(--ease-out), backdrop-filter var(--t-base) var(--ease-out);
-  }
-
-  /* Beim Scrollen kompakter, leicht abgesetzt und hinterlegt. */
-  .site-header.is-scrolled {
-    background: color-mix(in srgb, var(--c-bg) 82%, transparent);
+    /* Aussparungen (iPhone-Notch, abgerundete Ecken) freihalten. */
+    padding-top: var(--safe-top);
+    border-bottom: 1px solid var(--c-line);
+    /*
+      Auf Mobilgeräten dauerhaft abgesetzt, damit der Menübutton über jedem
+      Inhalt lesbar bleibt. Auf Desktop erst beim Scrollen (siehe unten).
+    */
+    background: color-mix(in srgb, var(--c-bg) 88%, transparent);
     backdrop-filter: blur(14px) saturate(140%);
     -webkit-backdrop-filter: blur(14px) saturate(140%);
-    border-bottom-color: var(--c-line);
+    transition: background-color var(--t-base) var(--ease-out),
+      border-color var(--t-base) var(--ease-out);
   }
 
   /* Browser ohne backdrop-filter erhalten eine deckende Fläche. */
   @supports not (backdrop-filter: blur(4px)) {
-    .site-header.is-scrolled {
+    .site-header {
       background: var(--c-bg);
     }
   }
 
   .site-header__inner {
-    /* Die Kopfleiste darf breiter sein als der Textbereich (74rem), damit
-       Logo, Navigation und Handlungsaufruf nebeneinander Platz haben. */
-    max-width: 84rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--sp-4);
-    padding-block: 1.05rem;
+    width: 100%;
+    max-width: var(--container-wide);
+    margin-inline: auto;
+    /* Seitliche Aussparungen im Querformat berücksichtigen. */
+    padding-inline: calc(var(--gutter) + var(--safe-left)) calc(var(--gutter) + var(--safe-right));
+    padding-block: 0.7rem;
     transition: padding-block var(--t-base) var(--ease-out);
   }
 
   .site-header.is-scrolled .site-header__inner {
-    padding-block: 0.6rem;
+    padding-block: 0.5rem;
   }
 
   .site-header__brand {
-    text-decoration: none;
     flex: none;
+    text-decoration: none;
+    /* Grosszügiges Touch-Ziel, ohne das Layout zu verändern. */
+    padding-block: 0.25rem;
   }
 
-  /* --- Desktop-Navigation ------------------------------------------------ */
+  /* ====================================================== Desktop-Navigation */
   .site-nav {
     display: none;
   }
@@ -180,7 +209,6 @@ function isActive(href: string) {
   .site-nav__link {
     position: relative;
     display: block;
-    /* Im mittleren Bereich knapper, damit der Header bei 1024 px passt. */
     padding: 0.5rem 0.6rem;
     border-radius: var(--r-full);
     font-size: var(--fs-sm);
@@ -200,7 +228,7 @@ function isActive(href: string) {
     color: var(--c-text);
   }
 
-  /* Aktive Seite zusätzlich über eine Linie gekennzeichnet – nicht nur farblich. */
+  /* Aktive Seite zusätzlich über eine Linie – nicht nur farblich. */
   .site-nav__link.is-active::after {
     content: '';
     position: absolute;
@@ -212,7 +240,7 @@ function isActive(href: string) {
     background: linear-gradient(to right, var(--c-accent), var(--c-accent-2));
   }
 
-  /* --- Aktionen ----------------------------------------------------------- */
+  /* ====================================================== Aktionen */
   .site-header__actions {
     display: flex;
     align-items: center;
@@ -220,8 +248,12 @@ function isActive(href: string) {
     flex: none;
   }
 
-  .site-header__phone {
+  .site-header__phone,
+  .site-header__cta {
     display: none;
+  }
+
+  .site-header__phone {
     align-items: center;
     gap: 0.45rem;
     font-size: var(--fs-sm);
@@ -235,33 +267,30 @@ function isActive(href: string) {
     color: var(--c-accent);
   }
 
-  .site-header__cta {
-    display: none;
-  }
-
-  /* --- Menüschaltfläche --------------------------------------------------- */
+  /* ====================================================== Menübutton */
   .nav-toggle {
     display: grid;
     place-items: center;
-    width: 2.85rem;
-    height: 2.85rem;
+    /* Mindestens 44 × 44 px – komfortables Touch-Ziel. */
+    width: 2.9rem;
+    height: 2.9rem;
     border: 1px solid var(--c-line-strong);
     border-radius: var(--r-md);
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.04);
     color: var(--c-text);
     transition: border-color var(--t-fast) var(--ease-out),
       background-color var(--t-fast) var(--ease-out);
   }
 
   .nav-toggle:hover {
-    border-color: var(--c-accent);
+    border-color: var(--c-accent-line);
     color: var(--c-accent);
   }
 
   .nav-toggle__icon {
     display: grid;
     gap: 5px;
-    width: 20px;
+    width: 19px;
   }
 
   .nav-toggle__icon span {
@@ -273,65 +302,109 @@ function isActive(href: string) {
     transition: transform var(--t-base) var(--ease-out), opacity var(--t-fast) var(--ease-out);
   }
 
-  /* Verwandelt das Menüsymbol beim Öffnen in ein Kreuz. */
-  .site-header.is-nav-open .nav-toggle__icon span:nth-child(1) {
+  /* Symbol wird beim Öffnen zum Kreuz. */
+  :global(.is-nav-open) .nav-toggle__icon span:nth-child(1) {
     transform: translateY(7px) rotate(45deg);
   }
-
-  .site-header.is-nav-open .nav-toggle__icon span:nth-child(2) {
+  :global(.is-nav-open) .nav-toggle__icon span:nth-child(2) {
     opacity: 0;
   }
-
-  .site-header.is-nav-open .nav-toggle__icon span:nth-child(3) {
+  :global(.is-nav-open) .nav-toggle__icon span:nth-child(3) {
     transform: translateY(-7px) rotate(-45deg);
   }
 
-  /* --- Mobiles Menü -------------------------------------------------------- */
-  .nav-panel {
+  /* ====================================================== Drawer */
+  .nav-drawer {
     position: fixed;
     inset: 0;
-    top: var(--header-height, 4.4rem);
     z-index: var(--z-overlay);
-    background: var(--c-bg);
-    border-top: 1px solid var(--c-line);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: opacity var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out);
   }
 
-  .nav-panel[hidden] {
+  .nav-drawer[hidden] {
     display: none;
   }
 
-  .site-header.is-nav-open .nav-panel {
-    opacity: 1;
-    transform: none;
+  .nav-drawer__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    transition: opacity var(--t-base) var(--ease-out);
   }
 
-  .nav-panel__inner {
+  .nav-drawer__panel {
+    position: absolute;
+    inset: 0 0 0 auto;
     display: flex;
     flex-direction: column;
-    gap: var(--sp-6);
-    padding-block: var(--sp-6) var(--sp-8);
-    min-height: 100%;
+    width: min(23rem, 100%);
+    padding: calc(var(--safe-top) + 0.9rem) calc(var(--gutter) + var(--safe-right))
+      calc(var(--safe-bottom) + var(--sp-6)) var(--gutter);
+    background: var(--c-bg-alt);
+    border-left: 1px solid var(--c-line);
+    box-shadow: var(--shadow-lg);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    transform: translateX(100%);
+    transition: transform var(--t-base) var(--ease-out);
   }
 
-  .nav-panel__list {
+  :global(.is-nav-open) .nav-drawer__backdrop {
+    opacity: 1;
+  }
+
+  :global(.is-nav-open) .nav-drawer__panel {
+    transform: translateX(0);
+  }
+
+  .nav-drawer__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    padding-bottom: var(--sp-5);
+    border-bottom: 1px solid var(--c-line);
+  }
+
+  .nav-drawer__close {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.85rem;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-md);
+    background: rgba(255, 255, 255, 0.04);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--c-text-muted);
+  }
+
+  .nav-drawer__close:hover {
+    border-color: var(--c-accent-line);
+    color: var(--c-text);
+  }
+
+  .nav-drawer__body {
+    padding-block: var(--sp-4);
+  }
+
+  .nav-drawer__list {
     display: grid;
-    gap: 0.2rem;
+    gap: 0.15rem;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .nav-panel__link {
+  .nav-drawer__link {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--sp-4);
-    padding: 1rem 0.25rem;
+    /* Mindesthöhe für ein bequemes Touch-Ziel. */
+    min-height: 3rem;
+    padding: 0.7rem 0.25rem;
     border-bottom: 1px solid var(--c-line);
     font-size: var(--fs-lg);
     font-weight: 600;
@@ -339,64 +412,85 @@ function isActive(href: string) {
     text-decoration: none;
   }
 
-  .nav-panel__link :global(svg) {
+  .nav-drawer__link :global(svg) {
     color: var(--c-text-muted);
     transition: transform var(--t-base) var(--ease-out), color var(--t-base) var(--ease-out);
   }
 
-  .nav-panel__link:hover :global(svg),
-  .nav-panel__link:focus-visible :global(svg) {
+  .nav-drawer__link:hover :global(svg),
+  .nav-drawer__link:focus-visible :global(svg) {
     transform: translateX(4px);
     color: var(--c-accent);
   }
 
-  .nav-panel__link.is-active {
+  .nav-drawer__link.is-active {
     color: var(--c-accent);
   }
 
-  .nav-panel__footer {
+  .nav-drawer__foot {
     display: grid;
     gap: var(--sp-5);
     margin-top: auto;
+    padding-top: var(--sp-6);
   }
 
-  .nav-panel__contact {
+  .nav-drawer__contact {
     display: grid;
     gap: var(--sp-3);
     font-size: var(--fs-sm);
   }
 
-  .nav-panel__contact a {
+  .nav-drawer__contact a {
     display: flex;
     align-items: center;
     gap: 0.6rem;
+    min-height: 2.5rem;
     color: var(--c-text-muted);
     text-decoration: none;
   }
 
-  .nav-panel__contact a:hover {
+  .nav-drawer__contact a:hover {
     color: var(--c-accent);
   }
 
-  /* --- Ab Tablet ----------------------------------------------------------- */
+  /* ====================================================== Ab Tablet */
   @media (min-width: 46rem) {
     .site-header__cta {
       display: inline-flex;
     }
   }
 
-  /* --- Ab Desktop ----------------------------------------------------------
-     62rem (992 px): erst ab hier hat die waagrechte Navigation zuverlässig
-     Platz neben Logo und Handlungsaufruf. Darunter greift das mobile Menü. */
+  /* ====================================================== Ab Desktop */
   @media (min-width: 62rem) {
+    .site-header {
+      /* Auf Desktop erst beim Scrollen absetzen – der Hero wirkt offener. */
+      background: transparent;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border-bottom-color: transparent;
+    }
+
+    .site-header.is-scrolled {
+      background: color-mix(in srgb, var(--c-bg) 84%, transparent);
+      backdrop-filter: blur(14px) saturate(140%);
+      -webkit-backdrop-filter: blur(14px) saturate(140%);
+      border-bottom-color: var(--c-line);
+    }
+
+    @supports not (backdrop-filter: blur(4px)) {
+      .site-header.is-scrolled {
+        background: var(--c-bg);
+      }
+    }
+
     .site-nav {
       display: block;
     }
 
-    .nav-toggle {
+    .nav-toggle,
+    .nav-drawer {
       display: none;
     }
-
   }
 
   @media (min-width: 72rem) {
@@ -421,6 +515,18 @@ function isActive(href: string) {
 
     .site-header__inner {
       gap: var(--sp-6);
+    }
+  }
+
+  /* Im Querformat auf flachen Geräten kompakter. */
+  @media (max-height: 26rem) and (orientation: landscape) {
+    .site-header__inner {
+      padding-block: 0.4rem;
+    }
+
+    .nav-drawer__link {
+      min-height: 2.5rem;
+      font-size: var(--fs-base);
     }
   }
 </style>

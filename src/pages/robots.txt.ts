@@ -15,7 +15,10 @@ Allow: /
 # Funktionsseiten ohne eigenständigen Inhalt.
 Disallow: /danke/
 
-# Endpunkt des Kontaktformulars – kein Inhalt zum Indexieren.
+# Adminbereich – kein öffentlicher Inhalt.
+Disallow: /admin/
+
+# Endpunkt des Kontaktformulars und Anmeldung – kein Inhalt zum Indexieren.
 Disallow: /api/
 
 Sitemap: ${SITE.url}/sitemap-index.xml

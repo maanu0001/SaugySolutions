@@ -1,0 +1,68 @@
+company:
+  name: Saugy Solutions
+  claim: Wir bringen Ihr Business online.
+  url: https://saugy-solutions.ch
+branding:
+  logo: /img/logo-saugy-solutions.png
+  logo_alt: Saugy Solutions
+  wordmark_strong: Saugy
+  wordmark_rest: Solutions
+contact:
+  person: Manuel Saugy
+  phone: +41 79 516 30 41
+  email: manu@saugy-solutions.ch
+  response_note: Anfragen beantwortet Manuel Saugy persönlich – in der Regel innerhalb weniger Arbeitstage.
+legal:
+  provider: Saugy Solutions
+  responsible: Manuel Saugy
+  address:
+    name: Manuel Saugy
+    street: Bücklirain 8b
+    postalCode: '5312'
+    locality: Döttingen
+    country: Schweiz
+    countryCode: CH
+  legal_form: Einzelunternehmen (nicht im Handelsregister eingetragen)
+  uid: ''
+  hosting_provider: Hostpoint AG, Rapperswil-Jona, Schweiz
+  hosting_location: Schweiz
+  mail_provider: Hostpoint AG, Rapperswil-Jona, Schweiz
+  last_updated: '2026-09-17'
+social: []
+seo:
+  default_title: Webdesign und digitale Lösungen für Schweizer KMU | Saugy Solutions
+  default_description: >-
+    Saugy Solutions entwickelt moderne Websites und bietet Hosting, Wartung, E-Mail und
+    Cloud-Lösungen für Schweizer KMU – persönlich und verständlich.
+  og_image: /img/og-saugy-solutions.png
+  theme_color: '#06110f'
+footer:
+  intro: >-
+    Saugy Solutions entwickelt Websites und digitale Lösungen für kleine Unternehmen, lokale
+    Betriebe, Vereine und Selbstständige – persönlich betreut und verständlich erklärt.
+  copyright_suffix: Alle Rechte vorbehalten.
+navigation:
+  - label: Startseite
+    href: /
+  - label: Leistungen
+    href: /leistungen/
+  - label: Projekte
+    href: /projekte/
+  - label: Ablauf
+    href: /ablauf/
+  - label: Über uns
+    href: /ueber-uns/
+  - label: Kontakt
+    href: /kontakt/
+navigation_cta:
+  label: Projekt anfragen
+  href: /kontakt/
+footer_legal:
+  - label: Datenschutz
+    href: /datenschutz/
+  - label: Impressum
+    href: /impressum/
+form:
+  action: /api/kontakt.php
+  success_page: /danke/
+  message_max_length: 4000

@@ -104,13 +104,13 @@
 .btn--primary {
   background: linear-gradient(120deg, var(--c-accent), #4cf0c5);
   color: var(--c-on-accent);
-  box-shadow: 0 16px 38px -22px rgba(36, 230, 178, 0.85);
+  box-shadow: 0 12px 30px -20px rgba(36, 223, 168, 0.45);
 }
 
 .btn--primary:hover {
   color: var(--c-on-accent);
   background: linear-gradient(120deg, #3ef0c1, #63f5d0);
-  box-shadow: 0 20px 44px -20px rgba(36, 230, 178, 0.95);
+  box-shadow: 0 16px 36px -18px rgba(36, 223, 168, 0.6);
 }
 
 /* Sekundär – dezente Kontur */
@@ -123,7 +123,7 @@
 .btn--secondary:hover {
   border-color: var(--c-accent);
   color: var(--c-accent);
-  background: var(--c-accent-soft);
+  background: var(--c-accent-faint);
 }
 
 /* Schlicht – reiner Textlink im Buttonformat */
@@ -227,15 +227,16 @@
   margin-bottom: var(--sp-5);
   border: 1px solid var(--c-line-strong);
   border-radius: var(--r-md);
-  background: var(--c-accent-soft);
+  /* Neutrale Fläche – die Farbe steckt allein im Icon. */
+  background: rgba(255, 255, 255, 0.04);
   color: var(--c-accent);
   transition: background-color var(--t-base) var(--ease-out),
     border-color var(--t-base) var(--ease-out);
 }
 
 .card--interactive:hover .icon-badge {
-  background: rgba(36, 230, 178, 0.2);
-  border-color: rgba(36, 230, 178, 0.4);
+  background: rgba(255, 255, 255, 0.07);
+  border-color: var(--c-accent-line);
 }
 
 /* --------------------------------------------------------------------------
@@ -272,8 +273,8 @@
 }
 
 .tag--accent {
-  border-color: rgba(36, 230, 178, 0.35);
-  background: var(--c-accent-soft);
+  border-color: var(--c-accent-line);
+  background: var(--c-accent-faint);
   color: var(--c-accent);
 }
 
@@ -393,24 +394,29 @@
 .decor--dots {
   inset: 0;
   background-image: radial-gradient(circle at center, var(--c-line) 1px, transparent 1px);
-  background-size: 34px 34px;
-  mask-image: radial-gradient(ellipse 78% 62% at 50% 0%, #000 8%, transparent 72%);
-  -webkit-mask-image: radial-gradient(ellipse 78% 62% at 50% 0%, #000 8%, transparent 72%);
+  background-size: 38px 38px;
+  opacity: 0.65;
+  mask-image: radial-gradient(ellipse 72% 58% at 50% 0%, #000 6%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 72% 58% at 50% 0%, #000 6%, transparent 70%);
 }
 
 /* Weicher Farbschein. */
+/*
+  Farbschleier bewusst sehr schwach. Er soll Tiefe andeuten, nicht die Seite
+  einfärben. Deckkraft und Radius sind absichtlich klein gehalten.
+*/
 .decor--glow {
-  width: min(46rem, 88vw);
+  width: min(34rem, 72vw);
   aspect-ratio: 1;
   border-radius: 50%;
-  filter: blur(90px);
-  opacity: 0.2;
-  background: radial-gradient(circle, var(--c-accent) 0%, transparent 68%);
+  filter: blur(100px);
+  opacity: 0.07;
+  background: radial-gradient(circle, var(--c-accent) 0%, transparent 70%);
 }
 
 .decor--glow-2 {
-  background: radial-gradient(circle, var(--c-accent-2) 0%, transparent 68%);
-  opacity: 0.16;
+  background: radial-gradient(circle, var(--c-accent-2) 0%, transparent 70%);
+  opacity: 0.055;
 }
 
 /* Sehr langsame, kaum wahrnehmbare Bewegung der Farbschleier. */

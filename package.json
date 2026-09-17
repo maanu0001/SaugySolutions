@@ -10,23 +10,31 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
+    "predev": "node scripts/prepare-assets.mjs",
+    "prebuild": "node scripts/prepare-assets.mjs",
     "build": "astro build",
     "preview": "astro preview",
+    "assets": "node scripts/prepare-assets.mjs",
+    "assets:images": "node scripts/optimize-images.mjs",
+    "assets:logo": "node scripts/generate-logo-assets.mjs",
+    "assets:og": "node scripts/generate-og-image.mjs",
+    "assets:screenshots": "node scripts/capture-screenshots.mjs",
     "deploy:build": "node scripts/build-deploy.mjs",
     "serve:dist": "node scripts/serve-dist.mjs",
     "qa": "node scripts/qa.mjs",
     "qa:browser": "node scripts/browser-qa.mjs",
     "check": "astro check",
-    "assets:logo": "node scripts/generate-logo-assets.mjs",
-    "assets:og": "node scripts/generate-og-image.mjs",
-    "assets:screenshots": "node scripts/capture-screenshots.mjs"
+    "assets:cms": "node scripts/generate-cms-config.mjs",
+    "assets:admin": "node scripts/prepare-admin.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
-    "astro": "^7.3.3"
+    "astro": "^7.3.3",
+    "js-yaml": "^5.4.2"
   },
   "devDependencies": {
     "@fontsource-variable/manrope": "^5.3.0",
+    "decap-cms": "^3.16.2",
     "playwright": "^1.63.0",
     "sharp": "^0.34.5"
   }

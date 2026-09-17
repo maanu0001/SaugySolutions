@@ -1,0 +1,116 @@
+# ============================================================================
+#  STARTSEITE
+#  Wird im Adminbereich unter „Startseite“ bearbeitet.
+#  Hervorhebungen in Überschriften: **Wort** wird grün/türkis dargestellt.
+# ============================================================================
+
+hero:
+  eyebrow: Webdesign und IT für kleine Unternehmen in der Schweiz
+  title: Websites und digitale Lösungen, die Ihr Unternehmen **weiterbringen**
+  subtitle: >-
+    Saugy Solutions entwickelt moderne Websites, übernimmt Hosting und Wartung und unterstützt
+    Schweizer KMU mit persönlichen, verständlichen IT-Lösungen.
+  primary_cta:
+    label: Kostenloses Erstgespräch
+    href: /kontakt/
+  secondary_cta:
+    label: Projekte ansehen
+    href: /projekte/
+  trust_points:
+    - icon: user
+      text: Ein direkter Ansprechpartner
+    - icon: stack
+      text: Website, Hosting und E-Mail aus einer Hand
+    - icon: chat
+      text: Technik verständlich erklärt
+
+sections:
+  benefits:
+    visible: true
+    order: 1
+    eyebrow: Weshalb Saugy Solutions
+    title: Persönlich statt anonym – und immer **nachvollziehbar**
+    lead: >-
+      Wir sind kein grosses Agenturnetzwerk. Genau das ist der Punkt: Sie sprechen direkt mit den
+      Personen, die Ihr Projekt umsetzen.
+
+  services:
+    visible: true
+    order: 2
+    eyebrow: Leistungen
+    title: Alles, was Ihr Unternehmen **online braucht**
+    lead: >-
+      Von der Website über E-Mail und Hosting bis zur sicheren Datenablage – abgestimmt auf das,
+      was Ihr Betrieb tatsächlich benötigt.
+    cta_label: Alle Leistungen
+
+  projects:
+    visible: true
+    order: 3
+    eyebrow: Projekte
+    title: Websites, die im **Alltag funktionieren**
+    lead: >-
+      Auftritte für ganz unterschiedliche Auftraggeber – vom Familienbetrieb über die öffentliche
+      Einrichtung bis zur Online-Community.
+    cta_label: Alle Projekte
+
+  process:
+    visible: true
+    order: 4
+    eyebrow: Ablauf
+    title: So entsteht **Ihr Projekt**
+    lead: >-
+      Sieben überschaubare Schritte von der ersten Anfrage bis zum laufenden Betrieb. Technische
+      Vorkenntnisse brauchen Sie dafür nicht.
+    cta_label: Ablauf im Detail
+    steps_shown: 5
+
+  team:
+    visible: true
+    order: 5
+    eyebrow: Wer dahintersteht
+    title: Zwei Informatiker, **ein Ansprechpartner**
+    lead: >-
+      Saugy Solutions wird von Manuel und Michael Saugy geführt. Beide sind ausgebildete
+      Informatiker EFZ in Applikationsentwicklung.
+    cta_label: Mehr über uns und unsere Arbeitsweise
+
+  trust:
+    visible: true
+    order: 6
+    eyebrow: Qualität
+    title: Worauf wir bei **jedem Projekt** achten
+    lead: >-
+      Eine Website ist erst gut, wenn sie auch auf dem Mobiltelefon, bei langsamer Verbindung und
+      für Menschen mit Einschränkungen funktioniert.
+    points:
+      - Darstellung geprüft auf Mobiltelefon, Tablet und Desktop
+      - Kurze Ladezeiten durch schlanke Umsetzung und optimierte Bilder
+      - Verschlüsselte Übertragung und aktuelle Sicherheitseinstellungen
+      - Lesbare Schrift, ausreichende Kontraste und Bedienung per Tastatur
+      - Saubere technische Grundlagen für die Auffindbarkeit in Suchmaschinen
+      - Keine unnötigen externen Dienste und kein Tracking ohne Notwendigkeit
+    aside_title: Was wir nicht tun
+    aside_points:
+      - strong: Keine Versprechen ins Blaue.
+        text: Wir sagen vorher, was möglich ist – und was nicht.
+      - strong: Keine unnötigen Zusatzpakete.
+        text: Wenn Sie etwas nicht brauchen, schlagen wir es nicht vor.
+      - strong: Keine Abhängigkeit.
+        text: Domain und Inhalte gehören Ihnen – auch wenn Sie später wechseln möchten.
+
+  faq:
+    visible: true
+    order: 7
+    eyebrow: Häufige Fragen
+    title: Fragen, die uns **oft gestellt** werden
+    lead: Weitere Antworten – etwa zu Kosten, Dauer und Inhalten – finden Sie bei den Leistungen.
+    cta_label: Alle häufigen Fragen ansehen
+
+cta:
+  visible: true
+  eyebrow: Nächster Schritt
+  title: Erzählen Sie uns von Ihrem Vorhaben.
+  text: >-
+    Eine grobe Idee genügt. Im kostenlosen Erstgespräch klären wir gemeinsam, was sinnvoll ist –
+    unverbindlich und ohne Fachjargon.

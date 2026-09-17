@@ -1,0 +1,63 @@
+title: SwissHub
+slug: swisshub
+published: true
+featured: true
+order: 1
+category: Community-Plattform
+industry: Gaming und Online-Community
+url: https://swisshub.gg
+domain: swisshub.gg
+accent: '#24e6b2'
+teaser: >-
+  Öffentlicher Webauftritt für eine Schweizer Gaming-Community mit Turnieren, Sponsoren und
+  Anlaufstelle für neue Mitglieder.
+seo_title: SwissHub – Website für eine Gaming-Community | Saugy Solutions
+meta_description: >-
+  Öffentlicher Webauftritt für eine Schweizer Gaming-Community mit Turnieren, Sponsoren und
+  Anlaufstelle für neue Mitglieder.
+cover: ''
+cover_alt: Vorschau der Website von SwissHub
+shot_desktop: ''
+shot_desktop_alt: Desktop-Ansicht der Website von SwissHub
+shot_mobile: ''
+shot_mobile_alt: Mobile Ansicht der Website von SwissHub
+gallery: []
+intro: >-
+  SwissHub ist eine Schweizer Gaming-Community, die sich über einen Discord-Server organisiert und
+  regelmässig Turniere und Onlineanlässe durchführt. Die Website ist der öffentliche Auftritt dieser
+  Community: Sie erklärt, worum es geht, und führt Interessierte auf die Community-Kanäle.
+situation: >-
+  Die Community ist in erster Linie auf Discord aktiv. Ein Discord-Server allein ist für
+  Aussenstehende jedoch schwer einzuschätzen und für Sponsoren wenig aussagekräftig. Es brauchte
+  eine öffentlich erreichbare Seite, die das Angebot einordnet und als seriöse Visitenkarte dient.
+goals:
+  - Die Community für Aussenstehende verständlich darstellen
+  - Turniere und Anlässe an einem öffentlich erreichbaren Ort bündeln
+  - Einen seriösen Anlaufpunkt für Sponsoren und Partner schaffen
+  - Einen klaren Weg in die Community-Kanäle anbieten
+delivered:
+  - Konzept und Aufbau des öffentlichen Webauftritts
+  - Gestaltung passend zur bestehenden Bildsprache der Community
+  - Bereiche für Turniere, Anlässe und Partner
+  - Verbindung zu den bestehenden Community-Kanälen
+  - Technischer Betrieb der Website
+challenges:
+  - title: Zwei Zielgruppen auf einer Seite
+    text: >-
+      Mitglieder suchen Turniere und Termine, Sponsoren möchten wissen, wofür die Community steht.
+      Beide Anliegen mussten auf derselben Seite Platz finden, ohne sich gegenseitig zu verdrängen.
+  - title: Inhalte, die sich laufend ändern
+    text: >-
+      Turniere, Anlässe und Partner wechseln regelmässig. Die Seite musste so aufgebaut werden, dass
+      diese Inhalte gepflegt werden können, ohne dass jedes Mal am Code gearbeitet werden muss.
+  - title: Ehrenamtliches Umfeld
+    text: >-
+      Die Community wird in der Freizeit betrieben. Die Lösung musste entsprechend wartungsarm
+      bleiben.
+result: >-
+  SwissHub verfügt über einen eigenständigen Webauftritt, der die Community nach aussen vertritt und
+  die Inhalte an einem Ort bündelt. Der Auftritt ist unter swisshub.gg öffentlich erreichbar.
+cta_title: Ein Projekt wie SwissHub im Kopf?
+cta_text: >-
+  Schildern Sie uns kurz Ihre Ausgangslage. Im kostenlosen Erstgespräch klären wir, was für Ihren
+  Betrieb sinnvoll ist.

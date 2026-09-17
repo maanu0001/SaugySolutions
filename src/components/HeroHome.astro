@@ -1,0 +1,540 @@
+---
+/**
+ * Hero der Startseite.
+ *
+ * Bewusst horizontal zentriert: Bildmarke, Auszeichnung, Hauptaussage,
+ * Unterzeile, Handlungsaufrufe und Vertrauenspunkte stehen auf einer Achse.
+ * Die Hauptaussage erhält eine enge maximale Textbreite, damit der Umbruch
+ * kontrolliert bleibt.
+ *
+ * Rundherum stehen auf grossen Bildschirmen kleine Karten, die die vier
+ * Bereiche zeigen, die bei Saugy Solutions zusammengehören: Website, Hosting,
+ * E-Mail/Cloud und persönliche Betreuung. Sie sind dekorativ und werden auf
+ * schmalen Geräten ausgeblendet – dort zählt allein die Aussage.
+ *
+ * Es kommen bewusst keine Codezeilen, Terminalfenster oder Matrixeffekte vor.
+ */
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+import Button from './Button.astro';
+import { renderAccent } from '../data/content.mjs';
+import { CONTACT } from '../data/site.mjs';
+
+interface Props {
+  hero: {
+    eyebrow?: string;
+    title?: string;
+    subtitle?: string;
+    primary_cta?: { label: string; href: string };
+    secondary_cta?: { label: string; href: string };
+    trust_points?: { icon: string; text: string }[];
+  };
+  /** Erstes Projekt – für die kleine Vorschau im Umfeld des Heros. */
+  project?: { name: string; domain: string; accent: string; shotDesktop?: string | null } | null;
+}
+
+const { hero, project = null } = Astro.props;
+
+const trustPoints = hero.trust_points ?? [];
+---
+
+<section class="hero" aria-labelledby="hero-titel">
+  <!-- Hintergrund: neutrales Raster, sehr schwacher Farbschein -->
+  <span class="decor decor--dots hero__dots" aria-hidden="true"></span>
+  <span class="decor decor--glow hero__glow" aria-hidden="true"></span>
+  <span class="decor decor--glow decor--glow-2 hero__glow hero__glow--2" aria-hidden="true"></span>
+
+  <div class="container hero__inner">
+    <!-- ===================== Umgebende Karten (nur Desktop) ===================== -->
+    <div class="hero__orbit" aria-hidden="true">
+      <!-- Website: kleines Browserfenster -->
+      <div class="orbit-card orbit-card--site" data-parallax="0.9">
+        <div class="orbit-card__chrome">
+          <span></span><span></span><span></span>
+          <span class="orbit-card__url">{project?.domain ?? 'ihre-domain.ch'}</span>
+        </div>
+        <div class="orbit-card__body" style={`--orbit-accent:${project?.accent ?? 'var(--c-accent)'}`}>
+          {
+            project?.shotDesktop ? (
+              <img src={project.shotDesktop} alt="" width="320" height="200" loading="eager" decoding="async" />
+            ) : (
+              <div class="orbit-card__scheme">
+                <span class="orbit-card__bar"></span>
+                <span class="orbit-card__line orbit-card__line--lg"></span>
+                <span class="orbit-card__line"></span>
+                <span class="orbit-card__pill"></span>
+              </div>
+            )
+          }
+        </div>
+      </div>
+
+      <!-- Hosting -->
+      <div class="orbit-card orbit-card--chip orbit-card--hosting" data-parallax="1.4">
+        <span class="orbit-card__icon"><Icon name="shield" size={17} /></span>
+        <span class="orbit-card__label">Hosting &amp; Wartung</span>
+        <span class="orbit-card__status">läuft</span>
+      </div>
+
+      <!-- E-Mail und Cloud -->
+      <div class="orbit-card orbit-card--chip orbit-card--mail" data-parallax="1.1">
+        <span class="orbit-card__icon"><Icon name="at" size={17} /></span>
+        <span class="orbit-card__label">E-Mail &amp; Cloud</span>
+      </div>
+
+      <!-- Persönliche Betreuung -->
+      <div class="orbit-card orbit-card--person" data-parallax="1.25">
+        <span class="orbit-card__avatar">{CONTACT.person.split(' ').map((w) => w[0]).join('')}</span>
+        <span class="orbit-card__person">
+          <strong>{CONTACT.person}</strong>
+          <span>Ihr Ansprechpartner</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- ===================== Zentrierter Inhalt ===================== -->
+    <div class="hero__content">
+      <span class="hero__mark">
+        <Logo size={84} markOnly eager />
+      </span>
+
+      {
+        hero.eyebrow && (
+          <p class="hero__eyebrow">
+            <span class="hero__pulse" aria-hidden="true" />
+            {hero.eyebrow}
+          </p>
+        )
+      }
+
+      <h1 id="hero-titel" class="hero__title" set:html={renderAccent(hero.title)} />
+
+      {hero.subtitle && <p class="hero__lead">{hero.subtitle}</p>}
+
+      <div class="hero__actions">
+        {
+          hero.primary_cta && (
+            <Button href={hero.primary_cta.href} variant="primary" size="lg">
+              {hero.primary_cta.label}
+            </Button>
+          )
+        }
+        {
+          hero.secondary_cta && (
+            <Button href={hero.secondary_cta.href} variant="secondary" size="lg" icon={false}>
+              {hero.secondary_cta.label}
+            </Button>
+          )
+        }
+      </div>
+
+      {
+        trustPoints.length > 0 && (
+          <ul class="hero__trust">
+            {trustPoints.map((point) => (
+              <li>
+                <Icon name={point.icon} size={16} />
+                <span>{point.text}</span>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  /* ====================================================== Grundgerüst */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    /* Auf grossen Bildschirmen optisch ausgewogen im sichtbaren Bereich. */
+    min-height: min(92svh, 54rem);
+    display: flex;
+    align-items: center;
+    padding-block: clamp(2.5rem, 1.5rem + 5vw, 5rem) clamp(3rem, 2rem + 5vw, 6rem);
+  }
+
+  .hero__dots {
+    inset: 0;
+  }
+
+  .hero__glow {
+    top: -20%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .hero__glow--2 {
+    top: auto;
+    bottom: -30%;
+    left: 22%;
+  }
+
+  .hero__inner {
+    position: relative;
+    z-index: var(--z-content);
+    width: 100%;
+  }
+
+  /* ====================================================== Zentrierter Text */
+  .hero__content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .hero__mark {
+    display: block;
+    margin-bottom: var(--sp-6);
+  }
+
+  .hero__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    max-width: 100%;
+    margin: 0 0 var(--sp-5);
+    padding: 0.42rem 1rem 0.42rem 0.75rem;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-full);
+    background: rgba(255, 255, 255, 0.035);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--c-text-muted);
+  }
+
+  .hero__pulse {
+    flex: none;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: var(--c-accent);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero__pulse {
+      animation: hero-pulse 3s var(--ease-out) infinite;
+    }
+  }
+
+  @keyframes hero-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(36, 223, 168, 0.5); }
+    70% { box-shadow: 0 0 0 0.55rem rgba(36, 223, 168, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(36, 223, 168, 0); }
+  }
+
+  /* Enge Textbreite sorgt für einen kontrollierten Zeilenumbruch. */
+  .hero__title {
+    max-width: var(--measure-hero);
+    margin: 0;
+    font-size: var(--fs-4xl);
+    text-wrap: balance;
+  }
+
+  .hero__lead {
+    max-width: 46ch;
+    margin: var(--sp-5) auto 0;
+    font-size: var(--fs-lg);
+    color: var(--c-text-muted);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--sp-4);
+    margin-top: var(--sp-7);
+  }
+
+  .hero__trust {
+    display: grid;
+    gap: var(--sp-3);
+    margin: var(--sp-7) 0 0;
+    padding: var(--sp-5) 0 0;
+    border-top: 1px solid var(--c-line);
+    list-style: none;
+    width: min(100%, 52rem);
+  }
+
+  .hero__trust li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: var(--fs-xs);
+    color: var(--c-text-muted);
+  }
+
+  /* Ab Tablet nebeneinander, gleichmässig verteilt. */
+  @media (min-width: 46rem) {
+    .hero__trust {
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-5);
+    }
+  }
+
+  .hero__trust :global(svg) {
+    flex: none;
+    color: var(--c-accent);
+  }
+
+  /* ====================================================== Umgebende Karten */
+  .hero__orbit {
+    display: none;
+  }
+
+  .orbit-card {
+    position: absolute;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-lg);
+    background: color-mix(in srgb, var(--c-surface) 92%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-md);
+    will-change: transform;
+  }
+
+  /* --- kleines Browserfenster --- */
+  .orbit-card--site {
+    width: 17.5rem;
+    overflow: hidden;
+    padding: 0;
+  }
+
+  .orbit-card__chrome {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.5rem 0.7rem;
+    border-bottom: 1px solid var(--c-line);
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .orbit-card__chrome > span:not(.orbit-card__url) {
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 50%;
+    background: var(--c-line-strong);
+  }
+
+  .orbit-card__url {
+    margin-left: 0.45rem;
+    padding: 0.1rem 0.55rem;
+    border-radius: var(--r-full);
+    background: rgba(0, 0, 0, 0.35);
+    font-size: 0.64rem;
+    font-weight: 600;
+    color: var(--c-text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .orbit-card__body {
+    aspect-ratio: 16 / 10;
+    background: linear-gradient(160deg, var(--c-surface-raised), var(--c-bg-alt));
+  }
+
+  .orbit-card__body img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+  }
+
+  .orbit-card__scheme {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem 1.1rem;
+  }
+
+  .orbit-card__bar {
+    width: 30%;
+    height: 0.4rem;
+    border-radius: var(--r-sm);
+    background: var(--orbit-accent, var(--c-accent));
+    opacity: 0.8;
+  }
+
+  .orbit-card__line {
+    height: 0.38rem;
+    width: 62%;
+    border-radius: var(--r-full);
+    background: var(--c-line-strong);
+  }
+
+  .orbit-card__line--lg {
+    width: 88%;
+    height: 0.55rem;
+    background: color-mix(in srgb, var(--c-text) 28%, transparent);
+  }
+
+  .orbit-card__pill {
+    width: 34%;
+    height: 0.8rem;
+    margin-top: 0.3rem;
+    border-radius: var(--r-full);
+    background: var(--orbit-accent, var(--c-accent));
+    opacity: 0.65;
+  }
+
+  /* --- kleine Beschriftungskarten --- */
+  .orbit-card--chip {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.6rem 0.9rem;
+    border-radius: var(--r-full);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--c-text-muted);
+    white-space: nowrap;
+  }
+
+  .orbit-card__icon {
+    display: grid;
+    place-items: center;
+    color: var(--c-accent);
+  }
+
+  .orbit-card--mail .orbit-card__icon {
+    color: var(--c-accent-2);
+  }
+
+  .orbit-card__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.12rem 0.5rem;
+    border-radius: var(--r-full);
+    background: rgba(255, 255, 255, 0.06);
+    font-size: 0.68rem;
+    color: var(--c-accent);
+  }
+
+  .orbit-card__status::before {
+    content: '';
+    width: 0.32rem;
+    height: 0.32rem;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  /* --- Personenkarte --- */
+  .orbit-card--person {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.7rem 1rem 0.7rem 0.7rem;
+  }
+
+  .orbit-card__avatar {
+    display: grid;
+    place-items: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    flex: none;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--r-md);
+    background: rgba(255, 255, 255, 0.05);
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--c-accent);
+  }
+
+  .orbit-card__person {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+  }
+
+  .orbit-card__person strong {
+    font-size: 0.8rem;
+  }
+
+  .orbit-card__person span {
+    font-size: 0.68rem;
+    color: var(--c-text-muted);
+  }
+
+  /* ====================================================== Ab grossen Breiten */
+  @media (min-width: 68rem) {
+    .hero__orbit {
+      display: block;
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .orbit-card--site {
+      top: 6%;
+      left: 0;
+    }
+
+    .orbit-card--hosting {
+      top: 18%;
+      right: 1%;
+    }
+
+    .orbit-card--mail {
+      bottom: 26%;
+      right: 7%;
+    }
+
+    .orbit-card--person {
+      bottom: 12%;
+      left: 4%;
+    }
+
+    /* Sehr zurückhaltendes Schweben – nur wenn Bewegung erwünscht ist. */
+    @media (prefers-reduced-motion: no-preference) {
+      .orbit-card {
+        animation: orbit-float 9s var(--ease-in-out) infinite alternate;
+      }
+
+      .orbit-card--hosting { animation-duration: 11s; animation-direction: alternate-reverse; }
+      .orbit-card--mail { animation-duration: 13s; }
+      .orbit-card--person { animation-duration: 10s; animation-direction: alternate-reverse; }
+    }
+  }
+
+  @media (min-width: 82rem) {
+    .orbit-card--site { left: 2%; }
+    .orbit-card--hosting { right: 4%; }
+    .orbit-card--mail { right: 10%; }
+    .orbit-card--person { left: 7%; }
+  }
+
+  @keyframes orbit-float {
+    from { transform: translateY(0); }
+    to { transform: translateY(-10px); }
+  }
+
+  /* ====================================================== Mobil */
+  @media (max-width: 40rem) {
+    .hero {
+      min-height: 0;
+    }
+
+    /* Buttons untereinander, volle Breite – bessere Touch-Ziele. */
+    .hero__actions {
+      width: 100%;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .hero__trust {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--sp-3);
+      text-align: left;
+    }
+  }
+</style>

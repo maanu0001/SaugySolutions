@@ -1,0 +1,61 @@
+---
+/**
+ * Bild aus der Mediathek.
+ *
+ * Nutzt die beim Build erzeugten AVIF- und WebP-Fassungen (siehe
+ * `scripts/optimize-images.mjs`) und setzt immer die echten Bildmasse, damit
+ * beim Laden nichts springt.
+ *
+ * Ist ein Bild nicht im Manifest (etwa direkt eingecheckt statt über den
+ * Adminbereich hochgeladen), wird es unverändert ausgegeben – die Seite
+ * funktioniert also in jedem Fall.
+ */
+import manifest from '../data/image-manifest.json';
+
+interface Props {
+  src: string;
+  alt: string;
+  /** Erwartete Anzeigebreiten – steuert die Auswahl im srcset. */
+  sizes?: string;
+  /** Sofort laden – nur für Bilder im sichtbaren Bereich. */
+  eager?: boolean;
+  /** Seitenverhältnis erzwingen, z. B. '16/10'. */
+  ratio?: string;
+  class?: string;
+}
+
+const { src, alt, sizes = '100vw', eager = false, ratio, class: className } = Astro.props;
+
+const entry = (manifest as Record<string, any>)[src];
+const loading = eager ? 'eager' : 'lazy';
+const style = ratio ? `aspect-ratio:${ratio};object-fit:cover` : undefined;
+---
+
+{
+  entry && !entry.vector ? (
+    <picture>
+      {entry.avif && <source srcset={entry.avif} sizes={sizes} type="image/avif" />}
+      {entry.webp && <source srcset={entry.webp} sizes={sizes} type="image/webp" />}
+      <img
+        src={entry.src}
+        alt={alt}
+        width={entry.width}
+        height={entry.height}
+        loading={loading}
+        decoding="async"
+        class={className}
+        style={style}
+      />
+    </picture>
+  ) : (
+    /* Vektorgrafik oder unbekanntes Bild: unverändert ausgeben. */
+    <img
+      src={src}
+      alt={alt}
+      loading={loading}
+      decoding="async"
+      class={className}
+      style={style}
+    />
+  )
+}

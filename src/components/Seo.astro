@@ -7,6 +7,7 @@
  * sie nicht auf jeder Seite wiederholt werden müssen.
  */
 import { SITE, CONTACT, LEGAL } from '../data/site.mjs';
+import logoManifest from '../data/logo-manifest.json';
 
 interface Props {
   title: string;
@@ -41,7 +42,7 @@ const organisation: Record<string, unknown> = {
   email: CONTACT.email,
   telephone: CONTACT.phone,
   image: new URL(SITE.ogImage, SITE.url).href,
-  logo: new URL('/img/logo-saugy-solutions.png', SITE.url).href,
+  logo: new URL(logoManifest.src, SITE.url).href,
   inLanguage: SITE.locale,
   areaServed: { '@type': 'Country', name: 'Schweiz' },
   knowsLanguage: ['de-CH'],

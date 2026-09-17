@@ -26,15 +26,6 @@ final class Validator
         'Allgemeine Frage',
     ];
 
-    public const ALLOWED_SERVICES = [
-        'Website und Webentwicklung',
-        'Hosting, Wartung und Sicherheit',
-        'Geschäftliche E-Mail-Lösungen',
-        'Nextcloud und sichere Datenablage',
-        'Individuelle digitale Lösungen',
-        'Noch unklar – bitte beraten',
-    ];
-
     public const ALLOWED_START = [
         'So bald wie möglich',
         'In den nächsten 1–3 Monaten',
@@ -109,14 +100,6 @@ final class Validator
             $topic = '';
         }
         $this->clean['topic'] = $topic;
-
-        // --- Pflichtfeld: Leistung --------------------------------------------
-        $service = $this->text($input['service'] ?? '', 80);
-        if (!in_array($service, self::ALLOWED_SERVICES, true)) {
-            $this->errors['service'] = 'Bitte wählen Sie die gewünschte Leistung.';
-            $service = '';
-        }
-        $this->clean['service'] = $service;
 
         // --- Optional: Start und Budget ---------------------------------------
         // Unzulässige Werte werden verworfen statt bemängelt: Beide Felder sind

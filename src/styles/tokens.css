@@ -1,34 +1,50 @@
 /* ==========================================================================
    DESIGNSYSTEM – TOKENS
    Alle Farben, Abstände, Schriftgrössen und Bewegungsregeln an einem Ort.
-   Änderungen hier wirken sich auf die gesamte Website aus.
+
+   FARBGRUNDSATZ
+   Die Website ist zuerst schwarz/dunkelgrau und erst danach grün. Grün und
+   Türkis sind AKZENTE – sie markieren Interaktion und Hervorhebung, sie
+   füllen keine Flächen. Grossflächige farbige Hintergründe, flächendeckende
+   Farbschleier und durchgehend eingefärbte Karten sind bewusst nicht
+   vorgesehen.
    ========================================================================== */
 
 :root {
-  /* --- Farben: Flächen ------------------------------------------------- */
-  --c-bg: #06110f;
-  --c-bg-alt: #091815;
-  --c-surface: #0d201c;
-  --c-surface-raised: #112823;
+  /* --- Flächen: neutral, keine Farbstiche ------------------------------- */
+  --c-bg: #080a0a;
+  --c-bg-alt: #0d1010;
+  --c-surface: #121616;
+  --c-surface-raised: #171c1b;
 
-  /* --- Farben: Schrift -------------------------------------------------- */
-  --c-text: #f3faf8;
-  --c-text-muted: #a6bbb5;
-  /* Kontrast gegen --c-bg: 9.5:1 – erfüllt WCAG AA auch für kleine Schrift. */
+  /* --- Schrift ----------------------------------------------------------- */
+  --c-text: #f4f7f6;
+  --c-text-muted: #a6b0ad;
+  /* Kontrast gegen --c-bg: 8.9:1 – erfüllt WCAG AA auch für kleine Schrift. */
 
-  /* --- Farben: Akzente --------------------------------------------------- */
-  --c-accent: #24e6b2;
-  --c-accent-2: #28c7d7;
-  --c-accent-soft: rgba(36, 230, 178, 0.12);
-  --c-accent-2-soft: rgba(40, 199, 215, 0.12);
-  /* Schrift auf Akzentflächen – bewusst sehr dunkel für hohen Kontrast. */
-  --c-on-accent: #04100d;
+  /* --- Akzente – sparsam einsetzen --------------------------------------- */
+  --c-accent: #24dfa8;
+  --c-accent-2: #2bc6c9;
+  /* Schrift auf gefüllten Akzentflächen (Buttons). */
+  --c-on-accent: #04110d;
 
-  /* --- Farben: Linien und Zustände --------------------------------------- */
+  /*
+    Sehr zurückhaltende Akzenttöne. Ausschliesslich für kleine Flächen wie
+    Icon-Rahmen oder schmale Markierungsstreifen – nie für ganze Karten.
+  */
+  --c-accent-faint: rgba(36, 223, 168, 0.08);
+  --c-accent-line: rgba(36, 223, 168, 0.26);
+  --c-accent-2-faint: rgba(43, 198, 201, 0.08);
+  --c-accent-2-line: rgba(43, 198, 201, 0.26);
+
+  /* --- Linien und Zustände ------------------------------------------------ */
   --c-line: rgba(255, 255, 255, 0.09);
   --c-line-strong: rgba(255, 255, 255, 0.16);
   --c-focus: #7cf5d5;
-  --c-danger: #ff8f8f;
+
+  --c-danger: #ff6b67;
+  --c-danger-border: rgba(255, 107, 103, 0.42);
+  --c-danger-soft: rgba(255, 107, 103, 0.08);
   --c-success: var(--c-accent);
 
   /* --- Typografie -------------------------------------------------------- */
@@ -42,8 +58,8 @@
   --fs-lg: clamp(1.1rem, 1.03rem + 0.35vw, 1.3rem);
   --fs-xl: clamp(1.35rem, 1.2rem + 0.72vw, 1.75rem);
   --fs-2xl: clamp(1.6rem, 1.33rem + 1.32vw, 2.4rem);
-  --fs-3xl: clamp(2rem, 1.55rem + 2.2vw, 3.3rem);
-  --fs-4xl: clamp(2.3rem, 1.75rem + 2.6vw, 3.65rem);
+  --fs-3xl: clamp(1.95rem, 1.5rem + 2.2vw, 3.2rem);
+  --fs-4xl: clamp(2.2rem, 1.65rem + 2.65vw, 3.5rem);
 
   --lh-tight: 1.1;
   --lh-snug: 1.25;
@@ -55,6 +71,8 @@
   /* Maximale Lesebreiten. */
   --measure: 68ch;
   --measure-narrow: 54ch;
+  /* Bewusst enge Breite für zentrierte Aussagen im Hero. */
+  --measure-hero: 22ch;
 
   /* --- Abstände ---------------------------------------------------------- */
   --sp-1: 0.25rem;
@@ -72,7 +90,17 @@
   --section-y: clamp(3.5rem, 2rem + 6.5vw, 7rem);
   --gutter: clamp(1.15rem, 0.7rem + 2.2vw, 2.5rem);
   --container: 74rem;
+  --container-wide: 84rem;
   --container-narrow: 52rem;
+
+  /* Höhe der Kopfleiste – wird per JavaScript aktualisiert. */
+  --header-height: 4.25rem;
+
+  /* Sichere Bereiche auf Geräten mit Aussparungen (iPhone). */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
 
   /* --- Radien ------------------------------------------------------------ */
   --r-sm: 6px;
@@ -81,11 +109,10 @@
   --r-xl: 26px;
   --r-full: 999px;
 
-  /* --- Schatten und Leuchten --------------------------------------------- */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 14px 34px -18px rgba(0, 0, 0, 0.9);
-  --shadow-lg: 0 34px 70px -34px rgba(0, 0, 0, 0.95);
-  --glow-accent: 0 0 0 1px rgba(36, 230, 178, 0.28), 0 18px 48px -26px rgba(36, 230, 178, 0.55);
+  /* --- Schatten ----------------------------------------------------------- */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 14px 34px -18px rgba(0, 0, 0, 0.95);
+  --shadow-lg: 0 34px 70px -34px rgba(0, 0, 0, 1);
 
   /* --- Bewegung ----------------------------------------------------------- */
   --ease-out: cubic-bezier(0.22, 0.75, 0.3, 1);
@@ -94,7 +121,7 @@
   --t-base: 260ms;
   --t-slow: 520ms;
 
-  /* Wird bei prefers-reduced-motion auf 0.01ms gesetzt (siehe unten). */
+  /* Wird bei prefers-reduced-motion auf 0 gesetzt (siehe unten). */
   --motion-scale: 1;
 
   /* --- Ebenen ------------------------------------------------------------- */

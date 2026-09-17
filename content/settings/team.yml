@@ -1,0 +1,40 @@
+items:
+  - name: Manuel Saugy
+    initials: MS
+    role: Gründer und Ansprechpartner
+    education: Informatiker EFZ, Applikationsentwicklung
+    current: Studium an der PH FHNW in Windisch, tätig als Stellvertretung
+    photo: ''
+    photo_alt: Porträtfoto von Manuel Saugy
+    text: >-
+      Manuel ist die Ansprechperson für Projekte von Saugy Solutions. Er führt das Erstgespräch,
+      hält Umfang und Kosten schriftlich fest und begleitet das Projekt bis zur Veröffentlichung.
+      Durch sein Studium an der Pädagogischen Hochschule ist ihm wichtig, technische Zusammenhänge
+      so zu erklären, dass sie ohne Vorwissen verständlich sind.
+    focus:
+      - Beratung und Projektbegleitung
+      - Konzept und Aufbau von Websites
+      - Webentwicklung
+      - Verständliche Erklärung technischer Zusammenhänge
+    accent: primary
+    order: 1
+    visible: true
+  - name: Michael Saugy
+    initials: MS
+    role: Technische Umsetzung
+    education: Informatiker EFZ, Applikationsentwicklung
+    current: Informatikstudium an der FHNW in Windisch, tätig als Informatiker
+    photo: ''
+    photo_alt: Porträtfoto von Michael Saugy
+    text: >-
+      Michael unterstützt Saugy Solutions als Freelancer bei der technischen Umsetzung. Sein
+      Schwerpunkt liegt auf der Entwicklung und dem technischen Betrieb – also auf dem Teil, den man
+      einer Website später nicht ansieht, der aber darüber entscheidet, ob sie zuverlässig läuft.
+    focus:
+      - Webentwicklung
+      - Technische Umsetzung und Betrieb
+      - Serverseitige Einrichtung
+      - Individuelle Weblösungen
+    accent: secondary
+    order: 2
+    visible: true

@@ -1,0 +1,77 @@
+items:
+  - title: Unverbindliche Anfrage
+    summary: Sie melden sich mit Ihrer Idee – telefonisch, per E-Mail oder über das Formular.
+    what_happens: >-
+      Sie schildern kurz, worum es geht. Eine grobe Vorstellung genügt vollständig; ein fertiges
+      Konzept ist nicht nötig.
+    your_part: >-
+      Eine kurze Beschreibung Ihres Anliegens und Ihrer Situation. Technische Vorkenntnisse brauchen
+      Sie nicht.
+    outcome: Wir melden uns bei Ihnen und schlagen einen Termin für ein Gespräch vor.
+    order: 1
+    visible: true
+  - title: Persönliches Erstgespräch
+    summary: Wir klären gemeinsam, was Sie brauchen – und was Sie nicht brauchen.
+    what_happens: >-
+      Im Gespräch gehen wir Ihr Vorhaben durch: Ziel, Zielgruppe, Umfang und bestehende
+      Voraussetzungen wie Domain, E-Mail oder eine vorhandene Website. Wir sagen auch, wenn etwas
+      aus unserer Sicht nicht nötig ist.
+    your_part: Ihre Fragen und Erwartungen sowie Angaben zu allem, was bereits vorhanden ist.
+    outcome: Ein gemeinsames Verständnis des Projekts und eine realistische Einschätzung des Umfangs.
+    order: 2
+    visible: true
+  - title: Konzept und transparente Offerte
+    summary: Sie erhalten eine nachvollziehbare Offerte mit klarem Leistungsumfang.
+    what_happens: >-
+      Wir halten schriftlich fest, was umgesetzt wird, wie der Aufbau aussieht und was das kostet.
+      Einmalige Kosten und allfällige laufende Kosten werden getrennt ausgewiesen.
+    your_part: Die Offerte prüfen, Rückfragen stellen und freigeben.
+    outcome: 'Eine verbindliche Grundlage: Umfang, Termine und Kosten sind vor Projektbeginn geklärt.'
+    order: 3
+    visible: true
+  - title: Design und technische Umsetzung
+    summary: Gestaltung und Entwicklung entstehen – Sie sehen den Fortschritt.
+    what_happens: >-
+      Wir gestalten die Seiten und setzen sie technisch um. Sie sehen den Stand während der
+      Umsetzung und nicht erst am Schluss.
+    your_part: >-
+      Inhalte wie Texte, Bilder und Logo, sofern vorhanden. Wenn nichts vorhanden ist, klären wir
+      vorher, wer was übernimmt.
+    outcome: Eine funktionsfähige Vorschauversion Ihrer Website.
+    order: 4
+    visible: true
+  - title: Feedback und Optimierung
+    summary: Sie prüfen in Ruhe, wir passen an.
+    what_happens: >-
+      Sie schauen die Vorschauversion durch und melden Anpassungen. Wir korrigieren Inhalte,
+      Gestaltung und Details und prüfen die Darstellung auf verschiedenen Geräten.
+    your_part: Ihre Rückmeldungen – gesammelt und in Ihren Worten, Fachbegriffe sind nicht nötig.
+    outcome: Eine abgenommene Version, die inhaltlich und gestalterisch stimmt.
+    order: 5
+    visible: true
+  - title: Veröffentlichung
+    summary: Die Website geht unter Ihrer Domain online.
+    what_happens: >-
+      Wir richten Hosting und Domain ein, veröffentlichen die Website und kontrollieren nach dem
+      Aufschalten Erreichbarkeit, Formulare und Darstellung.
+    your_part: Die Freigabe für den Aufschaltungstermin und Zugang zur Domain, falls diese bereits besteht.
+    outcome: Ihre Website ist öffentlich erreichbar und funktioniert.
+    order: 6
+    visible: true
+  - title: Optionale Betreuung und Wartung
+    summary: Auf Wunsch übernehmen wir den laufenden Betrieb.
+    what_happens: >-
+      Hosting, Updates, Sicherungen und inhaltliche Anpassungen im vereinbarten Rahmen. Sie haben
+      weiterhin dieselbe Ansprechperson.
+    your_part: Sie melden sich, wenn etwas geändert werden soll oder nicht funktioniert.
+    outcome: Eine Website, die technisch aktuell bleibt – ohne dass Sie sich darum kümmern müssen.
+    order: 7
+    visible: true
+notes:
+  - Technische Vorkenntnisse sind zu keinem Zeitpunkt erforderlich.
+  - Für die Kontaktaufnahme genügt eine erste grobe Projektidee.
+  - Sie werden während der Umsetzung regelmässig einbezogen und sehen Zwischenstände.
+  - Umfang, Termine und Kosten werden vor Projektbeginn transparent vereinbart.
+  - >-
+    Hosting, Wartung und Support lassen sich passend zum Projekt ergänzen – verpflichtend ist das
+    nicht.

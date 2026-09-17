@@ -2,45 +2,93 @@
 /**
  * Logo von Saugy Solutions.
  *
- * Verwendet die bestehende Bildmarke unverändert (freigestellt und für das Web
- * optimiert, siehe scripts/generate-logo-assets.mjs). Daneben steht der
- * Schriftzug als Text – dadurch bleibt der Name für Suchmaschinen und
- * Screenreader lesbar, ohne die Bildmarke zu verändern.
+ * Die Bildmarke stammt aus der zentralen Konfiguration
+ * (`content/settings/site.yml` → `branding.logo`) und ist an keiner Stelle
+ * fest eingebaut. Header, Hero und Footer verwenden ausschliesslich diese
+ * Komponente.
+ *
+ * Proportionen: Breite und Höhe stammen aus `src/data/logo-manifest.json`,
+ * das die Logo-Pipeline beim Build aus der echten Datei ermittelt. Dadurch
+ * wird das Logo nie verzerrt, nie beschnitten und es entsteht kein
+ * Layoutsprung beim Laden.
+ *
+ * Der Schriftzug steht als Text daneben – so bleibt der Name für
+ * Suchmaschinen und Screenreader lesbar, ohne die Bildmarke zu verändern.
  */
-import { SITE } from '../data/site.mjs';
+import { BRAND } from '../data/site.mjs';
+import logo from '../data/logo-manifest.json';
 
 interface Props {
-  /** Höhe der Bildmarke in Pixeln. */
+  /** Gewünschte Höhe der Bildmarke in Pixeln. Die Breite folgt daraus. */
   size?: number;
-  /** Schriftzug ausblenden (z. B. auf sehr schmalen Flächen). */
+  /** Nur die Bildmarke, ohne Schriftzug. */
   markOnly?: boolean;
+  /** Bild sofort laden – für Kopfzeile und Hero. */
+  eager?: boolean;
+  /** Grösse des Schriftzugs in rem. */
+  wordmarkSize?: number;
   class?: string;
 }
 
-const { size = 44, markOnly = false, class: className } = Astro.props;
+const {
+  size = 40,
+  markOnly = false,
+  eager = true,
+  wordmarkSize = 1.12,
+  class: className,
+} = Astro.props;
 
-// Die Bildmarke ist nahezu quadratisch (535 × 533 px im Original).
-const width = Math.round(size * (535 / 533));
+// Breite aus dem echten Seitenverhältnis – niemals geraten.
+const ratio = logo.width / logo.height;
+const width = Math.round(size * ratio);
+
+/**
+ * Sinnvolle Anzeigebreiten für das `sizes`-Attribut. Das Logo wird nie
+ * grösser als seine Datei dargestellt.
+ */
+const sizesAttr = `${width}px`;
 ---
 
 <span class:list={['logo', className]}>
-  <picture class="logo__mark">
-    <source srcset="/img/logo-saugy-solutions-320.webp" type="image/webp" />
-    <img
-      src="/img/logo-saugy-solutions-320.png"
-      width={width}
-      height={size}
-      alt={markOnly ? `${SITE.name} – Startseite` : ''}
-      aria-hidden={markOnly ? undefined : 'true'}
-      decoding="async"
-      loading="eager"
-      style={`width:${width}px;height:${size}px`}
-    />
-  </picture>
+  {
+    logo.isVector ? (
+      /* Vektorlogo: eine Datei für alle Grössen. */
+      <img
+        class="logo__mark"
+        src={logo.src}
+        width={width}
+        height={size}
+        alt={markOnly ? BRAND.logoAlt : ''}
+        aria-hidden={markOnly ? undefined : 'true'}
+        decoding="async"
+        loading={eager ? 'eager' : 'lazy'}
+        style={`width:${width}px;height:${size}px`}
+      />
+    ) : (
+      <picture>
+        {logo.webp && <source srcset={logo.webp} sizes={sizesAttr} type="image/webp" />}
+        <img
+          class="logo__mark"
+          src={logo.src}
+          srcset={logo.srcset ?? undefined}
+          sizes={sizesAttr}
+          width={width}
+          height={size}
+          alt={markOnly ? BRAND.logoAlt : ''}
+          aria-hidden={markOnly ? undefined : 'true'}
+          decoding="async"
+          loading={eager ? 'eager' : 'lazy'}
+          style={`width:${width}px;height:${size}px`}
+        />
+      </picture>
+    )
+  }
+
   {
     !markOnly && (
-      <span class="logo__text">
-        <span class="logo__name">Saugy</span> Solutions
+      <span class="logo__text" style={`font-size:${wordmarkSize}rem`}>
+        <span class="logo__name">{BRAND.wordmarkStrong}</span>
+        {BRAND.wordmarkRest ? ` ${BRAND.wordmarkRest}` : ''}
       </span>
     )
   }
@@ -50,24 +98,31 @@ const width = Math.round(size * (535 / 533));
   .logo {
     display: inline-flex;
     align-items: center;
-    gap: 0.7rem;
+    gap: 0.65rem;
     text-decoration: none;
     color: var(--c-text);
   }
 
-  .logo__mark img {
-    /* Hebt die Bildmarke leicht vom dunklen Untergrund ab. */
-    filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.55));
+  /*
+    `object-fit: contain` ist die Rückversicherung: Selbst wenn Breite und
+    Höhe einmal nicht zum Bild passen sollten, wird das Logo eingepasst statt
+    verzerrt. Kein Zuschnitt, kein runder Rahmen, kein farbiger Schein.
+  */
+  .logo__mark {
+    display: block;
+    object-fit: contain;
+    border-radius: 0;
+    background: none;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.55));
     transition: filter var(--t-base) var(--ease-out);
   }
 
-  a:hover .logo__mark img,
-  a:focus-visible .logo__mark img {
-    filter: drop-shadow(0 4px 18px rgba(36, 230, 178, 0.35));
+  a:hover .logo__mark,
+  a:focus-visible .logo__mark {
+    filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.75));
   }
 
   .logo__text {
-    font-size: 1.12rem;
     font-weight: 500;
     letter-spacing: -0.015em;
     line-height: 1.1;
@@ -80,8 +135,12 @@ const width = Math.round(size * (535 / 533));
   }
 
   @media (max-width: 22rem) {
+    .logo {
+      gap: 0.5rem;
+    }
+
     .logo__text {
-      font-size: 1rem;
+      font-size: 1rem !important;
     }
   }
 </style>

@@ -137,6 +137,38 @@ return [
     'max_form_age_seconds' => 43200,
 
     // -----------------------------------------------------------------------
+    //  Adminbereich (https://saugy-solutions.ch/admin/)
+    // -----------------------------------------------------------------------
+
+    /**
+     * Zugangsdaten der GitHub-OAuth-App.
+     *
+     * Anlegen unter: GitHub -> Settings -> Developer settings ->
+     * OAuth Apps -> New OAuth App
+     *
+     *   Application name:            Saugy Solutions Adminbereich
+     *   Homepage URL:                https://saugy-solutions.ch
+     *   Authorization callback URL:  https://saugy-solutions.ch/api/auth.php
+     *
+     * Das Secret wird nur einmal angezeigt – sofort hier eintragen.
+     * Es verlässt den Server nie und steht nicht im Repository.
+     */
+    'github_client_id'     => '',
+    'github_client_secret' => '',
+
+    /**
+     * Nur diese GitHub-Konten dürfen sich im Adminbereich anmelden.
+     * Ist die Liste leer, wird jede Anmeldung abgelehnt.
+     */
+    'github_allowed_users' => [
+        'maanu0001',
+    ],
+
+    /** Höchstzahl an Anmeldeversuchen pro IP-Adresse und Zeitfenster. */
+    'admin_rate_limit_max'    => 10,
+    'admin_rate_limit_window' => 3600,
+
+    // -----------------------------------------------------------------------
     //  Ablageorte für Laufzeitdaten
     // -----------------------------------------------------------------------
 

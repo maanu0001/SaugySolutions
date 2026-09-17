@@ -212,8 +212,8 @@ const faqSchema = {
   }
 
   .jump__link:hover {
-    border-color: var(--c-accent);
-    background: var(--c-accent-soft);
+    border-color: var(--c-accent-line);
+    background: rgba(255, 255, 255, 0.06);
     color: var(--c-text);
   }
 
@@ -243,7 +243,8 @@ const faqSchema = {
     padding: var(--sp-4) var(--sp-5);
     border-left: 2px solid var(--c-accent);
     border-radius: 0 var(--r-md) var(--r-md) 0;
-    background: var(--c-accent-soft);
+    /* Neutrale Fläche; die Akzentfarbe markiert nur die Kante. */
+    background: rgba(255, 255, 255, 0.035);
     font-size: var(--fs-sm);
     color: var(--c-text);
   }

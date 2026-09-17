@@ -3,73 +3,80 @@
  *  ZENTRALE KONFIGURATION – SAUGY SOLUTIONS
  * ============================================================================
  *
- *  Diese Datei ist die einzige Quelle für Unternehmensdaten, Kontaktangaben,
- *  Navigation und rechtliche Informationen. Alle Seiten und Komponenten lesen
- *  ausschliesslich von hier. Kontaktdaten dürfen nirgends im Projekt
- *  dupliziert werden.
+ *  Die Werte stammen aus `content/settings/site.yml` und werden im
+ *  Adminbereich (/admin/) unter „Allgemeine Einstellungen“ bearbeitet.
  *
- *  VOR DER VERÖFFENTLICHUNG:
- *  Alle Einträge, die unten mit `pending(...)` markiert sind, müssen durch die
- *  echten Angaben ersetzt werden. `npm run build` gibt eine Warnliste aus,
- *  solange noch Platzhalter vorhanden sind. Diese Angaben dürfen nicht
- *  erfunden werden.
+ *  Dieses Modul bereitet sie auf: es bildet abgeleitete Werte (tel:-Links,
+ *  Adresszeilen) und meldet fehlende Pflichtangaben an den Build.
  * ============================================================================
  */
 
-/** Sammelt alle noch offenen Angaben, damit der Build sie melden kann. */
-export const PENDING_FIELDS = [];
+import { siteData } from './content.mjs';
 
-/**
- * Markiert eine noch nicht bestätigte Angabe. Der zurückgegebene Text ist
- * bewusst unmissverständlich als Platzhalter erkennbar und darf so niemals
- * live gehen – er wird im Build als Warnung gemeldet.
- *
- * @param {string} label Klartext-Bezeichnung der fehlenden Angabe
- * @param {string} [hint] Zusatzhinweis für die Dokumentation
- * @returns {string}
- */
-function pending(label, hint = '') {
-  PENDING_FIELDS.push({ label, hint });
-  return `[noch zu ergänzen: ${label}]`;
-}
-
-/** Prüft, ob ein Wert noch ein Platzhalter ist. */
-export function isPending(value) {
-  return typeof value === 'string' && value.startsWith('[noch zu ergänzen:');
-}
+const company = siteData.company ?? {};
+const branding = siteData.branding ?? {};
+const contact = siteData.contact ?? {};
+const legal = siteData.legal ?? {};
+const seo = siteData.seo ?? {};
+const footer = siteData.footer ?? {};
+const form = siteData.form ?? {};
 
 // ---------------------------------------------------------------------------
 //  Basis
 // ---------------------------------------------------------------------------
 
 export const SITE = {
-  /** Produktive Basis-URL ohne abschliessenden Schrägstrich. */
-  url: 'https://saugy-solutions.ch',
-  name: 'Saugy Solutions',
-  claim: 'Wir bringen Ihr Business online.',
+  url: (company.url ?? 'https://saugy-solutions.ch').replace(/\/$/, ''),
+  name: company.name ?? 'Saugy Solutions',
+  claim: company.claim ?? '',
   locale: 'de-CH',
   lang: 'de',
-  /** Standard-Vorschaubild für Social Media (wird im Build erzeugt). */
-  ogImage: '/img/og-saugy-solutions.png',
+  ogImage: seo.og_image ?? '/img/og-saugy-solutions.png',
   ogImageWidth: 1200,
   ogImageHeight: 630,
-  themeColor: '#06110f',
+  themeColor: seo.theme_color ?? '#080a0a',
+  defaultTitle: seo.default_title ?? company.name ?? 'Saugy Solutions',
+  defaultDescription: seo.default_description ?? '',
+};
+
+// ---------------------------------------------------------------------------
+//  Marke und Logo
+// ---------------------------------------------------------------------------
+
+/**
+ * Zentrale Logo-Konfiguration. Header, Hero und Footer verwenden
+ * ausschliesslich diese Werte – das Logo ist an keiner Stelle fest eingebaut.
+ *
+ * `src` kann eine SVG-, PNG- oder WebP-Datei sein. Fehlt der Wert, greift die
+ * mitgelieferte Rückfalldatei.
+ */
+export const BRAND = {
+  logo: branding.logo || '/img/logo-saugy-solutions.png',
+  logoAlt: branding.logo_alt || `${company.name ?? 'Saugy Solutions'} Logo`,
+  /** Fett gesetzter Teil des Schriftzugs. */
+  wordmarkStrong: branding.wordmark_strong ?? 'Saugy',
+  /** Normal gesetzter Teil des Schriftzugs. */
+  wordmarkRest: branding.wordmark_rest ?? 'Solutions',
+  /** true, wenn das Logo eine Vektordatei ist (keine Rastergrössen nötig). */
+  isVector: /\.svg$/i.test(branding.logo || ''),
 };
 
 // ---------------------------------------------------------------------------
 //  Kontakt
 // ---------------------------------------------------------------------------
 
+/** Erzeugt aus einer Telefonnummer einen tel:-Link. */
+function telHref(phone) {
+  return `tel:${String(phone ?? '').replace(/[^0-9+]/g, '')}`;
+}
+
 export const CONTACT = {
-  person: 'Manuel Saugy',
-  phone: '+41 79 516 30 41',
-  /** Normalisiert für tel:-Links. */
-  phoneHref: 'tel:+41795163041',
-  email: 'manu@saugy-solutions.ch',
-  emailHref: 'mailto:manu@saugy-solutions.ch',
-  /** Ehrliche Formulierung ohne garantierte Reaktionszeit. */
-  responseNote:
-    'Anfragen beantwortet Manuel Saugy persönlich – in der Regel innerhalb weniger Arbeitstage.',
+  person: contact.person ?? '',
+  phone: contact.phone ?? '',
+  phoneHref: telHref(contact.phone),
+  email: contact.email ?? '',
+  emailHref: `mailto:${contact.email ?? ''}`,
+  responseNote: contact.response_note ?? '',
 };
 
 // ---------------------------------------------------------------------------
@@ -77,125 +84,80 @@ export const CONTACT = {
 // ---------------------------------------------------------------------------
 
 export const LEGAL = {
-  /** Offizieller Anbietername. */
-  provider: 'Saugy Solutions',
-  /** Verantwortliche und datenschutzrechtlich zuständige Person. */
-  responsible: 'Manuel Saugy',
-
-  /**
-   * Geschäftsadresse, strukturiert hinterlegt. Die einzelnen Felder werden
-   * sowohl für die Anzeige im Impressum als auch für die strukturierten Daten
-   * (schema.org PostalAddress) verwendet.
-   */
-  address: {
-    name: 'Manuel Saugy',
-    street: 'Bücklirain 8b',
-    postalCode: '5312',
-    locality: 'Döttingen',
-    country: 'Schweiz',
-    countryCode: 'CH',
-  },
-
-  /**
-   * Rechtsform.
-   *
-   * Hinweis: Wer in der Schweiz als natürliche Person selbstständig eine
-   * Erwerbstätigkeit ausübt – auch nebenberuflich –, führt von Gesetzes wegen
-   * ein Einzelunternehmen. Ein Eintrag im Handelsregister ist erst ab einem
-   * Jahresumsatz von 100 000 CHF Pflicht. „Keine Rechtsform“ gibt es rechtlich
-   * nicht; der Zusatz stellt klar, dass kein Registereintrag besteht.
-   */
-  legalForm: 'Einzelunternehmen (nicht im Handelsregister eingetragen)',
-
-  /**
-   * UID bzw. MWST-Nummer. `null` bedeutet: nicht vorhanden. Die Zeile wird
-   * im Impressum dann gar nicht ausgegeben – eine nicht existierende Nummer
-   * muss nicht angegeben werden.
-   */
-  uid: null,
-
-  /** Webhosting. */
-  hostingProvider: 'Hostpoint AG, Rapperswil-Jona, Schweiz',
-  hostingLocation: 'Schweiz',
-
-  /** Anbieter für den Versand der Formularnachrichten. */
-  mailProvider: 'Hostpoint AG, Rapperswil-Jona, Schweiz',
-
-  /** Datum der letzten inhaltlichen Überarbeitung der Rechtstexte. */
-  lastUpdated: '2026-09-17',
+  provider: legal.provider ?? company.name ?? '',
+  responsible: legal.responsible ?? '',
+  address: legal.address ?? {},
+  legalForm: legal.legal_form ?? '',
+  /** Leerer Wert bedeutet: nicht vorhanden – die Zeile entfällt dann. */
+  uid: legal.uid || null,
+  hostingProvider: legal.hosting_provider ?? '',
+  hostingLocation: legal.hosting_location ?? '',
+  mailProvider: legal.mail_provider ?? '',
+  lastUpdated: legal.last_updated ?? '',
 };
 
-/**
- * Setzt die Adresse zu einer einzeiligen Schreibweise zusammen.
- * Beispiel: „Manuel Saugy, Bücklirain 8b, 5312 Döttingen, Schweiz“
- */
+/** Setzt die Adresse zu einer einzeiligen Schreibweise zusammen. */
 export function formatAddress(address = LEGAL.address) {
-  return [
-    address.name,
-    address.street,
-    `${address.postalCode} ${address.locality}`,
-    address.country,
-  ]
-    .filter(Boolean)
-    .join(', ');
+  return addressLines(address).join(', ');
 }
 
-/**
- * Liefert die Adresse als Zeilen – für die mehrzeilige Darstellung im
- * Impressum und in der Datenschutzerklärung.
- *
- * @returns {string[]}
- */
+/** Liefert die Adresse als einzelne Zeilen für die mehrzeilige Darstellung. */
 export function addressLines(address = LEGAL.address) {
   return [
     address.name,
     address.street,
-    `${address.postalCode} ${address.locality}`,
+    [address.postalCode, address.locality].filter(Boolean).join(' ').trim(),
     address.country,
-  ].filter(Boolean);
+  ].filter((line) => line && String(line).trim() !== '');
 }
 
 // ---------------------------------------------------------------------------
-//  Social Media
+//  Pflichtangaben prüfen
 // ---------------------------------------------------------------------------
 
 /**
- * Nur echte, bestätigte Profile eintragen. Leer lassen, solange keine
- * offiziellen Kanäle von Saugy Solutions bekannt sind – der Footer blendet den
- * Bereich dann automatisch aus.
- * Format: { label: 'LinkedIn', href: 'https://…' }
+ * Pflichtangaben, die vor der Veröffentlichung gesetzt sein müssen.
+ * Fehlt eine davon, meldet `npm run deploy:build` das als Warnung.
+ * Die UID gehört bewusst NICHT dazu – sie ist optional.
  */
-export const SOCIAL = [];
+export const PENDING_FIELDS = [
+  { label: 'Geschäftsadresse', value: addressLines().join(''), hint: 'content/settings/site.yml → legal.address' },
+  { label: 'Rechtsform', value: LEGAL.legalForm, hint: 'content/settings/site.yml → legal.legal_form' },
+  { label: 'Hostinganbieter', value: LEGAL.hostingProvider, hint: 'content/settings/site.yml → legal.hosting_provider' },
+  { label: 'Serverstandort', value: LEGAL.hostingLocation, hint: 'content/settings/site.yml → legal.hosting_location' },
+  { label: 'SMTP-/E-Mail-Anbieter', value: LEGAL.mailProvider, hint: 'content/settings/site.yml → legal.mail_provider' },
+  { label: 'Telefonnummer', value: CONTACT.phone, hint: 'content/settings/site.yml → contact.phone' },
+  { label: 'E-Mail-Adresse', value: CONTACT.email, hint: 'content/settings/site.yml → contact.email' },
+].filter((field) => !field.value || String(field.value).trim() === '');
+
+/** Prüft, ob ein Wert leer ist und im Impressum als offen markiert werden muss. */
+export function isPending(value) {
+  return !value || String(value).trim() === '';
+}
 
 // ---------------------------------------------------------------------------
-//  Navigation
+//  Social Media, Navigation, Footer
 // ---------------------------------------------------------------------------
 
-export const NAV = [
-  { label: 'Startseite', href: '/' },
-  { label: 'Leistungen', href: '/leistungen/' },
-  { label: 'Projekte', href: '/projekte/' },
-  { label: 'Ablauf', href: '/ablauf/' },
-  { label: 'Über uns', href: '/ueber-uns/' },
-  { label: 'Kontakt', href: '/kontakt/' },
-];
+/** Nur Einträge mit Beschriftung und Adresse werden ausgegeben. */
+export const SOCIAL = (siteData.social ?? []).filter((item) => item?.label && item?.href);
 
-export const NAV_CTA = { label: 'Projekt anfragen', href: '/kontakt/' };
+export const NAV = siteData.navigation ?? [];
+export const NAV_CTA = siteData.navigation_cta ?? { label: 'Projekt anfragen', href: '/kontakt/' };
+export const FOOTER_LEGAL = siteData.footer_legal ?? [];
 
-export const FOOTER_LEGAL = [
-  { label: 'Datenschutz', href: '/datenschutz/' },
-  { label: 'Impressum', href: '/impressum/' },
-];
+export const FOOTER = {
+  intro: footer.intro ?? '',
+  copyrightSuffix: footer.copyright_suffix ?? 'Alle Rechte vorbehalten.',
+};
 
 // ---------------------------------------------------------------------------
-//  Formular-Endpunkt
+//  Formular
 // ---------------------------------------------------------------------------
 
 export const FORM = {
-  /** Pfad des PHP-Endpunkts im Deployment. */
-  action: '/api/kontakt.php',
-  successPage: '/danke/',
+  action: form.action ?? '/api/kontakt.php',
+  successPage: form.success_page ?? '/danke/',
   errorPage: '/kontakt/?status=fehler',
-  /** Maximale Länge des Nachrichtenfelds – identisch im PHP-Endpunkt. */
-  messageMaxLength: 4000,
+  messageMaxLength: form.message_max_length ?? 4000,
 };

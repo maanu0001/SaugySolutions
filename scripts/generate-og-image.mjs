@@ -16,15 +16,27 @@
 
 import { chromium } from 'playwright';
 import { readFile, mkdir } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { dirname, join, extname } from 'node:path';
+
+import { SITE, BRAND } from '../src/data/site.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const OUT = join(ROOT, 'public/img/og-saugy-solutions.png');
+const OUT = join(ROOT, 'public', SITE.ogImage.replace(/^\//, ''));
 
 /** Schrift und Logo als Data-URI einbetten, damit kein Server nötig ist. */
 const font = await readFile(join(ROOT, 'public/fonts/manrope-latin-var.woff2'));
-const logo = await readFile(join(ROOT, 'public/img/logo-saugy-solutions.png'));
+
+/*
+  Das Logo stammt aus der Logo-Pipeline. Dadurch erscheint im Vorschaubild
+  automatisch dasselbe Logo wie auf der Website – auch nach einem Austausch
+  im Adminbereich.
+*/
+const manifest = JSON.parse(await readFile(join(ROOT, 'src/data/logo-manifest.json'), 'utf8'));
+const logoPath = join(ROOT, 'public', manifest.src.replace(/^\//, ''));
+const logo = await readFile(logoPath);
+const logoMime = extname(logoPath).toLowerCase() === '.svg' ? 'image/svg+xml' : 'image/png';
 
 const html = `<!doctype html>
 <html lang="de-CH">
@@ -126,8 +138,8 @@ const html = `<!doctype html>
 
   <div class="frame">
     <div class="top">
-      <img src="data:image/png;base64,${logo.toString('base64')}" alt="">
-      <span class="brand"><b>Saugy</b> Solutions</span>
+      <img src="data:${logoMime};base64,${logo.toString('base64')}" alt="">
+      <span class="brand"><b>${BRAND.wordmarkStrong}</b> ${BRAND.wordmarkRest}</span>
     </div>
 
     <h1>Websites und digitale Lösungen für <span>Schweizer KMU</span></h1>
@@ -138,7 +150,7 @@ const html = `<!doctype html>
         <span class="tag">Hosting &amp; Wartung</span>
         <span class="tag">E-Mail &amp; Cloud</span>
       </div>
-      <span class="url">saugy-solutions.ch</span>
+      <span class="url">${SITE.url.replace(/^https?:\/\//, '')}</span>
     </div>
   </div>
 
@@ -148,10 +160,24 @@ const html = `<!doctype html>
 
 await mkdir(join(ROOT, 'public/img'), { recursive: true });
 
-const browser = await chromium.launch({
-  executablePath: process.env.CHROMIUM_PATH ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
-  args: ['--no-sandbox', '--disable-dev-shm-usage'],
-});
+/*
+  Ohne Browser kann kein Vorschaubild gerendert werden. Existiert bereits
+  eines, ist das kein Grund, den Build abzubrechen – es bleibt dann einfach
+  bestehen. Der aufrufende Schritt behandelt diesen Fall als „übersprungen“.
+*/
+let browser;
+try {
+  browser = await chromium.launch({
+    executablePath: process.env.CHROMIUM_PATH || undefined,
+    args: ['--no-sandbox', '--disable-dev-shm-usage'],
+  });
+} catch (error) {
+  const hint = existsSync(OUT)
+    ? 'Das vorhandene Vorschaubild bleibt unverändert.'
+    : 'ACHTUNG: Es existiert noch kein Vorschaubild.';
+  console.warn(`  ! Kein Browser verfügbar (${error.message.split('\n')[0]}). ${hint}`);
+  process.exit(1);
+}
 const page = await browser.newPage({ viewport: { width: 1200, height: 630 }, deviceScaleFactor: 1 });
 await page.setContent(html, { waitUntil: 'networkidle' });
 await page.evaluate(() => document.fonts.ready);

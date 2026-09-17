@@ -101,8 +101,8 @@
 .field__control:focus {
   outline: none;
   border-color: var(--c-accent);
-  background: rgba(36, 230, 178, 0.06);
-  box-shadow: 0 0 0 3px rgba(36, 230, 178, 0.18);
+  background: rgba(36, 223, 168, 0.05);
+  box-shadow: 0 0 0 3px rgba(36, 223, 168, 0.18);
 }
 
 /* Der sichtbare Fokusring bleibt zusätzlich erhalten. */
@@ -234,8 +234,8 @@ select.field__control option {
 }
 
 .form__status--success {
-  border-color: rgba(36, 230, 178, 0.45);
-  background: var(--c-accent-soft);
+  border-color: var(--c-accent-line);
+  background: var(--c-accent-faint);
   color: var(--c-accent);
 }
 
@@ -296,4 +296,71 @@ select.field__control option {
   background: var(--c-surface);
   font-size: var(--fs-sm);
   color: var(--c-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Fehlerzusammenfassung
+   Erscheint erst nach einem Absendeversuch und nennt alle betroffenen Felder.
+   -------------------------------------------------------------------------- */
+.form__summary {
+  padding: var(--sp-4) var(--sp-5);
+  border: 1px solid var(--c-danger-border);
+  border-left: 3px solid var(--c-danger);
+  border-radius: var(--r-md);
+  background: var(--c-danger-soft);
+}
+
+.form__summary[hidden] {
+  display: none;
+}
+
+.form__summary:focus-visible {
+  outline: 3px solid var(--c-focus);
+  outline-offset: 2px;
+}
+
+.form__summary-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  max-width: none;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--c-danger);
+}
+
+/* Warnzeichen – der Hinweis steht zusätzlich im Text, nicht nur in der Farbe. */
+.form__summary-title::before {
+  content: '!';
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.15rem;
+  height: 1.15rem;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  font-size: 0.78rem;
+  line-height: 1;
+}
+
+.form__summary-list {
+  display: grid;
+  gap: 0.35rem;
+  margin: var(--sp-3) 0 0;
+  padding-left: 1.1rem;
+  font-size: var(--fs-sm);
+}
+
+.form__summary-list li::marker {
+  color: var(--c-danger);
+}
+
+.form__summary-list a {
+  color: var(--c-danger);
+  text-underline-offset: 0.2em;
+}
+
+.form__summary-list a:hover {
+  color: var(--c-text);
 }

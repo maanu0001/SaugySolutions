@@ -129,7 +129,6 @@ final class Mailer
         }
 
         $fields[] = ['Art der Anfrage', $data['topic']];
-        $fields[] = ['Gewünschte Leistung', $data['service']];
 
         if ($data['start'] !== '') {
             $fields[] = ['Gewünschter Start', $data['start']];

@@ -1,10 +1,16 @@
 /**
- * Auswahlmöglichkeiten des Kontaktformulars.
+ * ============================================================================
+ *  AUSWAHLMÖGLICHKEITEN DES KONTAKTFORMULARS
+ * ============================================================================
  *
- * WICHTIG: Diese Listen müssen mit der serverseitigen Validierung in
- * `server/api/kontakt.php` übereinstimmen. Beim Ergänzen eines Eintrags
- * ist dort dieselbe Liste anzupassen (Konstanten ALLOWED_TOPICS,
- * ALLOWED_SERVICES, ALLOWED_START, ALLOWED_BUDGET).
+ *  WICHTIG: Diese Listen müssen mit der serverseitigen Validierung in
+ *  `server/lib/Validator.php` übereinstimmen (Konstanten ALLOWED_TOPICS,
+ *  ALLOWED_START, ALLOWED_BUDGET). Wird hier ein Eintrag ergänzt, ist er dort
+ *  ebenfalls zu ergänzen – sonst weist der Server die Eingabe zurück.
+ *
+ *  Hinweis: Das frühere Feld „Gewünschte Leistung“ wurde entfernt. Es
+ *  überschnitt sich inhaltlich zu stark mit „Art der Anfrage“.
+ * ============================================================================
  */
 
 export const REQUEST_TYPES = [
@@ -15,15 +21,6 @@ export const REQUEST_TYPES = [
   'Nextcloud',
   'Individuelle digitale Lösung',
   'Allgemeine Frage',
-];
-
-export const SERVICE_CHOICES = [
-  'Website und Webentwicklung',
-  'Hosting, Wartung und Sicherheit',
-  'Geschäftliche E-Mail-Lösungen',
-  'Nextcloud und sichere Datenablage',
-  'Individuelle digitale Lösungen',
-  'Noch unklar – bitte beraten',
 ];
 
 export const START_CHOICES = [

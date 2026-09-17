@@ -92,6 +92,8 @@ final class Config
             'smtp_pass', 'allowed_hosts', 'allow_missing_origin', 'rate_limit_max',
             'rate_limit_window', 'ip_hash_secret', 'min_fill_seconds', 'max_form_age_seconds',
             'storage_dir', 'mail_log_dir',
+            'github_client_id', 'github_client_secret', 'github_allowed_users',
+            'admin_rate_limit_max', 'admin_rate_limit_window',
         ];
 
         $result = [];
@@ -105,10 +107,11 @@ final class Config
             $result[$key] = match ($key) {
                 'debug', 'use_smtp', 'smtp_auth', 'allow_missing_origin'
                     => filter_var($raw, FILTER_VALIDATE_BOOLEAN),
-                'smtp_port', 'rate_limit_max', 'rate_limit_window', 'min_fill_seconds', 'max_form_age_seconds'
+                'smtp_port', 'rate_limit_max', 'rate_limit_window', 'min_fill_seconds',
+                'max_form_age_seconds', 'admin_rate_limit_max', 'admin_rate_limit_window'
                     => (int) $raw,
-                // Mehrere Hosts durch Komma getrennt angeben.
-                'allowed_hosts'
+                // Mehrere Werte durch Komma getrennt angeben.
+                'allowed_hosts', 'github_allowed_users'
                     => array_values(array_filter(array_map('trim', explode(',', $raw)))),
                 default => $raw,
             };
@@ -143,6 +146,14 @@ final class Config
             'max_form_age_seconds' => 43200,
             'storage_dir' => $apiDir . '/var',
             'mail_log_dir' => '',
+
+            // --- Adminbereich (Decap CMS über GitHub) ---------------------
+            'github_client_id' => '',
+            'github_client_secret' => '',
+            /** Liste der GitHub-Benutzernamen, die sich anmelden dürfen. */
+            'github_allowed_users' => [],
+            'admin_rate_limit_max' => 10,
+            'admin_rate_limit_window' => 3600,
         ];
     }
 

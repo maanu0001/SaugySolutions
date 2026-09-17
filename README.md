@@ -383,8 +383,8 @@ Diese müssen an **zwei** Stellen übereinstimmen, sonst weist der Server die
 Eingabe ab:
 
 1. `src/data/form.mjs`
-2. `server/lib/Validator.php` → `ALLOWED_TOPICS`, `ALLOWED_SERVICES`,
-   `ALLOWED_START`, `ALLOWED_BUDGET`
+2. `server/lib/Validator.php` → `ALLOWED_TOPICS`, `ALLOWED_START`,
+   `ALLOWED_BUDGET`
 
 ---
 

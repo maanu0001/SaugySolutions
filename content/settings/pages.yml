@@ -1,0 +1,65 @@
+# ============================================================================
+#  SEITENTITEL UND META-BESCHREIBUNGEN
+#  Wird im Adminbereich unter „Seiten & SEO“ bearbeitet.
+# ============================================================================
+
+home:
+  title: Webdesign und digitale Lösungen für Schweizer KMU | Saugy Solutions
+  description: >-
+    Saugy Solutions entwickelt moderne Websites und bietet Hosting, Wartung, E-Mail und
+    Cloud-Lösungen für Schweizer KMU – persönlich und verständlich.
+
+services:
+  title: "Leistungen: Website, Hosting, E-Mail und Cloud | Saugy Solutions"
+  description: >-
+    Websites und Webentwicklung, Hosting und Wartung, geschäftliche E-Mail-Lösungen, Nextcloud und
+    individuelle Weblösungen für kleine Unternehmen in der Schweiz.
+  heading: Alles für Ihren digitalen Auftritt – **aus einer Hand**
+  lead: >-
+    Website, Hosting, E-Mail und Datenablage greifen ineinander. Wenn alles von derselben Stelle
+    kommt, entfällt die Abstimmung zwischen mehreren Anbietern – und Sie wissen immer, an wen Sie
+    sich wenden können.
+
+projects:
+  title: "Projekte: Websites für KMU und Vereine | Saugy Solutions"
+  description: >-
+    Referenzen von Saugy Solutions: Webauftritte für einen Bio-Familienbetrieb, eine öffentliche
+    Bibliothek und eine Schweizer Gaming-Community.
+  heading: Websites für ganz **unterschiedliche** Auftraggeber
+  lead: >-
+    Ein Familienbetrieb mit Hofladen, eine öffentliche Bibliothek und eine Online-Community: So
+    verschieden die Ausgangslagen sind, so ähnlich ist die Aufgabe – die wichtigsten Informationen
+    müssen schnell und verständlich auffindbar sein.
+
+process:
+  title: "Ablauf: So entsteht Ihre Website | Saugy Solutions"
+  description: >-
+    Von der unverbindlichen Anfrage über Offerte und Umsetzung bis zur Veröffentlichung: der
+    Projektablauf bei Saugy Solutions – nachvollziehbar erklärt.
+  heading: Von der Idee zur fertigen Website – **Schritt für Schritt**
+  lead: >-
+    Viele Kundinnen und Kunden haben noch nie ein Webprojekt begleitet. Deshalb zeigen wir hier
+    offen, was in welchem Schritt passiert, was Sie dazu beitragen und was am Ende jedes Schritts
+    vorliegt.
+
+about:
+  title: "Über uns: Manuel und Michael Saugy | Saugy Solutions"
+  description: >-
+    Saugy Solutions wird von Manuel und Michael Saugy geführt – beide ausgebildete Informatiker
+    EFZ. Persönliche IT-Lösungen für kleinere Unternehmen in der Schweiz.
+  heading: Persönliche IT-Lösungen ohne **unnötige Umwege**
+  lead: >-
+    Saugy Solutions wird von Manuel und Michael Saugy geführt. Als ausgebildete Informatiker
+    verbinden wir technische Erfahrung mit persönlicher Beratung. Unser Ziel ist es,
+    professionelles Webdesign und zuverlässige digitale Lösungen auch für kleinere Unternehmen
+    verständlich und zugänglich zu machen.
+
+contact:
+  title: "Kontakt: Kostenloses Erstgespräch | Saugy Solutions"
+  description: >-
+    Nehmen Sie Kontakt mit Saugy Solutions auf: telefonisch, per E-Mail oder über das
+    Anfrageformular. Das Erstgespräch ist kostenlos und unverbindlich.
+  heading: Erzählen Sie uns von Ihrem **Vorhaben**
+  lead: >-
+    Eine grobe Idee genügt für den Anfang. Das Erstgespräch ist kostenlos und unverbindlich –
+    danach wissen Sie, ob und wie wir Ihnen weiterhelfen können.

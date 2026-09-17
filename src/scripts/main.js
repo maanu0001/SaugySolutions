@@ -20,9 +20,13 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
    -------------------------------------------------------------------------- */
 function initMobileNav() {
   const toggle = document.querySelector('[data-nav-toggle]');
-  const panel = document.querySelector('[data-nav-panel]');
-  const header = document.querySelector('[data-header]');
-  if (!toggle || !panel || !header) return;
+  const drawer = document.querySelector('[data-nav-panel]');
+  if (!toggle || !drawer) return;
+
+  const panel = drawer.querySelector('.nav-drawer__panel') ?? drawer;
+  const closeButton = drawer.querySelector('[data-nav-close]');
+  const backdrop = drawer.querySelector('[data-nav-backdrop]');
+  const root = document.documentElement;
 
   /** Alle fokussierbaren Elemente im geöffneten Menü. */
   const focusables = () =>
@@ -35,49 +39,77 @@ function initMobileNav() {
   function open() {
     if (isOpen) return;
     isOpen = true;
-    panel.hidden = false;
+
+    drawer.hidden = false;
     // Erzwingt einen Layout-Durchlauf, damit der Übergang greift.
-    void panel.offsetHeight;
-    header.classList.add('is-nav-open');
+    void drawer.offsetHeight;
+
+    root.classList.add('is-nav-open');
     toggle.setAttribute('aria-expanded', 'true');
     toggle.setAttribute('aria-label', 'Menü schliessen');
-    document.body.style.overflow = 'hidden';
+
+    /*
+      Scroll-Sperre am Dokument-Element.
+
+      Bewusst NICHT über `position: fixed` am Körper: Dabei verliert das
+      Dokument seine Höhe, die Scrollposition muss von Hand gesichert und
+      wiederhergestellt werden – und landet dabei zuverlässig an der falschen
+      Stelle. `overflow: hidden` am Dokument-Element hält die Position
+      dagegen unverändert; es gibt nichts wiederherzustellen.
+
+      Die Breite der Bildlaufleiste wird ausgeglichen, damit der Inhalt beim
+      Öffnen nicht seitlich springt.
+    */
+    const scrollbar = window.innerWidth - root.clientWidth;
+    root.style.overflow = 'hidden';
+    if (scrollbar > 0) root.style.paddingRight = `${scrollbar}px`;
 
     const first = focusables()[0];
-    if (first) first.focus();
+    if (first) first.focus({ preventScroll: true });
   }
 
   function close({ restoreFocus = true } = {}) {
     if (!isOpen) return;
     isOpen = false;
-    header.classList.remove('is-nav-open');
+
+    root.classList.remove('is-nav-open');
     toggle.setAttribute('aria-expanded', 'false');
     toggle.setAttribute('aria-label', 'Menü öffnen');
-    document.body.style.overflow = '';
+
+    // Scroll-Sperre lösen. Die Position blieb die ganze Zeit erhalten.
+    root.style.overflow = '';
+    root.style.paddingRight = '';
 
     const hide = () => {
-      if (!isOpen) panel.hidden = true;
+      if (!isOpen) drawer.hidden = true;
     };
     if (prefersReducedMotion.matches) {
       hide();
     } else {
-      window.setTimeout(hide, 220);
+      window.setTimeout(hide, 260);
     }
 
-    if (restoreFocus) toggle.focus();
+    /*
+      `preventScroll` ist hier entscheidend: Ohne diese Angabe scrollt der
+      Browser die Schaltfläche in den sichtbaren Bereich und macht die soeben
+      wiederhergestellte Scrollposition wieder zunichte.
+    */
+    if (restoreFocus) toggle.focus({ preventScroll: true });
   }
 
   toggle.addEventListener('click', () => (isOpen ? close() : open()));
+  closeButton?.addEventListener('click', () => close());
+  backdrop?.addEventListener('click', () => close());
 
   // Nach einem Klick auf einen Menüpunkt schliesst sich das Menü.
   panel.addEventListener('click', (event) => {
     if (event.target.closest('a')) close({ restoreFocus: false });
   });
 
-  // Escape schliesst das Menü, der Fokus kehrt zur Schaltfläche zurück.
   document.addEventListener('keydown', (event) => {
     if (!isOpen) return;
 
+    // Escape schliesst das Menü, der Fokus kehrt zur Schaltfläche zurück.
     if (event.key === 'Escape') {
       event.preventDefault();
       close();
@@ -88,6 +120,7 @@ function initMobileNav() {
     if (event.key === 'Tab') {
       const items = focusables();
       if (items.length === 0) return;
+
       const first = items[0];
       const last = items[items.length - 1];
 
@@ -205,6 +238,100 @@ function initReveal() {
   }, 1200);
 }
 
+
+/* ---------------------------------------------------------------------------
+   4. Dezente Mausbewegung im Hero
+
+   Die Karten rund um den Hero folgen der Maus minimal. Das gibt dem Bereich
+   Tiefe, ohne abzulenken.
+
+   Bewusst eingeschränkt auf:
+     - Geräte mit echtem Zeiger (kein Touch)
+     - ausreichend breite Bildschirme
+     - Nutzende ohne Wunsch nach reduzierter Bewegung
+
+   Die Verschiebung beträgt wenige Pixel und wird über requestAnimationFrame
+   geglättet, damit nichts ruckelt.
+   -------------------------------------------------------------------------- */
+function initHeroParallax() {
+  const hero = document.querySelector('.hero');
+  if (!hero) return;
+
+  const layers = hero.querySelectorAll('[data-parallax]');
+  if (layers.length === 0) return;
+
+  const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+  const wideEnough = window.matchMedia('(min-width: 68rem)');
+
+  /** Nur aktiv, wenn alle Bedingungen erfüllt sind. */
+  const isEligible = () =>
+    finePointer.matches && wideEnough.matches && !prefersReducedMotion.matches;
+
+  let targetX = 0;
+  let targetY = 0;
+  let currentX = 0;
+  let currentY = 0;
+  let frame = null;
+
+  /** Maximale Auslenkung in Pixeln. */
+  const RANGE = 10;
+
+  function render() {
+    // Sanftes Nachziehen statt harter Sprünge.
+    currentX += (targetX - currentX) * 0.08;
+    currentY += (targetY - currentY) * 0.08;
+
+    layers.forEach((layer) => {
+      const depth = Number(layer.dataset.parallax) || 1;
+      layer.style.transform = `translate3d(${(currentX * depth).toFixed(2)}px, ${(currentY * depth).toFixed(2)}px, 0)`;
+    });
+
+    // Weiterlaufen, bis die Bewegung praktisch stillsteht.
+    if (Math.abs(targetX - currentX) > 0.1 || Math.abs(targetY - currentY) > 0.1) {
+      frame = window.requestAnimationFrame(render);
+    } else {
+      frame = null;
+    }
+  }
+
+  function onMove(event) {
+    if (!isEligible()) return;
+
+    const rect = hero.getBoundingClientRect();
+    targetX = ((event.clientX - rect.left) / rect.width - 0.5) * RANGE * 2;
+    targetY = ((event.clientY - rect.top) / rect.height - 0.5) * RANGE * 2;
+
+    if (frame === null) frame = window.requestAnimationFrame(render);
+  }
+
+  function reset() {
+    targetX = 0;
+    targetY = 0;
+    if (frame === null) frame = window.requestAnimationFrame(render);
+  }
+
+  hero.addEventListener('mousemove', onMove, { passive: true });
+  hero.addEventListener('mouseleave', reset, { passive: true });
+
+  // Wechselt die Umgebung (Fensterbreite, Systemeinstellung), Auslenkung lösen.
+  const onChange = () => {
+    if (!isEligible()) {
+      layers.forEach((layer) => {
+        layer.style.transform = '';
+      });
+      targetX = 0;
+      targetY = 0;
+      currentX = 0;
+      currentY = 0;
+    }
+  };
+
+  if (typeof wideEnough.addEventListener === 'function') {
+    wideEnough.addEventListener('change', onChange);
+    prefersReducedMotion.addEventListener('change', onChange);
+  }
+}
+
 /* ---------------------------------------------------------------------------
    Start
    -------------------------------------------------------------------------- */
@@ -212,6 +339,7 @@ function init() {
   initMobileNav();
   initHeaderState();
   initReveal();
+  initHeroParallax();
 }
 
 if (document.readyState === 'loading') {

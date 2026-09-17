@@ -54,8 +54,9 @@ async function collectHtml(directory, found = []) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     const full = join(directory, entry.name);
     if (entry.isDirectory()) {
-      // Abhängigkeiten des PHP-Endpunkts nicht prüfen.
-      if (entry.name === 'vendor') continue;
+      // Abhängigkeiten des PHP-Endpunkts und den Adminbereich nicht als
+      // öffentliche Seiten prüfen – für /admin/ gibt es eigene Prüfungen.
+      if (entry.name === 'vendor' || entry.name === 'admin') continue;
       await collectHtml(full, found);
     } else if (entry.name.endsWith('.html')) {
       found.push(full);
@@ -395,6 +396,88 @@ if (deployProblems === 0) pass('Serverdateien vollständig, keine Konfigurations
 // Gesamtgrösse der Startseite als grober Performance-Anhaltspunkt.
 const homeSize = (await stat(join(DIST, 'index.html'))).size;
 pass(`Startseite: ${(homeSize / 1024).toFixed(1)} KB HTML`);
+
+// ---------------------------------------------------------------------------
+//  10. Adminbereich
+// ---------------------------------------------------------------------------
+section('10. Adminbereich');
+
+const adminIndex = join(DIST, 'admin/index.html');
+
+if (!existsSync(adminIndex)) {
+  warn('admin/index.html fehlt – wird erst durch „npm run deploy:build“ ergänzt');
+} else {
+  const adminHtml = await readFile(adminIndex, 'utf8');
+
+  if (/noindex/.test(adminHtml)) pass('Adminbereich ist auf „noindex“ gesetzt');
+  else fail('Adminbereich ist nicht vor Indexierung geschützt');
+
+  // Decap muss von der eigenen Domain kommen, nicht von einem CDN.
+  const externalScripts = [...adminHtml.matchAll(/<script[^>]+src="(https?:\/\/[^"]+)"/g)].map((m) => m[1]);
+  if (externalScripts.length === 0) pass('Adminbereich lädt keine externen Skripte (selbst gehostet)');
+  else fail(`Adminbereich lädt externe Skripte: ${externalScripts.join(', ')}`);
+
+  if (existsSync(join(DIST, 'admin/vendor/decap-cms.js'))) pass('Decap CMS liegt lokal im Deployment');
+  else fail('Decap CMS fehlt im Deployment');
+
+  // Konfiguration prüfen.
+  const configPath = join(DIST, 'admin/config.yml');
+  if (!existsSync(configPath)) {
+    fail('admin/config.yml fehlt');
+  } else {
+    const cfg = await readFile(configPath, 'utf8');
+
+    if (/auth_endpoint:\s*api\/auth\.php/.test(cfg)) pass('Anmeldung läuft über die eigene PHP-Brücke');
+    else fail('auth_endpoint ist nicht auf die eigene Brücke gesetzt');
+
+    if (/publish_mode:\s*editorial_workflow/.test(cfg)) pass('Entwurf, Vorschau und Veröffentlichen sind aktiv');
+    else warn('editorial_workflow ist nicht aktiv – keine Entwürfe möglich');
+
+    // Es dürfen keinerlei Geheimnisse in der Konfiguration stehen.
+    const secretPattern = /(client_secret|access_token|\bghp_[A-Za-z0-9]{20,}|\bgithub_pat_[A-Za-z0-9_]{20,})/i;
+    if (secretPattern.test(cfg)) fail('admin/config.yml enthält möglicherweise ein Geheimnis!');
+    else pass('admin/config.yml enthält keine Zugangsdaten');
+  }
+}
+
+// ---------------------------------------------------------------------------
+//  11. Keine Geheimnisse im Deployment
+// ---------------------------------------------------------------------------
+section('11. Geheimnisse');
+
+/** Muster, die auf versehentlich ausgelieferte Zugangsdaten hindeuten. */
+const SECRET_PATTERNS = [
+  { re: /\bghp_[A-Za-z0-9]{30,}/, label: 'GitHub-Token (ghp_…)' },
+  { re: /\bgithub_pat_[A-Za-z0-9_]{30,}/, label: 'GitHub-Token (github_pat_…)' },
+  { re: /-----BEGIN [A-Z ]*PRIVATE KEY-----/, label: 'privater Schlüssel' },
+  { re: /['\"]client_secret['\"]\s*[:=]\s*['\"][^'\"]{8,}/, label: 'OAuth-Client-Secret' },
+  { re: /['\"]smtp_pass['\"]\s*=>\s*['\"][^'\"]+['\"]/, label: 'SMTP-Passwort' },
+];
+
+async function scanForSecrets(directory, hits = []) {
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const full = join(directory, entry.name);
+
+    if (entry.isDirectory()) {
+      // Die CMS-Bibliothek ist Fremdcode und enthält naturgemäss Beispieltexte.
+      if (entry.name === 'vendor') continue;
+      await scanForSecrets(full, hits);
+      continue;
+    }
+
+    if (!/\.(html|js|json|yml|yaml|php|txt|xml)$/i.test(entry.name)) continue;
+
+    const content = await readFile(full, 'utf8');
+    for (const { re, label } of SECRET_PATTERNS) {
+      if (re.test(content)) hits.push(`${relative(DIST, full)} – ${label}`);
+    }
+  }
+  return hits;
+}
+
+const secretHits = await scanForSecrets(DIST);
+if (secretHits.length === 0) pass('Keine Zugangsdaten im Deployment gefunden');
+else secretHits.forEach((hit) => fail(`Mögliches Geheimnis: ${hit}`));
 
 // ---------------------------------------------------------------------------
 //  Ergebnis

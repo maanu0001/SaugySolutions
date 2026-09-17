@@ -78,17 +78,21 @@ log.step(1, 'Vorherigen Build entfernen');
 await rm(DIST, { recursive: true, force: true });
 log.ok('dist/ geleert');
 
-// --- 2. Statische Website --------------------------------------------------
-log.step(2, 'Statische Website bauen');
+// --- 2. Assets aus den Inhalten erzeugen -----------------------------------
+log.step(2, 'Bilder, Logo und Vorschaubild vorbereiten');
+run(process.execPath, [join(ROOT, 'scripts/prepare-assets.mjs')]);
+
+// --- 3. Statische Website --------------------------------------------------
+log.step(3, 'Statische Website bauen');
 run('npx', ['astro', 'build']);
 
 // --- 3. Apache-Konfiguration ----------------------------------------------
-log.step(3, 'Apache-Konfiguration ergänzen');
+log.step(4, 'Apache-Konfiguration ergänzen');
 await cp(join(SERVER, 'apache/htaccess'), join(DIST, '.htaccess'));
 log.ok('.htaccess im Wurzelverzeichnis');
 
 // --- 4. PHP-Endpunkt -------------------------------------------------------
-log.step(4, 'Kontaktformular-Endpunkt kopieren');
+log.step(5, 'Kontaktformular-Endpunkt kopieren');
 
 const API = join(DIST, 'api');
 await mkdir(API, { recursive: true });
@@ -124,10 +128,18 @@ log.ok('api/var/ (Laufzeitdaten, Zugriff gesperrt)');
 
 // Zugriffsschutz für den gesamten api-Ordner.
 await cp(join(SERVER, 'apache/htaccess-api'), join(API, '.htaccess'));
-log.ok('api/.htaccess (nur kontakt.php erreichbar)');
+log.ok('api/.htaccess (nur kontakt.php und auth.php erreichbar)');
+
+// Anmeldebrücke des Adminbereichs.
+await cp(join(SERVER, 'api/auth.php'), join(API, 'auth.php'));
+log.ok('api/auth.php (Anmeldung am Adminbereich)');
+
+// Eigene Regeln für den Adminbereich (eigene CSP, kein Indexieren).
+await cp(join(SERVER, 'apache/htaccess-admin'), join(DIST, 'admin/.htaccess'));
+log.ok('admin/.htaccess (eigene Sicherheitsregeln)');
 
 // --- 5. Kontrolle -----------------------------------------------------------
-log.step(5, 'Ergebnis prüfen');
+log.step(6, 'Ergebnis prüfen');
 
 let problems = 0;
 
@@ -136,6 +148,8 @@ const forbidden = [
   'node_modules',
   '.astro',
   'src',
+  'content',
+  'server',
   'package.json',
   'package-lock.json',
   'astro.config.mjs',
@@ -165,6 +179,11 @@ const required = [
   'api/lib/Mailer.php',
   'fonts/manrope-latin-var.woff2',
   'img/og-saugy-solutions.png',
+  'admin/index.html',
+  'admin/config.yml',
+  'admin/vendor/decap-cms.js',
+  'admin/.htaccess',
+  'api/auth.php',
   'kontakt/index.html',
   'danke/index.html',
   'impressum/index.html',
@@ -202,7 +221,8 @@ if (PENDING_FIELDS.length > 0) {
     console.log(`    • ${field.label}${field.hint ? ` – ${field.hint}` : ''}`);
   }
 
-  console.log('\n  Diese Angaben dürfen nicht erfunden werden. Details: README.md');
+  console.log('\n  Diese Angaben lassen sich im Adminbereich unter „Allgemeine');
+  console.log('  Einstellungen“ ergänzen. Details: README.md');
 }
 
 // --- 7. Abschluss -----------------------------------------------------------

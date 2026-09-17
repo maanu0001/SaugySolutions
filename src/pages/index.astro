@@ -2,33 +2,46 @@
 /**
  * Startseite.
  *
- * Aufbau: Hero – Vorteile – Leistungen – Projekte – Ablauf – Team –
- * Qualität/Vertrauen – FAQ – Abschluss-CTA.
+ * Inhalte und Reihenfolge stammen aus `content/settings/home.yml` und werden
+ * im Adminbereich bearbeitet. Jeder Abschnitt lässt sich dort ein- und
+ * ausblenden sowie umsortieren – die Gestaltung bleibt dabei fest, damit das
+ * Erscheinungsbild nicht auseinanderfällt.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
+import HeroHome from '../components/HeroHome.astro';
 import SectionHead from '../components/SectionHead.astro';
 import Button from '../components/Button.astro';
 import Icon from '../components/Icon.astro';
-import ServiceCard from '../components/ServiceCard.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import ProcessSteps from '../components/ProcessSteps.astro';
 import TeamCard from '../components/TeamCard.astro';
 import Faq from '../components/Faq.astro';
 import CtaSection from '../components/CtaSection.astro';
-import HeroVisual from '../components/HeroVisual.astro';
 
+import { homeData, pagesData, renderAccent, plainText } from '../data/content.mjs';
 import { SERVICES } from '../data/services.mjs';
-import { PROJECTS } from '../data/projects.mjs';
+import { FEATURED_PROJECTS } from '../data/projects.mjs';
 import { PROCESS } from '../data/process.mjs';
 import { BENEFITS } from '../data/benefits.mjs';
 import { TEAM } from '../data/team.mjs';
 import { FAQ_HOME } from '../data/faq.mjs';
 
-const title = 'Webdesign und digitale Lösungen für Schweizer KMU | Saugy Solutions';
-const description =
-  'Saugy Solutions entwickelt moderne Websites und bietet Hosting, Wartung, E-Mail und Cloud-Lösungen für Schweizer KMU – persönlich und verständlich.';
+const hero = homeData.hero ?? {};
+const sections = homeData.sections ?? {};
+const ctaConfig = homeData.cta ?? {};
+const meta = pagesData.home ?? {};
 
-/** FAQ als strukturierte Daten, damit die Fragen auch in der Suche erscheinen können. */
+/** Sichtbare Abschnitte in der im Adminbereich gewählten Reihenfolge. */
+const order = Object.entries(sections)
+  .filter(([, config]) => config?.visible !== false)
+  .sort((a, b) => (a[1]?.order ?? 99) - (b[1]?.order ?? 99))
+  .map(([key, config]) => ({ key, ...config }));
+
+const show = (key) => order.find((s) => s.key === key);
+
+/** Wechselt den Abschnittshintergrund, damit die Seite Rhythmus bekommt. */
+const bg = (key) => (order.findIndex((s) => s.key === key) % 2 === 1 ? 'section--alt' : '');
+
 const faqSchema = {
   '@type': 'FAQPage',
   mainEntity: FAQ_HOME.map((item) => ({
@@ -39,373 +52,422 @@ const faqSchema = {
 };
 ---
 
-<BaseLayout title={title} description={description} path="/" schema={[faqSchema]} heroPage>
-  <!-- ==================================================================
-       HERO
-       ================================================================== -->
-  <section class="hero" aria-labelledby="hero-titel">
-    <span class="decor decor--dots" aria-hidden="true"></span>
-    <span class="decor decor--glow decor--drift hero__glow-1" aria-hidden="true"></span>
-    <span class="decor decor--glow decor--glow-2 decor--drift-slow hero__glow-2" aria-hidden="true"></span>
+<BaseLayout
+  title={meta.title ?? 'Saugy Solutions'}
+  description={meta.description ?? ''}
+  path="/"
+  schema={[faqSchema]}
+  heroPage
+>
+  <HeroHome hero={hero} project={FEATURED_PROJECTS[0] ?? null} />
 
-    <div class="container hero__inner">
-      <div class="hero__content">
-        <p class="hero__eyebrow">
-          <span class="hero__pulse" aria-hidden="true"></span>
-          Webdesign und IT für kleine Unternehmen in der Schweiz
-        </p>
+  {order.map((section) => {
+    /* ================================================== VORTEILE ============ */
+    if (section.key === 'benefits') {
+      return (
+        <section class:list={['section', bg('benefits')]} aria-labelledby="vorteile-titel">
+          <div class="container">
+            <SectionHead
+              eyebrow={section.eyebrow}
+              title={renderAccent(section.title)}
+              lead={section.lead}
+              id="vorteile-titel"
+            />
+            <div class="bento bento--benefits">
+              {BENEFITS.map((benefit, i) => (
+                <article
+                  class:list={['tile', i === 0 && 'tile--wide']}
+                  data-reveal
+                  data-reveal-delay={(i % 4) + 1}
+                >
+                  <span class="icon-badge">
+                    <Icon name={benefit.icon} size={22} />
+                  </span>
+                  <h3 class="tile__title">{benefit.title}</h3>
+                  <p class="tile__text">{benefit.text}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    }
 
-        <h1 id="hero-titel" class="hero__title">
-          Websites und digitale Lösungen, die Ihr Unternehmen <span class="accent-text">weiterbringen</span>.
-        </h1>
+    /* ================================================== LEISTUNGEN ========== */
+    if (section.key === 'services') {
+      const [lead, ...rest] = SERVICES;
+      return (
+        <section class:list={['section', bg('services')]} aria-labelledby="leistungen-titel">
+          <div class="container">
+            <div class="split-head">
+              <SectionHead
+                eyebrow={section.eyebrow}
+                title={renderAccent(section.title)}
+                lead={section.lead}
+                id="leistungen-titel"
+                class="split-head__text"
+              />
+              {section.cta_label && (
+                <Button href="/leistungen/" variant="secondary" class="split-head__action">
+                  {section.cta_label}
+                </Button>
+              )}
+            </div>
 
-        <p class="hero__lead">
-          Saugy Solutions entwickelt moderne Websites, übernimmt Hosting und Wartung und unterstützt
-          Schweizer KMU mit persönlichen, verständlichen IT-Lösungen.
-        </p>
+            <div class="bento bento--services">
+              {/* Hauptleistung als grosse Kachel */}
+              {lead && (
+                <article class="tile tile--feature" data-reveal>
+                  <span class="icon-badge">
+                    <Icon name={lead.icon} size={24} />
+                  </span>
+                  <h3 class="tile__title tile__title--lg">
+                    <a href={`/leistungen/#${lead.slug}`} class="tile__link">{lead.title}</a>
+                  </h3>
+                  <p class="tile__text">{lead.teaser}</p>
+                  <ul class="tile__list">
+                    {lead.includes.slice(0, 4).map((item) => (
+                      <li>{item.title}</li>
+                    ))}
+                  </ul>
+                  <span class="tile__more">
+                    <span>Mehr dazu</span>
+                    <Icon name="arrow-right" size={16} />
+                  </span>
+                </article>
+              )}
 
-        <div class="btn-row hero__actions">
-          <Button href="/kontakt/" variant="primary" size="lg">Kostenloses Erstgespräch</Button>
-          <Button href="/projekte/" variant="secondary" size="lg">Projekte ansehen</Button>
-        </div>
+              {rest.map((service, i) => (
+                <article class="tile" data-reveal data-reveal-delay={(i % 4) + 1}>
+                  <span class="icon-badge">
+                    <Icon name={service.icon} size={22} />
+                  </span>
+                  <h3 class="tile__title">
+                    <a href={`/leistungen/#${service.slug}`} class="tile__link">{service.title}</a>
+                  </h3>
+                  <p class="tile__text">{service.teaser}</p>
+                  <span class="tile__more">
+                    <span>Mehr dazu</span>
+                    <Icon name="arrow-right" size={16} />
+                  </span>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    }
 
-        <ul class="hero__facts">
-          <li>
-            <Icon name="user" size={18} />
-            <span>Ein direkter Ansprechpartner</span>
-          </li>
-          <li>
-            <Icon name="stack" size={18} />
-            <span>Website, Hosting und E-Mail aus einer Hand</span>
-          </li>
-          <li>
-            <Icon name="chat" size={18} />
-            <span>Technik verständlich erklärt</span>
-          </li>
-        </ul>
-      </div>
+    /* ================================================== PROJEKTE ============ */
+    if (section.key === 'projects' && FEATURED_PROJECTS.length > 0) {
+      return (
+        <section class:list={['section', bg('projects')]} aria-labelledby="projekte-titel">
+          <div class="container">
+            <div class="split-head">
+              <SectionHead
+                eyebrow={section.eyebrow}
+                title={renderAccent(section.title)}
+                lead={section.lead}
+                id="projekte-titel"
+                class="split-head__text"
+              />
+              {section.cta_label && (
+                <Button href="/projekte/" variant="secondary" class="split-head__action">
+                  {section.cta_label}
+                </Button>
+              )}
+            </div>
 
-      <div class="hero__visual">
-        <HeroVisual />
-      </div>
-    </div>
-  </section>
+            <div class="grid grid--3">
+              {FEATURED_PROJECTS.map((project) => (
+                <ProjectCard project={project} />
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    }
 
-  <!-- ==================================================================
-       VORTEILE
-       ================================================================== -->
-  <section class="section section--alt" aria-labelledby="vorteile-titel">
-    <div class="container">
-      <SectionHead
-        eyebrow="Weshalb Saugy Solutions"
-        title="Persönlich statt anonym – und immer nachvollziehbar"
-        lead="Wir sind kein grosses Agenturnetzwerk. Genau das ist der Punkt: Sie sprechen direkt mit den Personen, die Ihr Projekt umsetzen."
-        id="vorteile-titel"
-      />
+    /* ================================================== ABLAUF ============== */
+    if (section.key === 'process') {
+      return (
+        <section class:list={['section', bg('process')]} aria-labelledby="ablauf-titel">
+          <div class="container">
+            <div class="process-layout">
+              <div class="process-layout__intro">
+                <SectionHead
+                  eyebrow={section.eyebrow}
+                  title={renderAccent(section.title)}
+                  lead={section.lead}
+                  id="ablauf-titel"
+                />
+                {section.cta_label && (
+                  <Button href="/ablauf/" variant="secondary">{section.cta_label}</Button>
+                )}
+              </div>
 
-      <div class="grid grid--3">
-        {
-          BENEFITS.map((benefit, index) => (
-            <article class="card card--interactive" data-reveal data-reveal-delay={(index % 3) + 1}>
-              <span class="icon-badge">
-                <Icon name={benefit.icon} size={22} />
-              </span>
-              <h3 class="card__title">{benefit.title}</h3>
-              <p class="card__text">{benefit.text}</p>
-            </article>
-          ))
-        }
-      </div>
-    </div>
-  </section>
+              <div class="process-layout__steps">
+                <ProcessSteps steps={PROCESS.slice(0, section.steps_shown ?? 5)} />
+                <p class="process-layout__more">
+                  Danach folgen Veröffentlichung und – auf Wunsch – die laufende Betreuung.
+                  <a href="/ablauf/">Alle Schritte ansehen</a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    }
 
-  <!-- ==================================================================
-       LEISTUNGEN
-       ================================================================== -->
-  <section class="section" aria-labelledby="leistungen-titel">
-    <div class="container">
-      <div class="split-head">
-        <SectionHead
-          eyebrow="Leistungen"
-          title="Alles, was Ihr Unternehmen online braucht"
-          lead="Von der Website über E-Mail und Hosting bis zur sicheren Datenablage – abgestimmt auf das, was Ihr Betrieb tatsächlich benötigt."
-          id="leistungen-titel"
-          class="split-head__text"
-        />
-        <Button href="/leistungen/" variant="secondary" class="split-head__action">
-          Alle Leistungen
-        </Button>
-      </div>
+    /* ================================================== TEAM ================ */
+    if (section.key === 'team') {
+      return (
+        <section class:list={['section', bg('team')]} aria-labelledby="team-titel">
+          <div class="container">
+            <SectionHead
+              eyebrow={section.eyebrow}
+              title={renderAccent(section.title)}
+              lead={section.lead}
+              id="team-titel"
+              center
+            />
+            <div class="grid grid--2 team-grid">
+              {TEAM.map((person, i) => (
+                <TeamCard person={person} delay={i + 1} />
+              ))}
+            </div>
+            {section.cta_label && (
+              <p class="team-note" data-reveal>
+                <a href="/ueber-uns/">{section.cta_label}</a>
+              </p>
+            )}
+          </div>
+        </section>
+      );
+    }
 
-      <div class="grid grid--3">
-        {SERVICES.map((service, index) => <ServiceCard service={service} delay={(index % 3) + 1} />)}
-      </div>
-    </div>
-  </section>
+    /* ================================================== QUALITÄT ============ */
+    if (section.key === 'trust') {
+      return (
+        <section class:list={['section', bg('trust')]} aria-labelledby="qualitaet-titel">
+          <div class="container">
+            <div class="trust">
+              <div class="trust__text">
+                <SectionHead
+                  eyebrow={section.eyebrow}
+                  title={renderAccent(section.title)}
+                  lead={section.lead}
+                  id="qualitaet-titel"
+                />
+                <ul class="check-list trust__list">
+                  {(section.points ?? []).map((point) => (
+                    <li>{point}</li>
+                  ))}
+                </ul>
+              </div>
 
-  <!-- ==================================================================
-       PROJEKTE
-       ================================================================== -->
-  <section class="section section--alt section--divided" aria-labelledby="projekte-titel">
-    <div class="container">
-      <div class="split-head">
-        <SectionHead
-          eyebrow="Projekte"
-          title="Websites, die im Alltag funktionieren"
-          lead="Drei Auftritte für ganz unterschiedliche Auftraggeber – vom Familienbetrieb über die öffentliche Einrichtung bis zur Online-Community."
-          id="projekte-titel"
-          class="split-head__text"
-        />
-        <Button href="/projekte/" variant="secondary" class="split-head__action">
-          Alle Projekte
-        </Button>
-      </div>
+              <aside class="trust__aside" data-reveal>
+                <h3 class="trust__aside-title">{section.aside_title}</h3>
+                <ul class="trust__aside-list">
+                  {(section.aside_points ?? []).map((point) => (
+                    <li>
+                      <strong>{point.strong}</strong> {point.text}
+                    </li>
+                  ))}
+                </ul>
+              </aside>
+            </div>
+          </div>
+        </section>
+      );
+    }
 
-      <div class="grid grid--3">
-        {PROJECTS.map((project) => <ProjectCard project={project} />)}
-      </div>
-    </div>
-  </section>
+    /* ================================================== FAQ ================= */
+    if (section.key === 'faq' && FAQ_HOME.length > 0) {
+      return (
+        <section class:list={['section', 'section--tight', bg('faq')]} aria-labelledby="faq-titel">
+          <div class="container">
+            <div class="faq-layout">
+              <SectionHead
+                eyebrow={section.eyebrow}
+                title={renderAccent(section.title)}
+                lead={section.lead}
+                id="faq-titel"
+              />
+              <div>
+                <Faq items={FAQ_HOME} openFirst />
+                {section.cta_label && (
+                  <p class="faq-layout__more">
+                    <a href="/leistungen/#fragen">{section.cta_label}</a>
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    }
 
-  <!-- ==================================================================
-       ABLAUF
-       ================================================================== -->
-  <section class="section" aria-labelledby="ablauf-titel">
-    <div class="container">
-      <div class="process-layout">
-        <div class="process-layout__intro">
-          <SectionHead
-            eyebrow="Ablauf"
-            title="So entsteht Ihr Projekt"
-            lead="Sieben überschaubare Schritte von der ersten Anfrage bis zum laufenden Betrieb. Technische Vorkenntnisse brauchen Sie dafür nicht."
-            id="ablauf-titel"
-          />
-          <Button href="/ablauf/" variant="secondary">Ablauf im Detail</Button>
-        </div>
+    return null;
+  })}
 
-        <div class="process-layout__steps">
-          <ProcessSteps steps={PROCESS.slice(0, 5)} />
-          <p class="process-layout__more">
-            Danach folgen Veröffentlichung und – auf Wunsch – die laufende Betreuung.
-            <a href="/ablauf/">Alle Schritte ansehen</a>
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ==================================================================
-       TEAM
-       ================================================================== -->
-  <section class="section section--alt" aria-labelledby="team-titel">
-    <div class="container">
-      <SectionHead
-        eyebrow="Wer dahintersteht"
-        title="Zwei Informatiker, ein Ansprechpartner"
-        lead="Saugy Solutions wird von Manuel und Michael Saugy geführt. Beide sind ausgebildete Informatiker EFZ in Applikationsentwicklung."
-        id="team-titel"
-        center
-      />
-
-      <div class="grid grid--2 team-grid">
-        {TEAM.map((person, index) => <TeamCard person={person} delay={index + 1} />)}
-      </div>
-
-      <p class="team-note" data-reveal>
-        <a href="/ueber-uns/">Mehr über uns und unsere Arbeitsweise</a>
-      </p>
-    </div>
-  </section>
-
-  <!-- ==================================================================
-       QUALITÄT UND VERTRAUEN
-       ================================================================== -->
-  <section class="section" aria-labelledby="qualitaet-titel">
-    <div class="container">
-      <div class="trust">
-        <div class="trust__text">
-          <SectionHead
-            eyebrow="Qualität"
-            title="Worauf wir bei jedem Projekt achten"
-            lead="Eine Website ist erst gut, wenn sie auch auf dem Mobiltelefon, bei langsamer Verbindung und für Menschen mit Einschränkungen funktioniert."
-            id="qualitaet-titel"
-          />
-
-          <ul class="check-list trust__list">
-            <li>Darstellung geprüft auf Mobiltelefon, Tablet und Desktop</li>
-            <li>Kurze Ladezeiten durch schlanke Umsetzung und optimierte Bilder</li>
-            <li>Verschlüsselte Übertragung und aktuelle Sicherheitseinstellungen</li>
-            <li>Lesbare Schrift, ausreichende Kontraste und Bedienung per Tastatur</li>
-            <li>Saubere technische Grundlagen für die Auffindbarkeit in Suchmaschinen</li>
-            <li>Keine unnötigen externen Dienste und kein Tracking ohne Notwendigkeit</li>
-          </ul>
-        </div>
-
-        <aside class="trust__aside" data-reveal>
-          <h3 class="trust__aside-title">Was wir nicht tun</h3>
-          <ul class="trust__aside-list">
-            <li>
-              <strong>Keine Versprechen ins Blaue.</strong> Wir sagen vorher, was möglich ist – und was nicht.
-            </li>
-            <li>
-              <strong>Keine unnötigen Zusatzpakete.</strong> Wenn Sie etwas nicht brauchen, schlagen wir es nicht vor.
-            </li>
-            <li>
-              <strong>Keine Abhängigkeit.</strong> Domain und Inhalte gehören Ihnen – auch wenn Sie später wechseln möchten.
-            </li>
-          </ul>
-        </aside>
-      </div>
-    </div>
-  </section>
-
-  <!-- ==================================================================
-       FAQ
-       ================================================================== -->
-  <section class="section section--alt section--tight" aria-labelledby="faq-titel">
-    <div class="container">
-      <div class="faq-layout">
-        <SectionHead
-          eyebrow="Häufige Fragen"
-          title="Fragen, die uns oft gestellt werden"
-          lead="Weitere Antworten – etwa zu Kosten, Dauer und Inhalten – finden Sie bei den Leistungen."
-          id="faq-titel"
-        />
-        <div>
-          <Faq items={FAQ_HOME} openFirst />
-          <p class="faq-layout__more">
-            <a href="/leistungen/#fragen">Alle häufigen Fragen ansehen</a>
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <CtaSection />
+  {
+    ctaConfig.visible !== false && (
+      <CtaSection title={plainText(ctaConfig.title)} text={ctaConfig.text} />
+    )
+  }
 </BaseLayout>
 
 <style>
-  /* ---------------------------------------------------------------- Hero */
-  .hero {
-    position: relative;
-    overflow: hidden;
-    padding-block: clamp(2.5rem, 1rem + 6vw, 5.5rem) clamp(3rem, 1.5rem + 6vw, 6rem);
-  }
-
-  .hero__glow-1 {
-    top: -32%;
-    right: -18%;
-  }
-
-  .hero__glow-2 {
-    bottom: -42%;
-    left: -22%;
-  }
-
-  .hero__inner {
-    position: relative;
-    z-index: var(--z-content);
+  /* ============================================================ Bento-Raster */
+  .bento {
     display: grid;
-    gap: clamp(2.5rem, 1rem + 5vw, 4rem);
-    align-items: center;
+    gap: var(--sp-4);
+    grid-template-columns: 1fr;
   }
 
-  .hero__eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    margin-bottom: var(--sp-5);
-    padding: 0.42rem 0.95rem 0.42rem 0.7rem;
-    border: 1px solid var(--c-line-strong);
+  .tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: var(--sp-6);
+    border: 1px solid var(--c-line);
+    border-radius: var(--r-lg);
+    background: var(--c-surface);
+    transition: border-color var(--t-base) var(--ease-out),
+      transform var(--t-base) var(--ease-out), background-color var(--t-base) var(--ease-out);
+  }
+
+  /* Feine Akzentlinie, die beim Hover von links einläuft. */
+  .tile::after {
+    content: '';
+    position: absolute;
+    left: var(--sp-6);
+    right: var(--sp-6);
+    bottom: 0;
+    height: 2px;
     border-radius: var(--r-full);
-    background: rgba(255, 255, 255, 0.03);
-    font-size: var(--fs-xs);
-    font-weight: 600;
-    color: var(--c-text-muted);
+    background: linear-gradient(to right, var(--c-accent), var(--c-accent-2));
+    transform: scaleX(0);
+    transform-origin: left;
+    opacity: 0;
+    transition: transform var(--t-slow) var(--ease-out), opacity var(--t-base) var(--ease-out);
   }
 
-  .hero__pulse {
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 50%;
-    background: var(--c-accent);
-    box-shadow: 0 0 0 0 rgba(36, 230, 178, 0.6);
-    flex: none;
+  .tile:hover,
+  .tile:focus-within {
+    border-color: var(--c-line-strong);
+    background: var(--c-surface-raised);
+    transform: translateY(calc(-3px * var(--motion-scale)));
   }
 
-  @media (prefers-reduced-motion: no-preference) {
-    .hero__pulse {
-      animation: pulse 2.8s var(--ease-out) infinite;
-    }
+  .tile:hover::after,
+  .tile:focus-within::after {
+    transform: scaleX(1);
+    opacity: 1;
   }
 
-  @keyframes pulse {
-    0% {
-      box-shadow: 0 0 0 0 rgba(36, 230, 178, 0.55);
-    }
-    70% {
-      box-shadow: 0 0 0 0.6rem rgba(36, 230, 178, 0);
-    }
-    100% {
-      box-shadow: 0 0 0 0 rgba(36, 230, 178, 0);
-    }
-  }
-
-  .hero__title {
-    max-width: 19ch;
-  }
-
-  .hero__lead {
-    margin-top: var(--sp-5);
-    max-width: 52ch;
+  .tile__title {
+    margin-bottom: var(--sp-3);
     font-size: var(--fs-lg);
+  }
+
+  .tile__title--lg {
+    font-size: var(--fs-xl);
+  }
+
+  .tile__link {
+    text-decoration: none;
+  }
+
+  /* Ganze Kachel klickbar, ohne den Linktext unklar zu machen. */
+  .tile__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  .tile__text {
     color: var(--c-text-muted);
+    font-size: var(--fs-sm);
   }
 
-  .hero__actions {
-    margin-top: var(--sp-7);
-  }
-
-  .hero__facts {
+  .tile__list {
     display: grid;
-    gap: var(--sp-3);
-    margin: var(--sp-7) 0 0;
-    padding: var(--sp-5) 0 0;
-    border-top: 1px solid var(--c-line);
+    gap: 0.45rem;
+    margin: var(--sp-5) 0 0;
+    padding: 0;
     list-style: none;
   }
 
-  .hero__facts li {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    font-size: var(--fs-sm);
+  .tile__list li {
+    position: relative;
+    padding-left: 1.1rem;
+    font-size: var(--fs-xs);
     color: var(--c-text-muted);
   }
 
-  .hero__facts :global(svg) {
-    flex: none;
+  .tile__list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.62em;
+    width: 0.38rem;
+    height: 0.38rem;
+    border-radius: 50%;
+    background: var(--c-accent);
+    opacity: 0.7;
+  }
+
+  .tile__more {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: auto;
+    padding-top: var(--sp-5);
+    font-size: var(--fs-sm);
+    font-weight: 700;
     color: var(--c-accent);
   }
 
-  @media (min-width: 62rem) {
-    .hero__inner {
-      grid-template-columns: 1.12fr 0.88fr;
-    }
+  .tile__more :global(svg) {
+    transition: transform var(--t-base) var(--ease-out);
+  }
 
-    .hero__facts {
-      grid-template-columns: repeat(3, 1fr);
-      gap: var(--sp-5);
-    }
+  .tile:hover .tile__more :global(svg) {
+    transform: translateX(4px);
+  }
 
-    .hero__facts li {
-      align-items: flex-start;
-      flex-direction: column;
-      gap: 0.5rem;
+  /* --- Ab Tablet: echtes Bento-Raster --- */
+  @media (min-width: 44rem) {
+    .bento {
+      grid-template-columns: repeat(2, 1fr);
     }
   }
 
-  /* ------------------------------------------------- Abschnitt mit Aktion */
+  @media (min-width: 64rem) {
+    .bento--benefits {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* Erster Vorteil bekommt mehr Gewicht. */
+    .bento--benefits .tile--wide {
+      grid-column: span 2;
+    }
+
+    .bento--services {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* Hauptleistung nimmt zwei Spalten und zwei Reihen ein. */
+    .bento--services .tile--feature {
+      grid-column: span 2;
+      grid-row: span 2;
+    }
+  }
+
+  /* ==================================================== Abschnitt mit Aktion */
   .split-head {
     display: flex;
     flex-wrap: wrap;
@@ -424,7 +486,7 @@ const faqSchema = {
     flex: none;
   }
 
-  /* -------------------------------------------------------------- Ablauf */
+  /* ================================================================= Ablauf */
   .process-layout {
     display: grid;
     gap: var(--sp-8);
@@ -452,11 +514,11 @@ const faqSchema = {
 
     .process-layout__intro {
       position: sticky;
-      top: 7rem;
+      top: calc(var(--header-height) + 2rem);
     }
   }
 
-  /* ---------------------------------------------------------------- Team */
+  /* =================================================================== Team */
   .team-grid {
     max-width: 62rem;
     margin-inline: auto;
@@ -472,7 +534,7 @@ const faqSchema = {
     color: var(--c-accent);
   }
 
-  /* ------------------------------------------------------------ Qualität */
+  /* =============================================================== Qualität */
   .trust {
     display: grid;
     gap: var(--sp-7);
@@ -487,7 +549,7 @@ const faqSchema = {
     padding: var(--sp-6);
     border: 1px solid var(--c-line-strong);
     border-radius: var(--r-lg);
-    background: linear-gradient(160deg, var(--c-surface), var(--c-bg-alt));
+    background: var(--c-surface);
   }
 
   .trust__aside-title {
@@ -518,7 +580,7 @@ const faqSchema = {
     }
   }
 
-  /* ----------------------------------------------------------------- FAQ */
+  /* ==================================================================== FAQ */
   .faq-layout {
     display: grid;
     gap: var(--sp-6);
@@ -546,7 +608,7 @@ const faqSchema = {
 
     .faq-layout :global(.section-head) {
       position: sticky;
-      top: 7rem;
+      top: calc(var(--header-height) + 2rem);
     }
   }
 </style>

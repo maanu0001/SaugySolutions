@@ -5,6 +5,14 @@ node_modules/
 dist/
 .astro/
 
+# Beim Build erzeugte Bildableitungen (aus Logo und Mediathek)
+public/img/generated/
+public/img/derived/
+
+# Selbst gehostetes Decap CMS (wird beim Build aus node_modules kopiert)
+public/admin/vendor/
+public/admin/config.yml
+
 # Lokale Konfiguration und Geheimnisse – NIEMALS einchecken
 server/config/config.php
 server/config/.env

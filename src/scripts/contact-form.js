@@ -4,14 +4,29 @@
  * ============================================================================
  *  Ohne JavaScript sendet das Formular ganz normal an den PHP-Endpunkt und
  *  der Browser folgt der Weiterleitung. Dieses Skript verbessert nur den
- *  Ablauf:
+ *  Ablauf: Fehlermeldungen beim Feld, Ladezustand, Rückmeldung ohne
+ *  Seitenwechsel und Schutz vor doppeltem Absenden.
  *
- *    - verständliche Fehlermeldungen direkt beim Feld
- *    - Ladezustand während des Sendens
- *    - Rückmeldung ohne Seitenwechsel
- *    - Schutz vor doppeltem Absenden
+ *  ZEITPUNKT DER VALIDIERUNG
+ *  -------------------------
+ *  Entscheidend ist der Status `hasAttemptedSubmit`:
  *
- *  Die verbindliche Prüfung erfolgt weiterhin serverseitig in kontakt.php.
+ *    VOR dem ersten Absenden
+ *      Es erscheinen keinerlei Fehlermeldungen. Ein Feld zu fokussieren und
+ *      leer wieder zu verlassen, markiert also nichts rot. Leere Pflichtfelder
+ *      bleiben visuell neutral.
+ *
+ *    BEIM Absenden
+ *      hasAttemptedSubmit wird gesetzt, alle Felder werden geprüft, fehlerhafte
+ *      Felder werden markiert, eine Zusammenfassung erscheint und der Fokus
+ *      springt auf das erste betroffene Feld.
+ *
+ *    NACH dem ersten Absenden
+ *      Korrigiert jemand ein Feld, verschwindet dessen Fehler sofort bei
+ *      `input` bzw. `change`. Andere fehlerhafte Felder bleiben markiert.
+ *      Neue Fehler entstehen weiterhin nicht allein durch `blur`.
+ *
+ *  Die verbindliche Prüfung erfolgt in jedem Fall serverseitig in kontakt.php.
  * ============================================================================
  */
 
@@ -19,10 +34,15 @@ const form = document.querySelector('[data-contact-form]');
 
 if (form) {
   const statusBox = form.querySelector('[data-form-status]');
+  const summaryBox = form.querySelector('[data-error-summary]');
+  const summaryTitle = form.querySelector('[data-summary-title]');
+  const summaryList = form.querySelector('[data-summary-list]');
   const submit = form.querySelector('[data-submit]');
   const submitLabel = form.querySelector('[data-submit-label]');
   const loadedAt = form.querySelector('[data-loaded-at]');
 
+  /** Erst nach dem ersten Absendeversuch werden Fehler sichtbar gemacht. */
+  let hasAttemptedSubmit = false;
   let isSending = false;
   let hasSucceeded = false;
 
@@ -32,10 +52,15 @@ if (form) {
 
   /* ------------------------------------------------------------------------
      Validierungsregeln
+
+     Jede Regel gibt eine Fehlermeldung zurück – oder einen leeren Text, wenn
+     das Feld in Ordnung ist. Optionale Felder liefern bei leerem Inhalt immer
+     einen leeren Text und werden dadurch nie bemängelt.
      ---------------------------------------------------------------------- */
   const RULES = {
     'kf-name': (value) =>
       value.trim().length < 2 ? 'Bitte geben Sie Ihren Vor- und Nachnamen an.' : '',
+
     'kf-email': (value) => {
       const v = value.trim();
       if (!v) return 'Bitte geben Sie Ihre E-Mail-Adresse an.';
@@ -45,6 +70,8 @@ if (form) {
       }
       return '';
     },
+
+    // Optional: leer ist immer in Ordnung.
     'kf-telefon': (value) => {
       const v = value.trim();
       if (!v) return '';
@@ -53,17 +80,41 @@ if (form) {
       }
       return '';
     },
+
+    // Auswahlfeld: „Bitte wählen“ hat den Wert "" und gilt als nicht ausgefüllt.
     'kf-anliegen': (value) => (value ? '' : 'Bitte wählen Sie aus, worum es geht.'),
-    'kf-leistung': (value) => (value ? '' : 'Bitte wählen Sie die gewünschte Leistung.'),
+
     'kf-nachricht': (value) =>
       value.trim().length < 10
         ? 'Bitte beschreiben Sie Ihr Anliegen kurz – ein bis zwei Sätze genügen.'
         : '',
+
     'kf-datenschutz': (_value, field) =>
       field.checked ? '' : 'Bitte stimmen Sie der Verwendung Ihrer Angaben zu.',
   };
 
-  /** Zeigt bzw. entfernt die Fehlermeldung eines Feldes. */
+  /** Alle Felder, für die es eine Regel gibt. */
+  const fields = Object.keys(RULES)
+    .map((id) => form.querySelector(`#${id}`))
+    .filter(Boolean);
+
+  /** Beschriftung eines Feldes – für die Fehlerzusammenfassung. */
+  function labelFor(field) {
+    const label = form.querySelector(`label[for="${field.id}"]`);
+    if (!label) return field.name;
+    // Zusätze wie „(optional)“ und „(Pflichtfeld)“ nicht mitnehmen.
+    return label.textContent.replace(/\(optional\)|\(Pflichtfeld\)|\*/g, '').trim();
+  }
+
+  /* ------------------------------------------------------------------------
+     Anzeige eines einzelnen Feldfehlers
+     ---------------------------------------------------------------------- */
+
+  /**
+   * Setzt oder entfernt die Fehlermeldung eines Feldes.
+   * `aria-invalid` wird ausschliesslich gesetzt, wenn wirklich eine sichtbare
+   * Meldung vorhanden ist.
+   */
   function setFieldError(field, message) {
     const target = form.querySelector(`[data-error-for="${field.id}"]`);
     if (target) target.textContent = message;
@@ -75,51 +126,103 @@ if (form) {
     }
   }
 
-  /** Prüft ein einzelnes Feld. */
-  function validateField(field) {
+  /** Entfernt sämtliche Fehlerzustände. */
+  function clearAllErrors() {
+    fields.forEach((field) => setFieldError(field, ''));
+    hideSummary();
+  }
+
+  /**
+   * Prüft ein Feld und zeigt das Ergebnis an.
+   * Vor dem ersten Absendeversuch wird nichts angezeigt.
+   */
+  function validateField(field, { show = true } = {}) {
     const rule = RULES[field.id];
     if (!rule) return true;
 
     const message = rule(field.value, field);
-    setFieldError(field, message);
+    if (show) setFieldError(field, message);
     return message === '';
   }
 
-  /** Prüft das gesamte Formular und liefert das erste fehlerhafte Feld. */
-  function validateForm() {
-    let firstInvalid = null;
+  /* ------------------------------------------------------------------------
+     Fehlerzusammenfassung
+     ---------------------------------------------------------------------- */
+  function showSummary(invalidFields) {
+    if (!summaryBox || !summaryTitle || !summaryList) return;
 
-    Object.keys(RULES).forEach((id) => {
-      const field = form.querySelector(`#${id}`);
-      if (!field) return;
-      if (!validateField(field) && !firstInvalid) firstInvalid = field;
+    const count = invalidFields.length;
+    summaryTitle.textContent =
+      count === 1
+        ? 'Ein Feld muss noch ergänzt werden.'
+        : `${count} Felder müssen noch ergänzt werden.`;
+
+    summaryList.innerHTML = '';
+    invalidFields.forEach((field) => {
+      const item = document.createElement('li');
+      const link = document.createElement('a');
+      link.href = `#${field.id}`;
+      link.textContent = labelFor(field);
+      link.addEventListener('click', (event) => {
+        event.preventDefault();
+        field.focus();
+      });
+      item.appendChild(link);
+      summaryList.appendChild(item);
     });
 
-    return firstInvalid;
+    summaryBox.hidden = false;
+  }
+
+  function hideSummary() {
+    if (!summaryBox) return;
+    summaryBox.hidden = true;
+    if (summaryList) summaryList.innerHTML = '';
+  }
+
+  /**
+   * Prüft das gesamte Formular und zeigt alle Fehler an.
+   * @returns {HTMLElement[]} die fehlerhaften Felder
+   */
+  function validateAll() {
+    const invalid = fields.filter((field) => !validateField(field));
+
+    if (invalid.length > 0) {
+      showSummary(invalid);
+    } else {
+      hideSummary();
+    }
+
+    return invalid;
   }
 
   /* ------------------------------------------------------------------------
-     Rückmeldung beim Verlassen eines Feldes
+     Nachbesserung: erst NACH dem ersten Absendeversuch aktiv
+
+     Bewusst kein `blur`-Listener. Ein Feld zu fokussieren und leer wieder zu
+     verlassen, darf niemals eine Fehlermeldung auslösen.
      ---------------------------------------------------------------------- */
-  Object.keys(RULES).forEach((id) => {
-    const field = form.querySelector(`#${id}`);
-    if (!field) return;
+  fields.forEach((field) => {
+    const recheck = () => {
+      if (!hasAttemptedSubmit) return;
 
-    field.addEventListener('blur', () => validateField(field));
+      validateField(field);
 
-    // Eine bereits angezeigte Fehlermeldung verschwindet, sobald der Fehler
-    // behoben ist – nicht erst beim erneuten Absenden.
-    field.addEventListener('input', () => {
-      if (field.hasAttribute('aria-invalid')) validateField(field);
-    });
+      // Zusammenfassung mitführen, damit dort nichts Erledigtes stehen bleibt.
+      const stillInvalid = fields.filter((f) => f.hasAttribute('aria-invalid'));
+      if (stillInvalid.length > 0) {
+        showSummary(stillInvalid);
+      } else {
+        hideSummary();
+      }
+    };
 
-    field.addEventListener('change', () => {
-      if (field.hasAttribute('aria-invalid')) validateField(field);
-    });
+    field.addEventListener('input', recheck);
+    field.addEventListener('change', recheck);
   });
 
   /* ------------------------------------------------------------------------
-     Statusmeldungen
+     Statusmeldungen des Servers
      ---------------------------------------------------------------------- */
   function showStatus(type, html) {
     if (!statusBox) return;
@@ -151,14 +254,14 @@ if (form) {
       return;
     }
 
-    const firstInvalid = validateForm();
-    if (firstInvalid) {
+    // Ab jetzt dürfen Fehler sichtbar werden.
+    hasAttemptedSubmit = true;
+
+    const invalid = validateAll();
+    if (invalid.length > 0) {
       event.preventDefault();
-      showStatus(
-        'error',
-        '<strong>Bitte prüfen Sie Ihre Angaben.</strong><span>Einzelne Felder sind noch nicht vollständig ausgefüllt. Die betroffenen Felder sind unten markiert.</span>',
-      );
-      firstInvalid.focus();
+      hideStatus();
+      invalid[0].focus();
       return;
     }
 
@@ -186,27 +289,43 @@ if (form) {
       if (response.ok && data.ok) {
         hasSucceeded = true;
         setSending(false);
+
         if (submit) {
           submit.disabled = true;
           submit.setAttribute('aria-disabled', 'true');
         }
         if (submitLabel) submitLabel.textContent = 'Anfrage gesendet';
 
+        // Nach erfolgreichem Versand sämtliche Fehlerzustände zurücksetzen.
+        form.reset();
+        hasAttemptedSubmit = false;
+        clearAllErrors();
+
         showStatus(
           'success',
           '<strong>Vielen Dank für Ihre Anfrage.</strong><span>Ihre Nachricht ist eingegangen. Manuel Saugy meldet sich persönlich bei Ihnen.</span>',
         );
         statusBox?.focus?.();
-        form.reset();
         return;
       }
 
       // Serverseitige Feldfehler den passenden Feldern zuordnen.
+      // Die Eingaben bleiben dabei erhalten – es wird nichts gelöscht.
       if (data.errors && typeof data.errors === 'object') {
+        const serverInvalid = [];
+
         Object.entries(data.errors).forEach(([name, message]) => {
           const field = form.querySelector(`[name="${name}"]`);
-          if (field) setFieldError(field, String(message));
+          if (field) {
+            setFieldError(field, String(message));
+            serverInvalid.push(field);
+          }
         });
+
+        if (serverInvalid.length > 0) {
+          showSummary(serverInvalid);
+          serverInvalid[0].focus();
+        }
       }
 
       const message =
