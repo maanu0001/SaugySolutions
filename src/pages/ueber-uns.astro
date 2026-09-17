@@ -11,45 +11,15 @@ import SectionHead from '../components/SectionHead.astro';
 import TeamCard from '../components/TeamCard.astro';
 import Icon from '../components/Icon.astro';
 import CtaSection from '../components/CtaSection.astro';
-import { TEAM } from '../data/team.mjs';
+import { TEAM, VALUES } from '../data/team.mjs';
+import { pagesData, renderAccent } from '../data/content.mjs';
 
-const title = 'Über uns: Manuel und Michael Saugy | Saugy Solutions';
-const description =
-  'Saugy Solutions wird von Manuel und Michael Saugy geführt – beide ausgebildete Informatiker EFZ. Persönliche IT-Lösungen für kleinere Unternehmen in der Schweiz.';
+/** Titel, Beschreibung und Überschrift stammen aus content/settings/pages.yml. */
+const meta = pagesData.about ?? {};
 
-/** Werte, nach denen gearbeitet wird. */
-const VALUES = [
-  {
-    icon: 'user',
-    title: 'Persönliche Betreuung',
-    text: 'Sie haben eine feste Ansprechperson – vom ersten Gespräch bis lange nach dem Aufschalten.',
-  },
-  {
-    icon: 'chat',
-    title: 'Verständliche Kommunikation',
-    text: 'Wir erklären in normaler Sprache, was wir tun und weshalb. Rückfragen sind ausdrücklich erwünscht.',
-  },
-  {
-    icon: 'rocket',
-    title: 'Zügige Umsetzung',
-    text: 'Kurze Wege statt langer Abstimmungsketten: Entscheidungen fallen direkt zwischen Ihnen und uns.',
-  },
-  {
-    icon: 'receipt',
-    title: 'Faire, transparente Preise',
-    text: 'Was etwas kostet, steht vor Projektbeginn schriftlich fest – inklusive allfälliger laufender Kosten.',
-  },
-  {
-    icon: 'target',
-    title: 'Passend zum Bedarf',
-    text: 'Wir bauen, was Ihr Betrieb wirklich braucht, und raten von allem ab, was keinen Nutzen bringt.',
-  },
-  {
-    icon: 'stack',
-    title: 'Alles aus einer Hand',
-    text: 'Website, Hosting, E-Mail und Datenablage kommen von derselben Stelle – ohne Anbieter-Pingpong.',
-  },
-];
+const title = meta.title ?? 'Über uns: Manuel und Michael Saugy | Saugy Solutions';
+const description = meta.description ?? 'Saugy Solutions wird von Manuel und Michael Saugy geführt – beide ausgebildete Informatiker EFZ. Persönliche IT-Lösungen für kleinere Unternehmen in der Schweiz.';
+
 ---
 
 <BaseLayout title={title} description={description} path="/ueber-uns/">
@@ -62,15 +32,8 @@ const VALUES = [
       <Breadcrumbs items={[{ label: 'Über uns' }]} />
 
       <p class="eyebrow">Über uns</p>
-      <h1 class="page-hero__title">
-        Persönliche IT-Lösungen ohne <span class="accent-text">unnötige Umwege</span>
-      </h1>
-      <p class="page-hero__lead">
-        Saugy Solutions wird von Manuel und Michael Saugy geführt. Als ausgebildete Informatiker
-        verbinden wir technische Erfahrung mit persönlicher Beratung. Unser Ziel ist es,
-        professionelles Webdesign und zuverlässige digitale Lösungen auch für kleinere Unternehmen
-        verständlich und zugänglich zu machen.
-      </p>
+      <h1 class="page-hero__title" set:html={renderAccent(meta.heading)} />
+      <p class="page-hero__lead">{meta.lead}</p>
     </div>
   </section>
 

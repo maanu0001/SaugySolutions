@@ -403,10 +403,10 @@ const settingsFiles = [
 
   // ======================================================================= Team
   {
-    label: 'Team',
+    label: 'Team & Arbeitsweise',
     name: 'team',
     file: 'content/settings/team.yml',
-    description: 'Die Personen hinter Saugy Solutions.',
+    description: 'Die Personen hinter Saugy Solutions und die Werte auf der Seite „Über uns“.',
     fields: [
       {
         label: 'Personen', name: 'items', widget: 'list', label_singular: 'Person',
@@ -434,6 +434,15 @@ const settingsFiles = [
             ],
             default: 'primary',
           },
+          ...visibility,
+        ],
+      },
+      {
+        label: 'Arbeitsweise („Über uns“)', name: 'values', widget: 'list', label_singular: 'Wert',
+        fields: [
+          iconField(),
+          { label: 'Titel', name: 'title', widget: 'string' },
+          { label: 'Text', name: 'text', widget: 'text' },
           ...visibility,
         ],
       },

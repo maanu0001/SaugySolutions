@@ -7,10 +7,13 @@ import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
 import CtaSection from '../../components/CtaSection.astro';
 import { PROJECTS } from '../../data/projects.mjs';
+import { pagesData, renderAccent } from '../../data/content.mjs';
 
-const title = 'Projekte: Websites für KMU und Vereine | Saugy Solutions';
-const description =
-  'Referenzen von Saugy Solutions: Webauftritte für einen Bio-Familienbetrieb, eine öffentliche Bibliothek und eine Schweizer Gaming-Community.';
+/** Titel, Beschreibung und Überschrift stammen aus content/settings/pages.yml. */
+const meta = pagesData.projects ?? {};
+
+const title = meta.title ?? 'Projekte: Websites für KMU und Vereine | Saugy Solutions';
+const description = meta.description ?? 'Referenzen von Saugy Solutions: Webauftritte für einen Bio-Familienbetrieb, eine öffentliche Bibliothek und eine Schweizer Gaming-Community.';
 ---
 
 <BaseLayout title={title} description={description} path="/projekte/">
@@ -22,14 +25,8 @@ const description =
       <Breadcrumbs items={[{ label: 'Projekte' }]} />
 
       <p class="eyebrow">Projekte</p>
-      <h1 class="page-hero__title">
-        Websites für ganz <span class="accent-text">unterschiedliche</span> Auftraggeber
-      </h1>
-      <p class="page-hero__lead">
-        Ein Familienbetrieb mit Hofladen, eine öffentliche Bibliothek und eine Online-Community: So
-        verschieden die Ausgangslagen sind, so ähnlich ist die Aufgabe – die wichtigsten
-        Informationen müssen schnell und verständlich auffindbar sein.
-      </p>
+      <h1 class="page-hero__title" set:html={renderAccent(meta.heading)} />
+      <p class="page-hero__lead">{meta.lead}</p>
     </div>
   </section>
 

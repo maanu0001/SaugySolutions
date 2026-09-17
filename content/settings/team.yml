@@ -38,3 +38,48 @@ items:
     accent: secondary
     order: 2
     visible: true
+
+# ---------------------------------------------------------------------------
+#  Arbeitsweise – erscheint auf der Seite „Über uns“
+# ---------------------------------------------------------------------------
+values:
+  - icon: user
+    title: Persönliche Betreuung
+    text: Sie haben eine feste Ansprechperson – vom ersten Gespräch bis lange nach dem Aufschalten.
+    order: 1
+    visible: true
+  - icon: chat
+    title: Verständliche Kommunikation
+    text: >-
+      Wir erklären in normaler Sprache, was wir tun und weshalb. Rückfragen sind ausdrücklich
+      erwünscht.
+    order: 2
+    visible: true
+  - icon: rocket
+    title: Zügige Umsetzung
+    text: >-
+      Kurze Wege statt langer Abstimmungsketten: Entscheidungen fallen direkt zwischen Ihnen und
+      uns.
+    order: 3
+    visible: true
+  - icon: receipt
+    title: Faire, transparente Preise
+    text: >-
+      Was etwas kostet, steht vor Projektbeginn schriftlich fest – inklusive allfälliger laufender
+      Kosten.
+    order: 4
+    visible: true
+  - icon: target
+    title: Passend zum Bedarf
+    text: >-
+      Wir bauen, was Ihr Betrieb wirklich braucht, und raten von allem ab, was keinen Nutzen
+      bringt.
+    order: 5
+    visible: true
+  - icon: stack
+    title: Alles aus einer Hand
+    text: >-
+      Website, Hosting, E-Mail und Datenablage kommen von derselben Stelle – ohne
+      Anbieter-Pingpong.
+    order: 6
+    visible: true

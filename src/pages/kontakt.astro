@@ -7,10 +7,13 @@ import Breadcrumbs from '../components/Breadcrumbs.astro';
 import ContactForm from '../components/ContactForm.astro';
 import Icon from '../components/Icon.astro';
 import { CONTACT, SITE } from '../data/site.mjs';
+import { pagesData, renderAccent } from '../data/content.mjs';
 
-const title = 'Kontakt: Kostenloses Erstgespräch | Saugy Solutions';
-const description =
-  'Nehmen Sie Kontakt mit Saugy Solutions auf: telefonisch, per E-Mail oder über das Anfrageformular. Das Erstgespräch ist kostenlos und unverbindlich.';
+/** Titel, Beschreibung und Überschrift stammen aus content/settings/pages.yml. */
+const meta = pagesData.contact ?? {};
+
+const title = meta.title ?? 'Kontakt: Kostenloses Erstgespräch | Saugy Solutions';
+const description = meta.description ?? 'Nehmen Sie Kontakt mit Saugy Solutions auf: telefonisch, per E-Mail oder über das Anfrageformular. Das Erstgespräch ist kostenlos und unverbindlich.';
 
 const schema = {
   '@type': 'ContactPage',
@@ -30,13 +33,8 @@ const schema = {
       <Breadcrumbs items={[{ label: 'Kontakt' }]} />
 
       <p class="eyebrow">Kontakt</p>
-      <h1 class="page-hero__title">
-        Erzählen Sie uns von Ihrem <span class="accent-text">Vorhaben</span>
-      </h1>
-      <p class="page-hero__lead">
-        Eine grobe Idee genügt für den Anfang. Das Erstgespräch ist kostenlos und unverbindlich –
-        danach wissen Sie, ob und wie wir Ihnen weiterhelfen können.
-      </p>
+      <h1 class="page-hero__title" set:html={renderAccent(meta.heading)} />
+      <p class="page-hero__lead">{meta.lead}</p>
     </div>
   </section>
 

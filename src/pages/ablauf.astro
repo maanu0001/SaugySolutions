@@ -9,10 +9,13 @@ import SectionHead from '../components/SectionHead.astro';
 import Icon from '../components/Icon.astro';
 import CtaSection from '../components/CtaSection.astro';
 import { PROCESS, PROCESS_NOTES } from '../data/process.mjs';
+import { pagesData, renderAccent } from '../data/content.mjs';
 
-const title = 'Ablauf: So entsteht Ihre Website | Saugy Solutions';
-const description =
-  'Von der unverbindlichen Anfrage über Offerte und Umsetzung bis zur Veröffentlichung: der Projektablauf bei Saugy Solutions – nachvollziehbar erklärt.';
+/** Titel, Beschreibung und Überschrift stammen aus content/settings/pages.yml. */
+const meta = pagesData.process ?? {};
+
+const title = meta.title ?? 'Ablauf: So entsteht Ihre Website | Saugy Solutions';
+const description = meta.description ?? 'Von der unverbindlichen Anfrage über Offerte und Umsetzung bis zur Veröffentlichung: der Projektablauf bei Saugy Solutions – nachvollziehbar erklärt.';
 
 /** Ablauf als strukturierte Daten (HowTo). */
 const schema = {
@@ -38,14 +41,8 @@ const schema = {
       <Breadcrumbs items={[{ label: 'Ablauf' }]} />
 
       <p class="eyebrow">Ablauf</p>
-      <h1 class="page-hero__title">
-        Von der Idee zur fertigen Website – <span class="accent-text">Schritt für Schritt</span>
-      </h1>
-      <p class="page-hero__lead">
-        Viele Kundinnen und Kunden haben noch nie ein Webprojekt begleitet. Deshalb zeigen wir hier
-        offen, was in welchem Schritt passiert, was Sie dazu beitragen und was am Ende jedes
-        Schritts vorliegt.
-      </p>
+      <h1 class="page-hero__title" set:html={renderAccent(meta.heading)} />
+      <p class="page-hero__lead">{meta.lead}</p>
 
       <ul class="notes">
         {

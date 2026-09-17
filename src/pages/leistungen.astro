@@ -16,10 +16,13 @@ import CtaSection from '../components/CtaSection.astro';
 
 import { SERVICES } from '../data/services.mjs';
 import { FAQ_SERVICES } from '../data/faq.mjs';
+import { pagesData, renderAccent } from '../data/content.mjs';
 
-const title = 'Leistungen: Website, Hosting, E-Mail und Cloud | Saugy Solutions';
-const description =
-  'Websites und Webentwicklung, Hosting und Wartung, geschäftliche E-Mail-Lösungen, Nextcloud und individuelle Weblösungen für kleine Unternehmen in der Schweiz.';
+/** Titel, Beschreibung und Überschrift stammen aus content/settings/pages.yml. */
+const meta = pagesData.services ?? {};
+
+const title = meta.title ?? 'Leistungen: Website, Hosting, E-Mail und Cloud | Saugy Solutions';
+const description = meta.description ?? 'Websites und Webentwicklung, Hosting und Wartung, geschäftliche E-Mail-Lösungen, Nextcloud und individuelle Weblösungen für kleine Unternehmen in der Schweiz.';
 
 const faqSchema = {
   '@type': 'FAQPage',
@@ -41,14 +44,8 @@ const faqSchema = {
       <Breadcrumbs items={[{ label: 'Leistungen' }]} />
 
       <p class="eyebrow">Leistungen</p>
-      <h1 class="page-hero__title">
-        Alles für Ihren digitalen Auftritt – <span class="accent-text">aus einer Hand</span>
-      </h1>
-      <p class="page-hero__lead">
-        Website, Hosting, E-Mail und Datenablage greifen ineinander. Wenn alles von derselben Stelle
-        kommt, entfällt die Abstimmung zwischen mehreren Anbietern – und Sie wissen immer, an wen Sie
-        sich wenden können.
-      </p>
+      <h1 class="page-hero__title" set:html={renderAccent(meta.heading)} />
+      <p class="page-hero__lead">{meta.lead}</p>
 
       <!-- Sprungnavigation zu den einzelnen Leistungen -->
       <nav class="jump" aria-label="Leistungen auf dieser Seite">

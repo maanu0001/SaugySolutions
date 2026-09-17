@@ -20,3 +20,14 @@ export const TEAM = activeSorted(teamData.items).map((item) => ({
   focus: item.focus ?? [],
   accent: item.accent ?? 'primary',
 }));
+
+/**
+ * Arbeitsweise – erscheint auf der Seite „Über uns“.
+ *
+ * @type {import('./types').Benefit[]}
+ */
+export const VALUES = activeSorted(teamData.values).map((item) => ({
+  icon: item.icon ?? 'check',
+  title: item.title ?? '',
+  text: item.text ?? '',
+}));
