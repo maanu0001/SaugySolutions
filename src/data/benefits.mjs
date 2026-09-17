@@ -4,6 +4,7 @@
  */
 import { benefitsData, activeSorted } from './content.mjs';
 
+/** @type {import('./types').Benefit[]} */
 export const BENEFITS = activeSorted(benefitsData.items).map((item) => ({
   icon: item.icon ?? 'check',
   title: item.title ?? '',

@@ -1,33 +1,36 @@
 # Saugy Solutions – Website
 
-Statische Unternehmenswebsite für **Saugy Solutions**, gebaut mit [Astro](https://astro.build)
-im vollständig statischen Modus.
+Statische Unternehmenswebsite mit Adminbereich, gebaut mit [Astro](https://astro.build)
+im vollständig statischen Modus und [Decap CMS](https://decapcms.org).
 
-Das fertige Ergebnis besteht aus gewöhnlichen HTML-, CSS-, JavaScript-, Bild- und
-Schriftdateien plus einem schlanken PHP-Endpunkt für das Kontaktformular.
-**Auf dem Produktivserver werden weder Node.js noch Composer benötigt** – ein
-normaler Apache-Webspace mit PHP 8.1 oder neuer genügt.
+Das fertige Ergebnis besteht aus gewöhnlichen HTML-, CSS-, JavaScript-, Bild-
+und Schriftdateien plus zwei schlanken PHP-Endpunkten (Kontaktformular und
+Anmeldung am Adminbereich). **Auf dem Produktivserver werden weder Node.js noch
+Composer benötigt** – ein normaler Hostpoint-Webspace mit PHP 8.1+ genügt.
+
+> **Inhalte pflegen?** Dafür gibt es eine eigene, nicht technische Anleitung:
+> [docs/ADMIN-ANLEITUNG.md](docs/ADMIN-ANLEITUNG.md)
 
 ---
 
 ## Inhalt
 
 1. [Überblick](#1-überblick)
-2. [Voraussetzungen](#2-voraussetzungen)
-3. [Installation und Entwicklung](#3-installation-und-entwicklung)
-4. [Befehle](#4-befehle)
-5. [Projektstruktur](#5-projektstruktur)
-6. [Deployment auf einen Apache-Webspace](#6-deployment-auf-einen-apache-webspace)
-7. [Kontaktformular einrichten (PHP und SMTP)](#7-kontaktformular-einrichten-php-und-smtp)
-8. [Kontaktformular testen](#8-kontaktformular-testen)
-9. [Inhalte pflegen](#9-inhalte-pflegen)
-10. [Logo austauschen](#10-logo-austauschen)
-11. [Neues Projekt hinzufügen](#11-neues-projekt-hinzufügen)
-12. [Vor der Veröffentlichung bestätigen](#12-vor-der-veröffentlichung-bestätigen)
-13. [Go-live-Checkliste](#13-go-live-checkliste)
-14. [Backups und Updates](#14-backups-und-updates)
+2. [Wie eine Änderung online geht](#2-wie-eine-änderung-online-geht)
+3. [Voraussetzungen](#3-voraussetzungen)
+4. [Installation und Entwicklung](#4-installation-und-entwicklung)
+5. [Befehle](#5-befehle)
+6. [Projektstruktur](#6-projektstruktur)
+7. [Adminbereich einrichten](#7-adminbereich-einrichten)
+8. [GitHub Secrets für das Deployment](#8-github-secrets-für-das-deployment)
+9. [Deployment auf Hostpoint](#9-deployment-auf-hostpoint)
+10. [Kontaktformular](#10-kontaktformular)
+11. [Inhalte und Logo pflegen](#11-inhalte-und-logo-pflegen)
+12. [Rollback und Backup](#12-rollback-und-backup)
+13. [Fehlerbehebung](#13-fehlerbehebung)
+14. [Qualitätskontrolle](#14-qualitätskontrolle)
 15. [Technische Hinweise](#15-technische-hinweise)
-16. [Fehlersuche](#16-fehlersuche)
+16. [Go-live-Checkliste](#16-go-live-checkliste)
 
 ---
 
@@ -36,177 +39,313 @@ normaler Apache-Webspace mit PHP 8.1 oder neuer genügt.
 | Bereich | Umsetzung |
 |---|---|
 | Generator | Astro 7, `output: "static"` |
+| Adminbereich | Decap CMS 3, selbst gehostet unter `/admin/` |
+| Inhalte | YAML-Dateien unter `content/`, versioniert in Git |
+| Anmeldung | GitHub OAuth über eigene PHP-Brücke |
 | Sprache | Deutsch, Schweizer Standardsprache (`de-CH`, „ss“ statt „ß“) |
-| Schrift | Manrope Variable, **lokal** ausgeliefert (keine Google Fonts) |
-| JavaScript | Vanilla, ca. 6 KB – die Website funktioniert vollständig auch ohne |
+| Schrift | Manrope Variable, **lokal** ausgeliefert |
+| JavaScript | Vanilla, ca. 8 KB – die Website funktioniert auch ohne |
 | Formular | PHP 8.1+ mit PHPMailer (SMTP) |
 | Tracking | keines. Keine Cookies, keine externen Dienste, kein Cookie-Banner |
-| Seiten | Start, Leistungen, Projekte (+3 Detailseiten), Ablauf, Über uns, Kontakt, Danke, Datenschutz, Impressum, 404 |
+| Seiten | Start, Leistungen, Projekte (+ Detailseiten), Ablauf, Über uns, Kontakt, Danke, Datenschutz, Impressum, 404 |
 
 **Grundsatz zu Inhalten:** Die Website enthält ausschliesslich belegbare
-Angaben. Es werden keine Kundenstimmen, Kennzahlen, Auszeichnungen,
-Reaktionszeiten oder Verfügbarkeiten behauptet, die nicht zugesichert sind.
-Bitte diesen Grundsatz bei künftigen Änderungen beibehalten.
+Angaben. Keine erfundenen Kundenstimmen, Kennzahlen oder Reaktionszeiten.
+Bitte bei künftigen Änderungen beibehalten.
 
 ---
 
-## 2. Voraussetzungen
+## 2. Wie eine Änderung online geht
+
+```
+  1. Anmeldung             saugy-solutions.ch/admin/  →  GitHub OAuth
+                                      │
+  2. Bearbeiten            Texte, Bilder, Projekte im Browser
+                                      │
+  3. Veröffentlichen       Decap schreibt die Änderung nach GitHub
+                                      │
+  4. GitHub Actions        npm ci → Build → statische QA → Browser-QA
+                                      │
+              ┌───────────────────────┴───────────────────────┐
+         Prüfung grün                                  Prüfung rot
+              │                                               │
+  5. rsync über SSH nach Hostpoint            Es wird NICHTS veröffentlicht.
+              │                               Die bisherige Website bleibt
+  6. Nach 3–5 Minuten live                    unverändert online.
+```
+
+Der Build wird also **nur bei bestandener Prüfung** übertragen. Ein fehlerhafter
+Inhalt kann die laufende Website nicht beschädigen.
+
+---
+
+## 3. Voraussetzungen
 
 **Für die Entwicklung (lokaler Rechner):**
 
 * Node.js **20 oder neuer** (`node --version`)
-* npm (kommt mit Node.js)
-* optional PHP 8.1+, um das Formular lokal zu testen
+* npm
+* optional PHP 8.1+, um die Endpunkte lokal zu testen
 * optional Composer, falls PHPMailer aktualisiert werden soll
 
-**Für den Betrieb (Webserver):**
+**Für den Betrieb (Hostpoint):**
 
-* Apache mit `AllowOverride All` (damit `.htaccess` wirkt)
-* PHP **8.1 oder neuer** mit den Erweiterungen `mbstring` und `openssl`
-* SSL-Zertifikat (bei Schweizer Hostern in der Regel per Let's Encrypt kostenlos)
+* Apache mit `AllowOverride All`
+* PHP **8.1 oder neuer** mit `mbstring`, `openssl` und `curl`
+* SSH-Zugang (für das automatische Deployment)
+* SSL-Zertifikat
 * **kein** Node.js, **kein** Composer
 
 ---
 
-## 3. Installation und Entwicklung
+## 4. Installation und Entwicklung
 
 ```bash
-# Repository holen
 git clone https://github.com/maanu0001/SaugySolutions.git
 cd SaugySolutions
 
-# Abhängigkeiten installieren
 npm install
 
-# Entwicklungsserver starten -> http://localhost:4321
+# Entwicklungsserver -> http://localhost:4321
 npm run dev
 ```
 
-Änderungen an Dateien unter `src/` erscheinen sofort im Browser.
+`npm run dev` und `npm run build` führen automatisch `scripts/prepare-assets.mjs`
+aus. Dabei werden Bilder optimiert, das Logo verarbeitet, die Adminkonfiguration
+erzeugt und Decap CMS bereitgestellt.
 
 ---
 
-## 4. Befehle
+## 5. Befehle
 
 | Befehl | Zweck |
 |---|---|
 | `npm run dev` | Entwicklungsserver mit automatischem Neuladen |
-| `npm run build` | Reiner Astro-Build (nur statische Seiten) |
+| `npm run build` | Reiner Astro-Build |
 | **`npm run deploy:build`** | **Vollständiger, hochladbarer Build inklusive PHP und `.htaccess`** |
 | `npm run serve:dist` | Lokale Vorschau des fertigen Builds auf Port 4321 |
-| `npm run qa` | Qualitätsprüfung des Builds (Links, SEO, Struktur, Vorlagenreste) |
-| `npm run qa:browser` | Browserprüfung (Responsivität, Tastatur, Formular, Bewegung) |
+| `npm run qa` | Statische Prüfung (Links, SEO, Struktur, Geheimnisse, Adminbereich) |
+| `npm run qa:browser` | Browserprüfung (11 Bildschirmgrössen, Tastatur, Formular, Logo) |
 | `npm run check` | Typprüfung der Astro-Komponenten |
+| `npm run assets` | Alle Asset-Schritte auf einmal |
 | `npm run assets:logo` | Logo, Favicons und App-Icons neu erzeugen |
+| `npm run assets:images` | Bilder der Mediathek optimieren |
 | `npm run assets:og` | Social-Media-Vorschaubild neu erzeugen |
+| `npm run assets:cms` | Adminkonfiguration neu erzeugen |
+| `npm run assets:admin` | Decap CMS aus node_modules bereitstellen |
 | `npm run assets:screenshots` | Echte Screenshots der Referenzprojekte aufnehmen |
-
-**Der Befehl für die Veröffentlichung ist `npm run deploy:build`.**
-`npm run build` allein erzeugt kein `.htaccess` und keinen PHP-Endpunkt.
 
 Vollständiger Prüfdurchlauf vor einem Release:
 
 ```bash
-npm run deploy:build   # bauen
-npm run qa             # statische Prüfung
-npm run serve:dist &   # Vorschau starten
-npm run qa:browser     # Browserprüfung
+npm ci
+npm run check
+npm run deploy:build
+npm run qa
+npm run serve:dist &
+npm run qa:browser
 ```
 
 ---
 
-## 5. Projektstruktur
+## 6. Projektstruktur
 
 ```
 SaugySolutions/
+├── content/                  ← INHALTE (vom Adminbereich bearbeitet)
+│   ├── settings/
+│   │   ├── site.yml          ← Unternehmen, Logo, Kontakt, Recht, Navigation
+│   │   ├── home.yml          ← Startseite: Hero, Abschnitte, Reihenfolge
+│   │   ├── pages.yml         ← Seitentitel und Meta-Beschreibungen
+│   │   ├── services.yml      ← Leistungen
+│   │   ├── benefits.yml      ← Vorteile
+│   │   ├── process.yml       ← Ablauf
+│   │   ├── team.yml          ← Team
+│   │   └── faq.yml           ← Häufige Fragen
+│   └── projects/*.yml        ← ein Projekt pro Datei
+│
 ├── src/
-│   ├── data/                 ← ZENTRALE INHALTE (hier wird gepflegt)
-│   │   ├── site.mjs          ← Kontaktdaten, Navigation, rechtliche Angaben
-│   │   ├── services.mjs      ← Leistungen
-│   │   ├── projects.mjs      ← Referenzprojekte
-│   │   ├── process.mjs       ← Projektablauf
-│   │   ├── team.mjs          ← Manuel und Michael
-│   │   ├── benefits.mjs      ← Vorteile auf der Startseite
-│   │   ├── faq.mjs           ← häufige Fragen
-│   │   └── form.mjs          ← Auswahllisten des Kontaktformulars
+│   ├── data/                 ← Ladeschicht: liest content/ ein
 │   ├── components/           ← wiederverwendbare Bausteine
-│   ├── layouts/              ← Grundgerüst aller Seiten
-│   ├── pages/                ← eine Datei = eine Seite
-│   ├── styles/               ← Designsystem (Tokens, Basis, Komponenten, Formulare)
-│   ├── scripts/              ← Vanilla-JavaScript
-│   └── assets/logo-original.png  ← Originaldatei des Logos
+│   ├── layouts/  pages/  styles/  scripts/
+│   └── assets/logo-original.png   ← Rückfalldatei für das Logo
 │
 ├── server/                   ← alles Serverseitige
-│   ├── api/kontakt.php       ← Endpunkt des Kontaktformulars
+│   ├── api/kontakt.php       ← Kontaktformular
+│   ├── api/auth.php          ← Anmeldebrücke des Adminbereichs
 │   ├── lib/                  ← Config, Validator, RateLimiter, Mailer
-│   ├── config/config.example.php  ← Konfigurationsvorlage OHNE Zugangsdaten
+│   ├── config/config.example.php  ← Vorlage OHNE Zugangsdaten
 │   ├── apache/               ← .htaccess-Vorlagen
-│   └── vendor/               ← PHPMailer (per Composer installiert)
+│   └── vendor/               ← PHPMailer
 │
-├── public/                   ← wird unverändert übernommen
-│   ├── fonts/  img/  icons/  favicon.ico
+├── public/
+│   ├── admin/index.html      ← Adminbereich
+│   ├── img/uploads/          ← Mediathek (Uploads aus dem Adminbereich)
+│   ├── fonts/  icons/
 │
-├── scripts/                  ← Build- und Prüfwerkzeuge (nur lokal)
+├── scripts/                  ← Build- und Prüfwerkzeuge (nur lokal und in CI)
+├── docs/ADMIN-ANLEITUNG.md   ← Anleitung für die Redaktion
 └── dist/                     ← ERGEBNIS – dieser Inhalt kommt auf den Server
 ```
 
+Nicht eingecheckt (wird beim Build erzeugt): `public/admin/vendor/`,
+`public/admin/config.yml`, `public/img/generated/`, `public/img/derived/`.
+
 ---
 
-## 6. Deployment auf einen Apache-Webspace
+## 7. Adminbereich einrichten
 
-### Schritt 1 – Build erzeugen
+Der Adminbereich liegt unter **<https://saugy-solutions.ch/admin/>**.
+
+### 7.1 GitHub-OAuth-App anlegen
+
+GitHub → **Settings** → **Developer settings** → **OAuth Apps** →
+**New OAuth App**
+
+| Feld | Wert |
+|---|---|
+| **Application name** | `Saugy Solutions Adminbereich` |
+| **Homepage URL** | `https://saugy-solutions.ch` |
+| **Authorization callback URL** | `https://saugy-solutions.ch/api/auth.php` |
+
+Nach dem Anlegen:
+
+1. Die **Client ID** notieren.
+2. **„Generate a new client secret“** klicken und das Secret sofort kopieren –
+   es wird nur einmal angezeigt.
+
+> Die Callback-URL muss **exakt** stimmen, inklusive `https://` und `.php`.
+> Weicht sie ab, lehnt GitHub die Anmeldung ab.
+
+### 7.2 Zugangsdaten auf dem Server hinterlegen
+
+In der Konfigurationsdatei (siehe [Abschnitt 10.1](#101-konfigurationsdatei-anlegen)):
+
+```php
+'github_client_id'     => 'Iv1.xxxxxxxxxxxx',
+'github_client_secret' => 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+
+// Nur diese GitHub-Konten dürfen sich anmelden.
+'github_allowed_users' => ['maanu0001'],
+```
+
+**Das Secret verlässt den Server nie** und steht nicht im Repository. Der
+Browser bekommt ausschliesslich das fertige Zugriffstoken.
+
+### 7.3 Weitere Person freigeben
+
+GitHub-Benutzernamen in `github_allowed_users` ergänzen und die Datei speichern.
+Zusätzlich braucht die Person Schreibrechte auf das Repository. Ein Neustart
+ist nicht nötig.
+
+Ist die Liste leer, wird **jede** Anmeldung abgelehnt.
+
+### 7.4 Produktivbranch ändern
+
+Aktuell wird auf `claude/saugy-solutions-website-b62pey` veröffentlicht. Beim
+Umstieg auf einen anderen Branch (etwa `main`) sind drei Stellen anzupassen:
+
+1. `.github/workflows/build-deployment.yml` → `on.push.branches`
+2. `scripts/generate-cms-config.mjs` → Standardwert von `CMS_BRANCH`
+3. Im Workflow wird `CMS_BRANCH` ohnehin aus `github.ref_name` gesetzt.
+
+### 7.5 Sicherheitsmassnahmen
+
+| Massnahme | Wirkung |
+|---|---|
+| Client-Secret nur serverseitig | Im Browser ist kein Geheimnis vorhanden |
+| `state`-Wert + HttpOnly-Cookie | Schutz gegen untergeschobene Anmeldungen (CSRF) |
+| Cookie `Secure` und `SameSite=Lax` | Nur über HTTPS, übersteht die Rückleitung von GitHub |
+| Freigabeliste | Nur benannte GitHub-Konten erhalten ein Token |
+| Begrenzung der Versuche | 10 Anmeldeversuche pro IP und Stunde |
+| Ziel der Token-Übergabe | Ausschliesslich die eigene Herkunft |
+| `noindex` | robots.txt, Meta-Angabe und `X-Robots-Tag` |
+| Eigene CSP | `/admin/` darf mit GitHub sprechen, die Website nicht |
+
+---
+
+## 8. GitHub Secrets für das Deployment
+
+**Settings → Secrets and variables → Actions → New repository secret**
+
+| Secret | Beispiel | Beschreibung |
+|---|---|---|
+| `HOSTPOINT_SSH_HOST` | `s123.web.hostpoint.ch` | SSH-Server (im Hostpoint Control Panel) |
+| `HOSTPOINT_SSH_PORT` | `22` | Optional, Standard ist 22 |
+| `HOSTPOINT_SSH_USER` | `saugysol` | SSH-Benutzername |
+| `HOSTPOINT_SSH_KEY` | `-----BEGIN OPENSSH PRIVATE KEY-----…` | Privater Schlüssel, vollständig |
+| `HOSTPOINT_KNOWN_HOSTS` | Ausgabe von `ssh-keyscan` | Fingerabdruck des Servers |
+| `HOSTPOINT_DOCUMENT_ROOT` | `/home/saugysol/www` | Absoluter Pfad zum Webroot |
+
+### Deployment-Schlüssel erzeugen
 
 ```bash
-npm run deploy:build
+# 1. Schlüsselpaar ohne Passwort erzeugen
+ssh-keygen -t ed25519 -C "github-actions-deploy" -f ~/.ssh/saugy_deploy -N ""
+
+# 2. Öffentlichen Teil auf Hostpoint hinterlegen
+ssh-copy-id -i ~/.ssh/saugy_deploy.pub benutzer@s123.web.hostpoint.ch
+#    (alternativ den Inhalt von saugy_deploy.pub in ~/.ssh/authorized_keys eintragen)
+
+# 3. Privaten Teil als Secret HOSTPOINT_SSH_KEY hinterlegen
+cat ~/.ssh/saugy_deploy
+
+# 4. Fingerabdruck als Secret HOSTPOINT_KNOWN_HOSTS hinterlegen
+ssh-keyscan -p 22 s123.web.hostpoint.ch
 ```
 
-Am Ende erscheint eine Liste der Angaben, die noch ergänzt werden müssen
-(siehe [Abschnitt 12](#12-vor-der-veröffentlichung-bestätigen)).
+> `HOSTPOINT_KNOWN_HOSTS` ist nicht zwingend, aber empfohlen. Fehlt es, wird
+> der Fingerabdruck ungeprüft übernommen und der Workflow gibt eine Warnung aus.
 
-### Schritt 2 – Dateien hochladen
+**Fehlen die Secrets**, läuft der Workflow trotzdem: Build und Prüfungen werden
+ausgeführt, die Veröffentlichung wird übersprungen und im Protokoll vermerkt.
+Der Build liegt dann als Artefakt zum manuellen Hochladen bereit.
 
-Den **Inhalt** von `dist/` in das Wurzelverzeichnis des Webspace laden – also
-alles *innerhalb* des Ordners, nicht den Ordner selbst.
+---
 
-Je nach Hoster heisst dieses Verzeichnis `public_html`, `httpdocs`, `htdocs`
-oder `www`.
+## 9. Deployment auf Hostpoint
+
+### Automatisch
+
+Bei jedem Push auf den Produktivbranch – also auch bei jeder Veröffentlichung
+aus dem Adminbereich. Zusätzlich manuell über
+**Actions → „Build, Prüfung und Veröffentlichung“ → Run workflow**.
+
+Eine `concurrency`-Sperre verhindert, dass zwei Veröffentlichungen gleichzeitig
+laufen.
+
+### Verzeichnisaufbau auf dem Server
 
 ```
-public_html/
-├── .htaccess
-├── index.html
-├── 404.html
-├── robots.txt
-├── sitemap-index.xml
-├── site.webmanifest
-├── favicon.ico
-├── assets/   fonts/   img/   icons/
-├── leistungen/  projekte/  ablauf/  ueber-uns/  kontakt/  danke/
-├── datenschutz/  impressum/
-└── api/
-    ├── kontakt.php
-    ├── lib/
-    ├── vendor/
-    ├── config/
-    └── var/          ← muss beschreibbar sein
+/home/<benutzer>/
+├── saugy-solutions-config.php     ← Zugangsdaten, NICHT über das Web erreichbar
+└── www/                           ← Webroot (HOSTPOINT_DOCUMENT_ROOT)
+    ├── .htaccess
+    ├── index.html   404.html   robots.txt   sitemap-index.xml
+    ├── assets/  fonts/  img/  icons/
+    ├── admin/                     ← Adminbereich
+    │   ├── index.html  config.yml  .htaccess  vendor/
+    └── api/
+        ├── kontakt.php  auth.php  lib/  vendor/
+        ├── config/                ← nur Vorlage
+        └── var/                   ← Laufzeitdaten, muss beschreibbar sein
 ```
 
-> **Wichtig:** `.htaccess` beginnt mit einem Punkt und wird von vielen
-> FTP-Programmen standardmässig ausgeblendet. In FileZilla:
-> *Server → Versteckte Dateien anzeigen erzwingen*.
+### Was beim Übertragen geschützt ist
 
-### Schritt 3 – Konfiguration anlegen
+Die Übertragung nutzt `rsync --delete`, damit entfernte Dateien auch auf dem
+Server verschwinden. Ausdrücklich **geschützt** sind:
 
-Siehe [Abschnitt 7](#7-kontaktformular-einrichten-php-und-smtp).
+| Pfad | Grund |
+|---|---|
+| `../saugy-solutions-config.php` | Liegt ausserhalb des Webroots und wird gar nicht berührt |
+| `api/config/config.php` | Zugangsdaten, falls diese Variante genutzt wird |
+| `api/var/rl_*` | Zähler der Ratenbegrenzung |
+| `api/var/mail/` | Testnachrichten im Entwicklungsmodus |
 
-### Schritt 4 – Dateiberechtigungen
+**Die SMTP-Konfiguration wird also niemals überschrieben oder gelöscht.**
 
-| Pfad | Rechte | Zweck |
-|---|---|---|
-| Ordner allgemein | `755` | lesbar und ausführbar |
-| Dateien allgemein | `644` | lesbar |
-| `api/var/` | `755` (oder `750`) | PHP muss hier schreiben können |
-| Konfigurationsdatei | `600` | enthält das SMTP-Passwort |
+### Dateiberechtigungen
 
 ```bash
 find . -type d -exec chmod 755 {} \;
@@ -215,478 +354,335 @@ chmod 755 api/var
 chmod 600 ../saugy-solutions-config.php
 ```
 
-### Schritt 5 – Prüfen
+### Erstes Deployment von Hand
 
-* Startseite aufrufen – erscheint sie?
-* Eine Unterseite direkt aufrufen, z. B. `/leistungen/`
-* Eine erfundene Adresse aufrufen – erscheint die eigene 404-Seite?
-* `https://` erzwungen? (Aufruf über `http://` muss umleiten)
-* Formular absenden – siehe [Abschnitt 8](#8-kontaktformular-testen)
+Falls SSH noch nicht eingerichtet ist:
+
+1. Workflow manuell starten oder `npm run deploy:build` lokal ausführen.
+2. Artefakt `saugy-solutions-deployment` herunterladen und entpacken.
+3. Den **Inhalt** per FTP in das Webroot laden – inklusive der versteckten
+   `.htaccess`-Dateien (in FileZilla:
+   *Server → Versteckte Dateien anzeigen erzwingen*).
 
 ---
 
-## 7. Kontaktformular einrichten (PHP und SMTP)
+## 10. Kontaktformular
 
-### 7.1 Konfigurationsdatei anlegen
+### 10.1 Konfigurationsdatei anlegen
 
-`api/config/config.example.php` als Vorlage verwenden. Es gibt **drei mögliche
-Ablageorte**, sie werden in dieser Reihenfolge gesucht:
+`api/config/config.example.php` als Vorlage verwenden. Ablageorte, in dieser
+Reihenfolge gesucht:
 
 | Priorität | Ort | Empfehlung |
 |---|---|---|
-| 1 | Umgebungsvariablen (`SAUGY_SMTP_HOST` usw.) | ideal, wenn der Hoster das unterstützt |
-| 2 | `../saugy-solutions-config.php` (eine Ebene **über** dem Webroot) | **empfohlen** – über das Web gar nicht erreichbar |
-| 3 | `api/config/config.php` (im Webroot) | nur, wenn (2) nicht möglich ist; Zugriff wird per `.htaccess` gesperrt |
+| 1 | Umgebungsvariablen (`SAUGY_…`) | Wenn der Hoster das unterstützt |
+| 2 | `../saugy-solutions-config.php` | **Empfohlen** – über das Web nicht erreichbar |
+| 3 | `api/config/config.php` | Nur als Notlösung; per `.htaccess` gesperrt |
 
 ```bash
-# Empfohlene Variante
-cp public_html/api/config/config.example.php ./saugy-solutions-config.php
+cp www/api/config/config.example.php ./saugy-solutions-config.php
 chmod 600 ./saugy-solutions-config.php
 ```
 
-### 7.2 Werte eintragen
+### 10.2 SMTP bei Hostpoint
 
 ```php
-'mode'            => 'production',       // 'development' versendet keine echten E-Mails
-'debug'           => false,              // im Produktivbetrieb IMMER false
-
-'recipient_email' => 'manu@saugy-solutions.ch',
-'sender_email'    => 'formular@saugy-solutions.ch',   // MUSS die eigene Domain sein
-
 'use_smtp'        => true,
-'smtp_host'       => 'smtp.ihr-hoster.ch',
-'smtp_port'       => 587,                // 587 = tls, 465 = ssl
+'smtp_host'       => 'asmtp.mail.hostpoint.ch',
+'smtp_port'       => 587,
 'smtp_security'   => 'tls',
-'smtp_user'       => 'formular@saugy-solutions.ch',
-'smtp_pass'       => 'DAS-ECHTE-PASSWORT',
+'smtp_auth'       => true,
+'smtp_user'       => 'formular@saugy-solutions.ch',   // vollständige Adresse
+'smtp_pass'       => '…',
 
-'ip_hash_secret'  => '…',                // siehe unten
+'sender_email'    => 'formular@saugy-solutions.ch',   // MUSS eigene Domain sein
+'recipient_email' => 'manu@saugy-solutions.ch',
+
+'ip_hash_secret'  => '…',   // php -r "echo bin2hex(random_bytes(32));"
 ```
 
-**Zufallswert für `ip_hash_secret` erzeugen:**
+Die aktuellen Serverdaten stehen im Hostpoint Control Panel unter
+*E-Mail → Konto → Servereinstellungen*.
 
-```bash
-php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"
-```
+### 10.3 Felder
 
-Dieser Wert verschlüsselt die IP-Adressen für die Ratenbegrenzung. Die
-IP-Adresse selbst wird **nie** gespeichert.
+Name, E-Mail, Telefon (optional), Unternehmen (optional), Art der Anfrage,
+gewünschter Projektstart (optional), Budgetrahmen (optional),
+Projektbeschreibung, Datenschutz-Zustimmung.
 
-### 7.3 Warum eine eigene Absenderadresse?
+> Das frühere Feld **„Gewünschte Leistung“** wurde entfernt – es überschnitt
+> sich zu stark mit „Art der Anfrage“.
 
-Die Absenderadresse muss zur eigenen Domain gehören. Würde dort die Adresse der
-anfragenden Person stehen, werten SPF und DKIM die Nachricht als Fälschung und
-sie landet im Spam. Die Adresse der anfragenden Person steht deshalb in
-`Reply-To` – ein Klick auf „Antworten“ geht trotzdem direkt an sie.
-
-### 7.4 Sicherheitsmassnahmen des Endpunkts
-
-| Massnahme | Wirkung |
-|---|---|
-| Herkunftsprüfung | akzeptiert nur Anfragen von der eigenen Domain (`Origin`/`Referer`) |
-| Honeypot | unsichtbares Feld; ausgefüllt = automatisiertes Skript |
-| Zeitprüfung | Absenden unter 3 Sekunden oder nach über 12 Stunden wird abgewiesen |
-| Ratenbegrenzung | standardmässig 5 Anfragen pro IP und Stunde |
-| Feldlängen | serverseitig begrenzt |
-| Header Injection | Zeilenumbrüche werden aus allen einzeiligen Feldern entfernt |
-| Offene Weiterleitung | nur seiteninterne Ziele werden akzeptiert |
-| Protokollierung | keine Formularinhalte in Logdateien |
-
-Es wird bewusst **kein externer Captcha-Dienst** eingesetzt, weil das Daten an
-Dritte übertragen würde.
-
----
-
-## 8. Kontaktformular testen
-
-### 8.1 Testmodus (verschickt keine echten E-Mails)
-
-In der Konfiguration `'mode' => 'development'` setzen. Nachrichten landen dann
-als Datei unter `api/var/mail/` statt im Postfach.
-
-```bash
-# Lokal
-php -S localhost:8080 -t dist
-# Dann http://localhost:8080/kontakt/ im Browser öffnen und absenden
-ls dist/api/var/mail/
-```
-
-Nach dem Test wieder auf `'mode' => 'production'` stellen und die Testdateien
-löschen.
-
-### 8.2 Test im Produktivbetrieb
-
-1. `/kontakt/` aufrufen und das Formular vollständig ausfüllen
-2. Absenden – es erscheint eine Bestätigung direkt im Formular
-3. Prüfen, ob die E-Mail bei `manu@saugy-solutions.ch` ankommt
-   (auch den Spam-Ordner kontrollieren)
-4. Auf „Antworten“ klicken – die Antwort muss an die anfragende Person gehen
-5. Gegenprobe ohne JavaScript: Das Formular muss auf `/danke/` weiterleiten
-
-### 8.3 Wenn keine E-Mail ankommt
-
-| Ursache | Prüfung |
-|---|---|
-| Falsche SMTP-Daten | Zugangsdaten beim Hoster kontrollieren |
-| Falscher Port | 587 mit `tls` oder 465 mit `ssl` |
-| Absender fremd | `sender_email` muss zur eigenen Domain gehören |
-| Spam-Filter | Spam-Ordner prüfen, SPF-Eintrag der Domain kontrollieren |
-| Port gesperrt | manche Hoster verlangen ihren eigenen SMTP-Server |
-
-Zur Eingrenzung kurzzeitig `'debug' => true` setzen – dann erscheint die
-technische Fehlermeldung im Browser. **Danach unbedingt wieder auf `false`.**
-
----
-
-## 9. Inhalte pflegen
-
-Alle Texte liegen in `src/data/`. Nach jeder Änderung neu bauen und hochladen:
-
-```bash
-npm run deploy:build
-```
-
-### Kontaktdaten ändern
-
-`src/data/site.mjs` → `CONTACT`. Telefonnummer und E-Mail werden **automatisch**
-an allen Stellen übernommen (Header, Footer, Kontaktseite, Dankeseite,
-Impressum, Datenschutz, strukturierte Daten).
-
-```js
-export const CONTACT = {
-  person: 'Manuel Saugy',
-  phone: '+41 79 516 30 41',
-  phoneHref: 'tel:+41795163041',   // ohne Leerzeichen!
-  email: 'manu@saugy-solutions.ch',
-  emailHref: 'mailto:manu@saugy-solutions.ch',
-};
-```
-
-### Navigation ändern
-
-`src/data/site.mjs` → `NAV`. Der Eintrag erscheint danach in der Kopfzeile, im
-mobilen Menü und im Footer.
-
-### Leistung ändern oder ergänzen
-
-`src/data/services.mjs`. Ein neuer Eintrag erscheint automatisch auf der
-Startseite, auf `/leistungen/`, in der Sprungnavigation und im Footer.
-
-### Häufige Fragen ändern
-
-`src/data/faq.mjs`. Die Fragen werden zusätzlich als strukturierte Daten
-(`FAQPage`) ausgegeben.
-
-### Auswahlfelder des Formulars ändern
-
-Diese müssen an **zwei** Stellen übereinstimmen, sonst weist der Server die
-Eingabe ab:
+Auswahllisten müssen an **zwei** Stellen übereinstimmen:
 
 1. `src/data/form.mjs`
-2. `server/lib/Validator.php` → `ALLOWED_TOPICS`, `ALLOWED_START`,
-   `ALLOWED_BUDGET`
+2. `server/lib/Validator.php` → `ALLOWED_TOPICS`, `ALLOWED_START`, `ALLOWED_BUDGET`
+
+### 10.4 Validierung
+
+Rote Fehlermeldungen erscheinen **erst nach dem ersten Absendeversuch**. Ein
+Feld zu fokussieren und leer wieder zu verlassen markiert nichts. Danach
+verschwindet ein Fehler, sobald das Feld korrigiert wird.
+
+### 10.5 Testen ohne echten Versand
+
+`'mode' => 'development'` setzen. Nachrichten landen dann als Datei unter
+`api/var/mail/` statt im Postfach. Danach wieder auf `'production'` stellen.
 
 ---
 
-## 10. Logo austauschen
+## 11. Inhalte und Logo pflegen
 
-Das Logo wird **nicht** neu gestaltet; das Skript nimmt nur technische
-Optimierungen vor (Freistellen, Zuschnitt, Grössen, Icons).
+Für die tägliche Arbeit: **[docs/ADMIN-ANLEITUNG.md](docs/ADMIN-ANLEITUNG.md)**
+
+Technisch liegen alle Inhalte als YAML unter `content/`. Sie lassen sich auch
+direkt im Editor bearbeiten – der Adminbereich schreibt dieselben Dateien.
+
+### Logo
+
+Quelle ist `content/settings/site.yml` → `branding.logo`. Beim Build:
+
+* SVG wird unverändert übernommen (bevorzugt).
+* PNG/WebP: weisser Hintergrund wird freigestellt, transparenter Rand
+  entfernt, Rastergrössen erzeugt.
+* `src/data/logo-manifest.json` hält die echten Masse fest – dadurch wird das
+  Logo **nie verzerrt** und es entsteht kein Layoutsprung.
+* Favicon, App-Icons und das Open-Graph-Bild entstehen automatisch neu.
+
+Header, Hero und Footer verwenden ausschliesslich `src/components/Logo.astro`.
+Das Logo ist an keiner Stelle fest eingebaut.
+
+### Bilder
+
+Uploads landen in `public/img/uploads/`. Beim Build entstehen daraus AVIF- und
+WebP-Fassungen in mehreren Breiten (`public/img/derived/`) plus ein Manifest
+mit den echten Massen.
+
+---
+
+## 12. Rollback und Backup
+
+### Eine frühere Fassung wiederherstellen
+
+**Variante A – über GitHub (empfohlen):**
 
 ```bash
-# 1. Neue Datei ablegen (möglichst gross, weisser oder transparenter Hintergrund)
-cp mein-neues-logo.png src/assets/logo-original.png
-
-# 2. Alle Ableitungen neu erzeugen
-npm run assets:logo
-
-# 3. Social-Media-Vorschaubild ebenfalls erneuern
-npm run assets:og
-
-# 4. Neu bauen
-npm run deploy:build
+git log --oneline              # gewünschten Stand suchen
+git revert <commit>            # Änderung rückgängig machen
+git push
 ```
 
-Erzeugt werden: freigestelltes Logo in drei Grössen (PNG + WebP),
-`favicon.ico`, `favicon-32/48`, `icon-192/512`, `apple-touch-icon` und ein
-maskierbares Icon für Android.
+Der Push löst automatisch einen neuen Build samt Veröffentlichung aus.
 
-Liegt bereits eine SVG-Fassung des Logos vor, ist diese vorzuziehen: Datei nach
-`public/img/` legen und die Pfade in `src/components/Logo.astro` sowie
-`src/components/HeroVisual.astro` anpassen.
+**Variante B – über ein Artefakt:**
 
----
+1. **Actions** → den letzten erfolgreichen Durchgang öffnen.
+2. Artefakt `saugy-solutions-deployment` herunterladen (30 Tage verfügbar).
+3. Inhalt per FTP/SFTP ins Webroot laden.
 
-## 11. Neues Projekt hinzufügen
-
-Einen Eintrag in `src/data/projects.mjs` ergänzen. Übersichtsseite,
-Detailseite, Navigation und Sitemap entstehen daraus automatisch – es muss
-**keine** neue Datei angelegt werden.
-
-```js
-{
-  slug: 'kundenname',                    // wird zur Adresse /projekte/kundenname/
-  name: 'Kundenname',
-  domain: 'kundenname.ch',
-  url: 'https://kundenname.ch',
-  category: 'Unternehmenswebsite',
-  industry: 'Branche',
-  metaTitle: 'Kundenname – Website | Saugy Solutions',   // bis ca. 70 Zeichen
-  teaser: 'Ein Satz für die Übersichtskarte.',
-  accent: '#24e6b2',                     // Farbe der Vorschau
-  shotDesktop: null,                     // Pfad zum Screenshot oder null
-  shotMobile: null,
-
-  intro: '…',        // Worum geht es?
-  situation: '…',    // Ausgangslage
-  goals: ['…'],      // Zielsetzung
-  delivered: ['…'],  // umgesetzte Leistungen
-  challenges: [{ title: '…', text: '…' }],
-  result: '…',       // sachlich beschriebenes Ergebnis
-}
-```
-
-**Echte Screenshots hinzufügen:**
+**Variante C – Notfall, letzter funktionierender Stand:**
 
 ```bash
-npm run assets:screenshots
+git checkout <letzter-guter-commit> -- content/
+git commit -m "Inhalte auf letzten funktionierenden Stand zurückgesetzt"
+git push
 ```
-
-Danach `shotDesktop` und `shotMobile` auf die erzeugten Dateien zeigen lassen.
-Solange beide auf `null` stehen, zeigt die Website eine bewusst **stilisierte**
-Darstellung – es wird also kein Screenshot vorgetäuscht.
-
-> Screenshots fremder Websites im eigenen Portfolio sind üblich, sollten aber
-> mit der jeweiligen Kundschaft abgesprochen sein.
-
----
-
-## 12. Vor der Veröffentlichung bestätigen
-
-### Rechtliche Angaben – vollständig hinterlegt
-
-Alle rechtlich erforderlichen Angaben sind in `src/data/site.mjs` unter `LEGAL`
-eingetragen. `npm run deploy:build` meldet keine offenen Platzhalter mehr.
-
-| Angabe | Wert |
-|---|---|
-| Geschäftsadresse | Manuel Saugy, Bücklirain 8b, 5312 Döttingen, Schweiz |
-| Rechtsform | Einzelunternehmen (nicht im Handelsregister eingetragen) |
-| UID / MWST-Nummer | nicht vorhanden – die Zeile entfällt im Impressum |
-| Hostinganbieter | Hostpoint AG, Rapperswil-Jona, Schweiz |
-| Serverstandort | Schweiz |
-| SMTP-Anbieter | Hostpoint AG, Rapperswil-Jona, Schweiz |
-
-**Zur Rechtsform:** Wer in der Schweiz als natürliche Person selbstständig
-erwerbstätig ist – auch nebenberuflich –, führt von Gesetzes wegen ein
-**Einzelunternehmen**. Eine „keine Rechtsform“ gibt es rechtlich nicht. Ein
-Eintrag im Handelsregister ist erst ab 100 000 CHF Jahresumsatz Pflicht; der
-Klammerzusatz stellt klar, dass kein Registereintrag besteht. Das Impressum
-ergänzt dazu einen erklärenden Satz, weshalb keine UID vorhanden ist.
-
-**Zur Adresse:** Die angegebene Adresse erscheint öffentlich im Impressum und
-in der Datenschutzerklärung – das ist für ein Impressum so vorgesehen und
-notwendig, damit der Anbieter erreichbar ist.
-
-**Falls sich etwas ändert:** ausschliesslich `LEGAL` in `src/data/site.mjs`
-anpassen. Impressum, Datenschutzerklärung und die strukturierten Daten
-übernehmen die Werte automatisch.
-
-### Noch inhaltlich zu bestätigen
-
-* **Projektbeschreibungen** (`src/data/projects.mjs`) – sie halten sich an das,
-  was auf den öffentlich erreichbaren Websites erkennbar ist. Bitte einmal
-  gegenlesen und, wo gewünscht, um projektinterne Details ergänzen.
-* **Einverständnis der Kundschaft**, als Referenz genannt zu werden.
-* **Rechtstexte** – Datenschutzerklärung und Impressum sind sorgfältig
-  erstellte **Vorlagen**, die die tatsächlichen Funktionen der Website
-  abbilden. Sie ersetzen keine Rechtsberatung und sollten vor der
-  Veröffentlichung geprüft werden.
-* **Social-Media-Profile** – `SOCIAL` in `site.mjs` ist leer. Nur echte,
-  bestehende Profile eintragen; der Footer blendet den Bereich sonst aus.
-
-### Hostpoint-spezifische Hinweise
-
-Für die SMTP-Konfiguration (siehe [Abschnitt 7](#7-kontaktformular-einrichten-php-und-smtp))
-gelten bei Hostpoint folgende Werte:
-
-```php
-'smtp_host'     => 'asmtp.mail.hostpoint.ch',
-'smtp_port'     => 587,
-'smtp_security' => 'tls',
-'smtp_auth'     => true,
-'smtp_user'     => 'formular@saugy-solutions.ch',   // vollständige Adresse
-'smtp_pass'     => '…',                             // Passwort des Postfachs
-```
-
-Die Absenderadresse muss ein bei Hostpoint eingerichtetes Postfach der Domain
-`saugy-solutions.ch` sein. Die aktuellen Serverdaten stehen im Hostpoint
-Control Panel unter *E-Mail → Konto → Servereinstellungen*.
-
-Bei Hostpoint liegt das Webroot im Ordner `www`. Die empfohlene
-Konfigurationsdatei kommt daher **neben** diesen Ordner:
-
-```
-/home/<benutzer>/
-├── saugy-solutions-config.php     ← hierhin (nicht über das Web erreichbar)
-└── www/                           ← Inhalt von dist/ hierhin
-    ├── index.html
-    └── api/
-```
-
----
-
-## 13. Go-live-Checkliste
-
-### Vor dem Hochladen
-
-- [ ] Rechtliche Angaben in `LEGAL` geprüft (siehe [Abschnitt 12](#12-vor-der-veröffentlichung-bestätigen))
-- [ ] `npm run deploy:build` läuft ohne Fehler und ohne Platzhalterwarnung
-- [ ] `npm run qa` meldet keine Fehler
-- [ ] `npm run qa:browser` meldet keine Fehler
-- [ ] Rechtstexte gegengelesen
-- [ ] Projektbeschreibungen bestätigt
-- [ ] `SITE.url` in `src/data/site.mjs` zeigt auf die Produktivdomain
-
-### Auf dem Server
-
-- [ ] Inhalt von `dist/` vollständig hochgeladen (inklusive `.htaccess`)
-- [ ] SSL-Zertifikat aktiv, `http://` leitet auf `https://` um
-- [ ] Domainvariante vereinheitlicht (mit oder ohne `www`)
-- [ ] Konfigurationsdatei ausserhalb des Webroots angelegt, Rechte `600`
-- [ ] `ip_hash_secret` mit einem eigenen Zufallswert gesetzt
-- [ ] `api/var/` ist beschreibbar
-- [ ] `'mode' => 'production'` und `'debug' => false`
-
-### Funktionsprüfung
-
-- [ ] Alle elf Seiten erreichbar
-- [ ] Navigation auf Desktop und Mobilgerät
-- [ ] Mobiles Menü öffnet, schliesst und ist per Tastatur bedienbar
-- [ ] Formular absenden – E-Mail kommt an
-- [ ] „Antworten“ geht an die anfragende Person
-- [ ] Erfundene Adresse zeigt die eigene 404-Seite
-- [ ] `/api/lib/Config.php` direkt aufrufen → muss **403 Forbidden** liefern
-- [ ] `/api/config/config.php` direkt aufrufen → muss **403 Forbidden** liefern
-- [ ] Browser-Konsole ohne Fehler
-
-### Nach dem Aufschalten
-
-- [ ] `https://saugy-solutions.ch/robots.txt` erreichbar
-- [ ] `https://saugy-solutions.ch/sitemap-index.xml` erreichbar
-- [ ] Sitemap in der Google Search Console eingereicht
-- [ ] Vorschaubild geprüft (Link in einem Messenger teilen)
-- [ ] Lighthouse-Prüfung durchgeführt (Ziel: Performance ≥ 90, übrige ≥ 95)
-- [ ] Strukturierte Daten geprüft: <https://search.google.com/test/rich-results>
-- [ ] Erstes Backup erstellt
-
----
-
-## 14. Backups und Updates
 
 ### Backup
 
 Zu sichern sind:
 
-1. **Das Repository** – enthält alle Inhalte und den gesamten Quellcode
-2. **Die Konfigurationsdatei** (`saugy-solutions-config.php`) – liegt bewusst
-   nicht im Repository und enthält die SMTP-Zugangsdaten
-3. Eingegangene Anfragen liegen im E-Mail-Postfach, nicht auf dem Server
+1. **Das Repository** – enthält Inhalte, Bilder und den gesamten Quellcode.
+2. **`saugy-solutions-config.php`** – liegt bewusst nicht im Repository.
+3. Eingegangene Anfragen liegen im E-Mail-Postfach.
 
 Die Website selbst lässt sich jederzeit aus dem Repository neu erzeugen.
 
 ### Updates
 
 ```bash
-# Verfügbare Aktualisierungen anzeigen
 npm outdated
-
-# Astro und Abhängigkeiten aktualisieren
 npm update
-
-# PHPMailer aktualisieren (nur lokal, Composer nötig)
 cd server && composer update --no-dev && cd ..
 
-# Danach immer prüfen und neu bauen
 npm run deploy:build && npm run qa
 ```
 
-Empfohlen: zwei- bis viermal jährlich aktualisieren, mindestens aber bei
-Sicherheitsmeldungen zu PHPMailer.
+Empfohlen: zwei- bis viermal jährlich, mindestens bei Sicherheitsmeldungen zu
+PHPMailer oder Decap CMS.
+
+---
+
+## 13. Fehlerbehebung
+
+### Der Build schlägt fehl
+
+1. **Actions** → fehlgeschlagenen Durchgang → roten Schritt aufklappen.
+2. Häufige Ursachen:
+
+| Meldung | Ursache und Lösung |
+|---|---|
+| `content/… ist kein gültiges YAML` | Eine Inhaltsdatei ist beschädigt. Im Adminbereich die letzte Änderung rückgängig machen. |
+| `Link ins Leere` | Ein Menüpunkt zeigt auf eine Seite, die es nicht gibt. Ziel in den Einstellungen korrigieren. |
+| `Titel identisch mit …` | Zwei Seiten haben denselben Seitentitel. Unter „Seiten & SEO“ ändern. |
+| `Logo nicht gefunden` | Die Datei wurde gelöscht. Im Adminbereich neu hochladen. |
+| `Mögliches Geheimnis` | Es wurde versehentlich ein Token eingecheckt. **Sofort widerrufen.** |
+
+**Wichtig:** Bei einem fehlgeschlagenen Build wird nichts veröffentlicht. Die
+Website bleibt auf dem letzten funktionierenden Stand.
+
+### Das Deployment schlägt fehl
+
+| Meldung | Ursache und Lösung |
+|---|---|
+| `Permission denied (publickey)` | Der öffentliche Schlüssel liegt nicht in `~/.ssh/authorized_keys` auf dem Server. |
+| `Host key verification failed` | `HOSTPOINT_KNOWN_HOSTS` fehlt oder ist veraltet – mit `ssh-keyscan` neu erzeugen. |
+| `No such file or directory` | `HOSTPOINT_DOCUMENT_ROOT` stimmt nicht. Pfad per SSH mit `pwd` prüfen. |
+| `Veröffentlichung übersprungen` | Secrets fehlen. Artefakt herunterladen und von Hand hochladen. |
+
+Nach der Korrektur genügt ein erneuter Start über **Run workflow**.
+
+### Der Adminbereich
+
+| Problem | Ursache und Lösung |
+|---|---|
+| „Anmeldung ist noch nicht eingerichtet“ | `github_client_id`/`github_client_secret` fehlen in der Konfiguration. |
+| „Konto ist nicht freigegeben“ | GitHub-Benutzernamen in `github_allowed_users` ergänzen. |
+| „Anmeldung konnte nicht überprüft werden“ | Das state-Cookie ging verloren. Ohne HTTPS oder bei blockierten Cookies. Erneut versuchen. |
+| Fenster öffnet sich, bleibt leer | Callback-URL in der OAuth-App prüfen: exakt `https://saugy-solutions.ch/api/auth.php`. |
+| „Zu viele Anmeldeversuche“ | Begrenzung greift. Eine Stunde warten oder `admin_rate_limit_max` erhöhen. |
+| Adminbereich lädt nicht | `admin/vendor/` wurde nicht vollständig hochgeladen. Deployment wiederholen. |
+
+### Die Website allgemein
+
+| Problem | Ursache und Lösung |
+|---|---|
+| **500 Internal Server Error** | `.htaccess` nicht kompatibel. Datei kurz umbenennen; erscheint die Seite, Blöcke einzeln auskommentieren. Meist fehlt `AllowOverride All`. |
+| **Unterseiten nicht erreichbar** | `mod_rewrite` ist aus. Beim Hoster nachfragen. |
+| **Formular meldet „Verbindung nicht möglich“** | `/api/kontakt.php` fehlt oder PHP ist inaktiv. Direkt aufrufen – erwartet wird JSON mit Status 405. |
+| **Keine E-Mail trotz Erfolgsmeldung** | `mode` steht auf `development`. |
+| **Änderung nicht sichtbar** | Browser-Cache leeren (Strg/Cmd + Umschalt + R). |
+
+---
+
+## 14. Qualitätskontrolle
+
+`npm run qa` – **20 statische Prüfungen**: interne Links und Anker,
+Überschriftenstruktur, Alt-Texte, Metadaten und Eindeutigkeit, strukturierte
+Daten, Vorlagenreste, Schweizer Schreibweise, Sitemap und robots.txt,
+Deployment-Hygiene, Adminbereich, Suche nach Zugangsdaten.
+
+`npm run qa:browser` – **81 Browserprüfungen**:
+
+| Bereich | Umfang |
+|---|---|
+| Konsole und Status | 13 Seiten, eigene 404-Seite |
+| Bildschirmgrössen | 320, 360, 375, 390, 430, 768, 1024, 1440, 1920 plus zwei Querformate |
+| Logo | Seitenverhältnis, `object-fit`, kein Zuschnitt, Grösse, Ladezustand |
+| Hero | Zentrierung mit Pixelmessung, begrenzte Textbreite |
+| Mobiler Header | Sichtbarkeit beim Scrollen, Hintergrund, Touch-Ziel, z-index |
+| Mobiles Menü | Öffnen, ARIA, Scroll-Sperre, Fokusfalle, Escape, Fokusrückgabe, Scrollposition |
+| Tastatur | Sprungmarke, Fokusringe, FAQ per Tastatur |
+| Formular | Keine Fehler vor dem Absenden, Fehler danach, Korrekturverhalten, Screenreader-Verknüpfung, mobile Darstellung |
+| Reduzierte Bewegung | Inhalte sichtbar, keine Animation, keine Mausreaktion |
+| Ohne JavaScript | Inhalte und Formularversand |
+| Adminbereich | Erreichbar, lädt, `noindex`, keine Zugangsdaten |
+| Projekte | Unterseiten aus CMS-Daten, Bildmasse und Alt-Texte |
 
 ---
 
 ## 15. Technische Hinweise
 
-### Warum statisch?
+### Warum statisch mit Git-basiertem CMS?
 
-Statische Dateien sind schnell, brauchen keine Datenbank, lassen sich nicht
-über eine veraltete CMS-Version angreifen und laufen auf jedem Webspace. Für
-eine Unternehmenswebsite dieser Grösse ist das die robusteste Variante.
+Es gibt keine Datenbank und kein serverseitiges CMS, das angegriffen oder
+veraltet sein könnte. Jede Inhaltsänderung ist ein Commit: nachvollziehbar,
+mit Datum und Person, jederzeit umkehrbar.
 
 ### Bewegung und Barrierefreiheit
 
-Sämtliche Animationen sind in `@media (prefers-reduced-motion: no-preference)`
-gekapselt oder werden über `--motion-scale` abgeschaltet. Wer im Betriebssystem
-reduzierte Bewegung eingestellt hat, erhält dieselbe Website ohne Bewegung –
-Inhalte bleiben dabei immer sichtbar.
+Alle Animationen sind in `@media (prefers-reduced-motion: no-preference)`
+gekapselt oder werden über `--motion-scale` abgeschaltet. Weiter umgesetzt:
+Sprungmarke, sichtbare Fokuszustände, semantische Landmarken, Fokusfalle im
+mobilen Menü, mit Feldern verknüpfte Fehlermeldungen.
 
-Weiter umgesetzt: Sprungmarke, sichtbare Fokuszustände, semantische
-Landmarken, Fokusfalle im mobilen Menü, mit Feldern verknüpfte
-Fehlermeldungen, Kontraste über WCAG AA (Fliesstext 9,5:1).
+### Farbkontraste
+
+Alle geprüften Kombinationen liegen zwischen 6.5:1 und 18.4:1 und erfüllen
+damit WCAG AA (mindestens 4.5:1) deutlich.
 
 ### Content Security Policy
 
-Die CSP in `.htaccess` erlaubt ausschliesslich eigene Inhalte. `'unsafe-inline'`
-ist nötig für das kleine Inline-Skript im `<head>`, die strukturierten Daten und
-einzelne `style`-Attribute. Da keine fremden und keine von Nutzenden erzeugten
-Inhalte ausgegeben werden, ist das Restrisiko gering.
-
-Wer die Vorgabe verschärfen möchte: die Hashes der Inline-Skripte berechnen
-(`openssl dgst -sha256 -binary | openssl base64`) und `'unsafe-inline'` durch
-`'sha256-…'` ersetzen. Die Hashes ändern sich bei jedem Build, in dem sich der
-Inhalt strukturierter Daten ändert.
+Die öffentliche Website erlaubt ausschliesslich eigene Inhalte. Der
+Adminbereich hat unter `/admin/.htaccess` eine eigene, etwas weitere Vorgabe,
+weil Decap CMS mit der GitHub-Schnittstelle sprechen muss.
 
 ### HSTS
 
 `Strict-Transport-Security` ist in `.htaccess` **auskommentiert**. Erst
-aktivieren, wenn HTTPS dauerhaft und für alle Subdomains läuft – die Vorgabe
-lässt sich nicht kurzfristig zurücknehmen.
+aktivieren, wenn HTTPS dauerhaft und für alle Subdomains läuft.
 
 ### Kein Cookie-Banner
 
-Die Website setzt keine Cookies und speichert nichts im Browser. Es gibt daher
-nichts, dem zugestimmt werden müsste. Ein Banner wäre irreführend.
-**Wird später ein Dienst eingebunden, der Cookies setzt (Analyse,
-Kartendienst, eingebettete Videos), müssen Datenschutzerklärung und
-Einwilligung entsprechend ergänzt werden.**
+Die öffentliche Website setzt keine Cookies. Der Adminbereich verwendet ein
+technisch notwendiges Sitzungscookie – er ist nicht öffentlich und benötigt
+keine Einwilligung.
+
+**Wird später ein Dienst eingebunden, der Cookies setzt, müssen
+Datenschutzerklärung und Einwilligung ergänzt werden.**
 
 ---
 
-## 16. Fehlersuche
+## 16. Go-live-Checkliste
 
-| Problem | Ursache und Lösung |
-|---|---|
-| **500 Internal Server Error** | `.htaccess` nicht kompatibel. Datei kurz umbenennen; erscheint die Seite, die Blöcke einzeln auskommentieren. Meist fehlt `AllowOverride All`. |
-| **Unterseiten nicht erreichbar** | `.htaccess` fehlt oder `mod_rewrite` ist aus. Beim Hoster nachfragen. |
-| **`.htaccess` nicht sichtbar** | Versteckte Dateien im FTP-Programm einblenden. |
-| **Formular meldet „Verbindung nicht möglich“** | `/api/kontakt.php` fehlt oder PHP ist nicht aktiv. Direkt aufrufen – erwartet wird eine JSON-Antwort mit Status 405. |
-| **Formular meldet „stammt nicht von der Website“** | `allowed_hosts` in der Konfiguration ergänzen (mit und ohne `www`). |
-| **„Das ging uns etwas zu schnell“** | Bot-Schutz. Bei echten Personen unkritisch; notfalls `min_fill_seconds` senken. |
-| **Keine E-Mail trotz Erfolgsmeldung** | `mode` steht auf `development`. Auf `production` umstellen. |
-| **Schriften werden nicht geladen** | `fonts/` wurde nicht hochgeladen oder die CSP blockiert sie. |
-| **Logo unscharf** | `npm run assets:logo` mit einer grösseren Originaldatei erneut ausführen. |
-| **Änderung nicht sichtbar** | Browser-Cache leeren (Strg/Cmd + Shift + R). HTML wird nicht zwischengespeichert, CSS und JS tragen einen Hash im Namen. |
+### Einmalig einrichten
+
+- [ ] GitHub-OAuth-App angelegt, Callback-URL exakt `https://saugy-solutions.ch/api/auth.php`
+- [ ] `github_client_id`, `github_client_secret` und `github_allowed_users` in der Konfiguration
+- [ ] SSH-Deployment-Schlüssel erzeugt und auf Hostpoint hinterlegt
+- [ ] Alle sechs GitHub Secrets gesetzt
+- [ ] `saugy-solutions-config.php` eine Ebene über dem Webroot, Rechte `600`
+- [ ] `ip_hash_secret` mit eigenem Zufallswert
+- [ ] SMTP-Daten eingetragen und getestet
+- [ ] `api/var/` beschreibbar
+- [ ] `'mode' => 'production'`, `'debug' => false`
+
+### Vor dem ersten Aufschalten
+
+- [ ] `npm run deploy:build` ohne Fehler und ohne Platzhalterwarnung
+- [ ] `npm run qa` und `npm run qa:browser` fehlerfrei
+- [ ] Rechtstexte gegengelesen (Vorlagen, keine Rechtsberatung)
+- [ ] Projektbeschreibungen bestätigt
+- [ ] Einverständnis der Kundschaft für die Nennung als Referenz
+
+### Funktionsprüfung
+
+- [ ] Alle Seiten erreichbar, auch direkt aufgerufen
+- [ ] Mobiles Menü öffnet, schliesst, per Tastatur bedienbar
+- [ ] Formular absenden – E-Mail kommt an, „Antworten“ geht an die anfragende Person
+- [ ] Erfundene Adresse zeigt die eigene 404-Seite
+- [ ] Anmeldung unter `/admin/` funktioniert
+- [ ] Teständerung im Adminbereich veröffentlichen → nach wenigen Minuten live
+- [ ] `/api/lib/Config.php` direkt aufrufen → **403 Forbidden**
+- [ ] `/api/config/config.php` direkt aufrufen → **403 Forbidden**
+
+### Nach dem Aufschalten
+
+- [ ] `robots.txt` und `sitemap-index.xml` erreichbar
+- [ ] Sitemap in der Google Search Console eingereicht
+- [ ] Vorschaubild geprüft (Link in einem Messenger teilen)
+- [ ] Lighthouse-Prüfung (Ziel: Performance ≥ 90, übrige ≥ 95)
+- [ ] Strukturierte Daten geprüft: <https://search.google.com/test/rich-results>
+- [ ] Erstes Backup erstellt
 
 ---
 
 ## Lizenz und Urheberrecht
 
 Inhalte, Gestaltung und Bildmarke gehören Saugy Solutions.
-Die Schriftart Manrope steht unter der SIL Open Font License
-(`public/fonts/manrope-OFL.txt`), PHPMailer unter der LGPL-2.1.
+Manrope steht unter der SIL Open Font License (`public/fonts/manrope-OFL.txt`),
+PHPMailer unter der LGPL-2.1, Decap CMS unter der MIT-Lizenz.
 
 ---
 
-**Kontakt bei Fragen zu diesem Projekt:**
-Manuel Saugy · <manu@saugy-solutions.ch> · +41 79 516 30 41
+**Kontakt:** Manuel Saugy · <manu@saugy-solutions.ch> · +41 79 516 30 41

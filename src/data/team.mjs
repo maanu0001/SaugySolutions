@@ -7,6 +7,7 @@
  */
 import { teamData, activeSorted } from './content.mjs';
 
+/** @type {import('./types').TeamMember[]} */
 export const TEAM = activeSorted(teamData.items).map((item) => ({
   name: item.name ?? '',
   initials: item.initials || String(item.name ?? '').split(' ').map((w) => w[0]).join('').slice(0, 2),

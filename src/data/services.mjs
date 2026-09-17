@@ -4,6 +4,7 @@
  */
 import { servicesData, activeSorted } from './content.mjs';
 
+/** @type {import('./types').Service[]} */
 export const SERVICES = activeSorted(servicesData.items).map((item) => ({
   slug: item.slug,
   icon: item.icon ?? 'layout',

@@ -56,12 +56,14 @@ function normalise(item) {
 }
 
 /** Alle veröffentlichten Projekte, nach Sortierreihenfolge. */
+/** @type {import('./types').Project[]} */
 export const PROJECTS = projectsData
   .filter((item) => item?.published !== false && item?.slug)
   .map(normalise)
   .sort((a, b) => a.order - b.order);
 
 /** Projekte, die zusätzlich auf der Startseite erscheinen sollen. */
+/** @type {import('./types').Project[]} */
 export const FEATURED_PROJECTS = PROJECTS.filter((p) => p.featured);
 
 /** Findet ein Projekt anhand seines Slugs. */

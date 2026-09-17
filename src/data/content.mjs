@@ -62,7 +62,9 @@ const CONTENT = findContentDir();
  * Liest eine YAML-Datei aus `content/`.
  *
  * @param {string} relativePath Pfad unterhalb von content/
- * @param {unknown} [fallback] Rückgabewert, falls die Datei fehlt
+ * @param {any} [fallback] Rückgabewert, falls die Datei fehlt
+ * @returns {any} Der Inhalt der Datei – die YAML-Dateien sind untypisiert,
+ *   die Ladeschichten geben ihnen anschliessend eine feste Form.
  */
 function readYaml(relativePath, fallback = {}) {
   const file = join(CONTENT, relativePath);
@@ -83,9 +85,8 @@ function readYaml(relativePath, fallback = {}) {
  * Sortiert nach dem Feld `order` und entfernt ausgeblendete Einträge.
  * Einträge ohne `visible` gelten als sichtbar.
  *
- * @template T
- * @param {T[]} items
- * @returns {T[]}
+ * @param {any[]} items
+ * @returns {any[]}
  */
 export function activeSorted(items) {
   return (Array.isArray(items) ? items : [])
@@ -98,7 +99,9 @@ export function activeSorted(items) {
 // ---------------------------------------------------------------------------
 
 export const siteData = readYaml('settings/site.yml');
+/** @type {import('./types').HomeContent} */
 export const homeData = readYaml('settings/home.yml');
+/** @type {import('./types').PagesContent} */
 export const pagesData = readYaml('settings/pages.yml');
 export const servicesData = readYaml('settings/services.yml', { items: [] });
 export const benefitsData = readYaml('settings/benefits.yml', { items: [] });
@@ -142,7 +145,7 @@ function escapeHtml(value) {
  * Der Text wird vorher maskiert, damit aus dem CMS kein HTML eingeschleust
  * werden kann.
  *
- * @param {string} text
+ * @param {string | undefined | null} text
  * @returns {string} HTML
  */
 export function renderAccent(text) {
@@ -153,7 +156,12 @@ export function renderAccent(text) {
   );
 }
 
-/** Entfernt die Hervorhebungszeichen – für Titel, Meta-Angaben und Alt-Texte. */
+/**
+ * Entfernt die Hervorhebungszeichen – für Titel, Meta-Angaben und Alt-Texte.
+ *
+ * @param {string | undefined | null} text
+ * @returns {string}
+ */
 export function plainText(text) {
   return text ? String(text).replace(/\*\*(.+?)\*\*/g, '$1') : '';
 }

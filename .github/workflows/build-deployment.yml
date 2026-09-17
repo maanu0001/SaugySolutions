@@ -1,41 +1,71 @@
 # ============================================================================
-#  DEPLOYMENT-BUILD ERZEUGEN
+#  BUILD, QUALITÄTSPRÜFUNG UND VERÖFFENTLICHUNG
 # ============================================================================
 #
-#  Baut die statische Website, prüft das Ergebnis und stellt den fertigen
-#  Ordner dist/ als herunterladbares Artefakt bereit.
+#  Läuft automatisch, sobald im Adminbereich etwas veröffentlicht wurde (das
+#  schreibt eine Änderung auf den produktiven Branch), und lässt sich zusätzlich
+#  von Hand starten.
 #
-#  Der Workflow lädt bewusst NICHTS auf den Webserver hoch und enthält keine
-#  Zugangsdaten. Das Hochladen auf den Webspace erfolgt weiterhin von Hand
-#  (siehe README, Abschnitt 6).
+#  Ablauf:
+#    1. Abhängigkeiten installieren
+#    2. Vollständigen Deployment-Build erzeugen
+#    3. Statische Qualitätsprüfung
+#    4. Browser- und Formularprüfung
+#    5. Ergebnis als Artefakt sichern (für Wiederherstellung)
+#    6. Nur bei erfolgreicher Prüfung: Übertragung auf Hostpoint
 #
-#  Verwendung:
-#    GitHub -> Actions -> „Deployment-Build erzeugen“ -> „Run workflow“
-#    Nach dem Durchlauf liegt unten auf der Seite das Artefakt
-#    „saugy-solutions-deployment“ zum Herunterladen bereit.
+#  Schlägt eine Prüfung fehl, wird NICHT veröffentlicht. Die zuletzt
+#  hochgeladene Fassung bleibt dann unverändert online.
+#
+#  BENÖTIGTE GITHUB SECRETS (Settings -> Secrets and variables -> Actions)
+#    HOSTPOINT_SSH_HOST        z. B. s123.web.hostpoint.ch
+#    HOSTPOINT_SSH_PORT        in der Regel 22
+#    HOSTPOINT_SSH_USER        SSH-Benutzername bei Hostpoint
+#    HOSTPOINT_SSH_KEY         privater Deployment-Schlüssel (vollständig,
+#                              inklusive BEGIN- und END-Zeile)
+#    HOSTPOINT_KNOWN_HOSTS     Ausgabe von: ssh-keyscan -p <port> <host>
+#    HOSTPOINT_DOCUMENT_ROOT   absoluter Pfad, z. B.
+#                              /home/benutzer/www
+#
+#  Ohne diese Secrets läuft der Build samt Prüfungen trotzdem – die
+#  Veröffentlichung wird dann übersprungen und im Protokoll vermerkt.
 # ============================================================================
 
-name: Deployment-Build erzeugen
+name: Build, Prüfung und Veröffentlichung
 
-# Startet ausschliesslich von Hand – kein automatischer Lauf bei jedem Push.
 on:
+  push:
+    branches:
+      - claude/saugy-solutions-website-b62pey
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
   workflow_dispatch:
+    inputs:
+      deploy:
+        description: 'Nach erfolgreicher Prüfung auf Hostpoint veröffentlichen'
+        type: boolean
+        default: true
 
-# Weniger Rechte als nötig gibt es nicht: Der Workflow liest nur das Repository.
 permissions:
   contents: read
 
+# Nie zwei Veröffentlichungen gleichzeitig. Ein bereits laufender Durchgang
+# wird nicht abgebrochen, damit keine halb übertragene Website entsteht.
+concurrency:
+  group: hostpoint-deployment
+  cancel-in-progress: false
+
 jobs:
   build:
-    name: Statische Website bauen und prüfen
+    name: Bauen, prüfen und veröffentlichen
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     env:
-      # Sicherheitsnetz: Playwright wird nur für die optionale Browserprüfung
-      # gebraucht, nicht für Build und Qualitätskontrolle. Sollte eine künftige
-      # Version wieder Browser beim Installieren herunterladen, bleibt das hier
-      # abgeschaltet.
-      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+      # Repository und Branch für die Adminkonfiguration.
+      CMS_REPO: ${{ github.repository }}
+      CMS_BRANCH: ${{ github.ref_name }}
 
     steps:
       - name: Repository auschecken
@@ -50,26 +80,43 @@ jobs:
       - name: Abhängigkeiten installieren
         run: npm ci
 
+      - name: Browser für die Prüfung installieren
+        # Wird für die Browserprüfung und das Vorschaubild benötigt.
+        run: npx playwright install --with-deps chromium
+
       - name: Deployment-Build erzeugen
-        # Erstellt dist/ inklusive .htaccess, PHP-Endpunkt und PHPMailer.
         run: npm run deploy:build
 
-      - name: Qualitätskontrolle
-        # Prüft interne Links, Überschriftenstruktur, Metadaten, strukturierte
-        # Daten, Vorlagenreste und die Schweizer Schreibweise.
+      - name: Statische Qualitätsprüfung
         run: npm run qa
 
-      - name: Inhalt des Artefakts zusammenfassen
-        # Macht im Actions-Protokoll sichtbar, was im Artefakt landet – vor
-        # allem die versteckten Dateien, die sonst leicht übersehen werden.
+      - name: Browser- und Formularprüfung
+        run: |
+          npm run serve:dist &
+          SERVER_PID=$!
+
+          # Warten, bis die Vorschau antwortet (maximal 30 Sekunden).
+          for i in $(seq 1 30); do
+            if curl -sf -o /dev/null http://localhost:4321/; then break; fi
+            sleep 1
+          done
+
+          npm run qa:browser
+          STATUS=$?
+
+          kill $SERVER_PID 2>/dev/null || true
+          exit $STATUS
+
+      - name: Zusammenfassung schreiben
+        if: always()
         run: |
           {
-            echo "### Inhalt von \`dist/\`"
+            echo "### Deployment-Build"
             echo
             echo "| Kennzahl | Wert |"
             echo "| --- | --- |"
             echo "| Dateien insgesamt | $(find dist -type f | wc -l) |"
-            echo "| HTML-Seiten | $(find dist -name '*.html' | wc -l) |"
+            echo "| HTML-Seiten | $(find dist -name '*.html' -not -path 'dist/admin/*' | wc -l) |"
             echo "| Gesamtgrösse | $(du -sh dist | cut -f1) |"
             echo
             echo "#### Versteckte Dateien"
@@ -79,14 +126,135 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Deployment als Artefakt hochladen
+      - name: Deployment als Artefakt sichern
+        # Auch bei fehlgeschlagener Prüfung sichern – hilft bei der Fehlersuche
+        # und erlaubt eine manuelle Wiederherstellung.
+        if: always() && hashFiles('dist/index.html') != ''
         uses: actions/upload-artifact@v4
         with:
           name: saugy-solutions-deployment
           path: dist/
-          # Zwingend: Ohne diese Einstellung fehlen .htaccess sowie die
-          # Schutzdateien in api/, api/config/ und api/var/ im Artefakt –
-          # die Website funktioniert dann auf dem Server nicht korrekt.
           include-hidden-files: true
-          # Ein leeres Artefakt wäre ein stiller Fehlschlag.
           if-no-files-found: error
+          retention-days: 30
+
+      # ----------------------------------------------------------------------
+      #  Veröffentlichung auf Hostpoint
+      # ----------------------------------------------------------------------
+
+      - name: Vorhandensein der Zugangsdaten prüfen
+        id: secrets
+        run: |
+          if [ -n "${{ secrets.HOSTPOINT_SSH_HOST }}" ] \
+            && [ -n "${{ secrets.HOSTPOINT_SSH_USER }}" ] \
+            && [ -n "${{ secrets.HOSTPOINT_SSH_KEY }}" ] \
+            && [ -n "${{ secrets.HOSTPOINT_DOCUMENT_ROOT }}" ]; then
+            echo "vorhanden=ja" >> "$GITHUB_OUTPUT"
+          else
+            echo "vorhanden=nein" >> "$GITHUB_OUTPUT"
+            {
+              echo "### Veröffentlichung übersprungen"
+              echo
+              echo "Es fehlen GitHub Secrets für die Übertragung auf Hostpoint."
+              echo "Benötigt werden: \`HOSTPOINT_SSH_HOST\`, \`HOSTPOINT_SSH_USER\`,"
+              echo "\`HOSTPOINT_SSH_KEY\` und \`HOSTPOINT_DOCUMENT_ROOT\`."
+              echo
+              echo "Der Build liegt trotzdem als Artefakt bereit und kann von Hand"
+              echo "hochgeladen werden."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: SSH-Zugang einrichten
+        if: steps.secrets.outputs.vorhanden == 'ja' && (github.event_name == 'push' || inputs.deploy)
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          printf '%s\n' "${{ secrets.HOSTPOINT_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          if [ -n "${{ secrets.HOSTPOINT_KNOWN_HOSTS }}" ]; then
+            printf '%s\n' "${{ secrets.HOSTPOINT_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          else
+            # Ohne hinterlegten Fingerabdruck wird er einmalig abgefragt.
+            ssh-keyscan -p "${{ secrets.HOSTPOINT_SSH_PORT || 22 }}" \
+              "${{ secrets.HOSTPOINT_SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+            echo "::warning::HOSTPOINT_KNOWN_HOSTS ist nicht gesetzt. Der Fingerabdruck wurde ungeprüft übernommen. Bitte das Secret nachtragen."
+          fi
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Auf Hostpoint veröffentlichen
+        if: steps.secrets.outputs.vorhanden == 'ja' && (github.event_name == 'push' || inputs.deploy)
+        env:
+          SSH_HOST: ${{ secrets.HOSTPOINT_SSH_HOST }}
+          SSH_PORT: ${{ secrets.HOSTPOINT_SSH_PORT || 22 }}
+          SSH_USER: ${{ secrets.HOSTPOINT_SSH_USER }}
+          DOC_ROOT: ${{ secrets.HOSTPOINT_DOCUMENT_ROOT }}
+        run: |
+          set -euo pipefail
+
+          echo "Übertrage nach ${SSH_USER}@${SSH_HOST}:${DOC_ROOT}"
+
+          # ------------------------------------------------------------------
+          #  WICHTIG – Schutz bestehender Serverdateien
+          #
+          #  --delete räumt entfernte Dateien auf, die es im Build nicht mehr
+          #  gibt. Ausgenommen sind:
+          #
+          #    api/config/config.php  Zugangsdaten (SMTP, OAuth). Diese Datei
+          #                           liegt bewusst nicht im Repository und
+          #                           darf niemals überschrieben oder gelöscht
+          #                           werden.
+          #    api/var/               Laufzeitdaten der Begrenzungen.
+          #
+          #  Die empfohlene Konfigurationsdatei liegt ohnehin EINE EBENE ÜBER
+          #  dem Webroot und wird von dieser Übertragung gar nicht berührt.
+          # ------------------------------------------------------------------
+          #  `protect` verhindert das Löschen auf dem Server, `exclude`
+          #  verhindert das Überschreiben. Der Ordner api/var/ wird beim
+          #  ersten Mal mit angelegt, seine Laufzeitdateien bleiben danach
+          #  unangetastet.
+          rsync -rlptDvz --checksum \
+            --delete \
+            --filter='protect api/config/config.php' \
+            --filter='protect api/var/rl_*' \
+            --filter='protect api/var/mail/***' \
+            --exclude='api/config/config.php' \
+            -e "ssh -i ~/.ssh/deploy_key -p ${SSH_PORT} -o StrictHostKeyChecking=yes" \
+            dist/ "${SSH_USER}@${SSH_HOST}:${DOC_ROOT}/"
+
+          echo "Übertragung abgeschlossen."
+
+      - name: Erreichbarkeit prüfen
+        if: steps.secrets.outputs.vorhanden == 'ja' && (github.event_name == 'push' || inputs.deploy)
+        continue-on-error: true
+        run: |
+          # Kurz warten, dann die Startseite abrufen.
+          sleep 5
+          CODE=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 https://saugy-solutions.ch/ || echo '000')
+
+          if [ "$CODE" = "200" ]; then
+            echo "### Veröffentlichung erfolgreich" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "Die Startseite antwortet mit Status 200." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::warning::Die Startseite antwortete mit Status ${CODE}. Bitte die Website von Hand prüfen."
+          fi
+
+      - name: Hinweis bei Fehlschlag
+        if: failure()
+        run: |
+          {
+            echo "### Durchgang fehlgeschlagen"
+            echo
+            echo "Es wurde **nichts veröffentlicht**. Die bisherige Website bleibt unverändert online."
+            echo
+            echo "Nächste Schritte:"
+            echo "1. Im Protokoll oben den fehlgeschlagenen Schritt öffnen."
+            echo "2. Bei einem Fehler in der Qualitätsprüfung: Die Meldung nennt Seite und Ursache."
+            echo "3. Bei einem Fehler bei der Übertragung: Zugangsdaten und Pfad in den Secrets prüfen."
+            echo "4. Nach der Korrektur genügt ein erneuter Start über \"Run workflow\"."
+            echo
+            echo "Der zuletzt erfolgreiche Build liegt als Artefakt bereit und kann notfalls"
+            echo "von Hand hochgeladen werden."
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -33,12 +33,13 @@ export default defineConfig({
       serialize(item) {
         if (item.url === `${SITE.url}/`) {
           item.priority = 1.0;
-          item.changefreq = 'monthly';
+          // `changefreq` erwartet einen Enum-Wert; die Zeichenkette entspricht ihm.
+          item.changefreq = /** @type {any} */ ('monthly');
         } else if (/\/(leistungen|projekte|kontakt)\/$/.test(item.url)) {
           item.priority = 0.9;
         } else if (/\/(datenschutz|impressum)\/$/.test(item.url)) {
           item.priority = 0.2;
-          item.changefreq = 'yearly';
+          item.changefreq = /** @type {any} */ ('yearly');
         } else {
           item.priority = 0.7;
         }

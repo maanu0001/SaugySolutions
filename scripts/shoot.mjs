@@ -9,7 +9,9 @@ const full = flags.includes('--full');
 
 const browser = await chromium.launch({
   // Vorinstalliertes Chromium dieser Umgebung nutzen (kein Download nötig).
-  executablePath: process.env.CHROMIUM_PATH ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  // Ohne CHROMIUM_PATH nutzt Playwright seine eigene Installation
+  // (so läuft es auch auf einem GitHub-Runner).
+  executablePath: process.env.CHROMIUM_PATH || undefined,
   args: ['--no-sandbox', '--disable-dev-shm-usage'],
 });
 const page = await browser.newPage({

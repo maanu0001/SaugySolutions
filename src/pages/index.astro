@@ -37,10 +37,8 @@ const order = Object.entries(sections)
   .sort((a, b) => (a[1]?.order ?? 99) - (b[1]?.order ?? 99))
   .map(([key, config]) => ({ key, ...config }));
 
-const show = (key) => order.find((s) => s.key === key);
-
 /** Wechselt den Abschnittshintergrund, damit die Seite Rhythmus bekommt. */
-const bg = (key) => (order.findIndex((s) => s.key === key) % 2 === 1 ? 'section--alt' : '');
+const bg = (key: string) => (order.findIndex((s) => s.key === key) % 2 === 1 ? 'section--alt' : '');
 
 const faqSchema = {
   '@type': 'FAQPage',

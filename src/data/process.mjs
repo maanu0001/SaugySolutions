@@ -4,6 +4,7 @@
  */
 import { processData, activeSorted } from './content.mjs';
 
+/** @type {import('./types').ProcessStep[]} */
 export const PROCESS = activeSorted(processData.items).map((item) => ({
   title: item.title ?? '',
   summary: item.summary ?? '',
@@ -13,4 +14,5 @@ export const PROCESS = activeSorted(processData.items).map((item) => ({
 }));
 
 /** Hinweise, die den Ablauf für Kundschaft ohne Vorkenntnisse einordnen. */
+/** @type {string[]} */
 export const PROCESS_NOTES = processData.notes ?? [];

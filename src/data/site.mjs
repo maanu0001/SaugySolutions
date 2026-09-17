@@ -70,6 +70,7 @@ function telHref(phone) {
   return `tel:${String(phone ?? '').replace(/[^0-9+]/g, '')}`;
 }
 
+/** @type {{person: string, phone: string, phoneHref: string, email: string, emailHref: string, responseNote: string}} */
 export const CONTACT = {
   person: contact.person ?? '',
   phone: contact.phone ?? '',
@@ -86,6 +87,7 @@ export const CONTACT = {
 export const LEGAL = {
   provider: legal.provider ?? company.name ?? '',
   responsible: legal.responsible ?? '',
+  /** @type {import('./types').PostalAddress} */
   address: legal.address ?? {},
   legalForm: legal.legal_form ?? '',
   /** Leerer Wert bedeutet: nicht vorhanden – die Zeile entfällt dann. */
@@ -140,10 +142,13 @@ export function isPending(value) {
 // ---------------------------------------------------------------------------
 
 /** Nur Einträge mit Beschriftung und Adresse werden ausgegeben. */
+/** @type {import('./types').SocialProfile[]} */
 export const SOCIAL = (siteData.social ?? []).filter((item) => item?.label && item?.href);
 
+/** @type {import('./types').NavItem[]} */
 export const NAV = siteData.navigation ?? [];
 export const NAV_CTA = siteData.navigation_cta ?? { label: 'Projekt anfragen', href: '/kontakt/' };
+/** @type {import('./types').NavItem[]} */
 export const FOOTER_LEGAL = siteData.footer_legal ?? [];
 
 export const FOOTER = {
