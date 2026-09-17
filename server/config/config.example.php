@@ -16,6 +16,8 @@
  *  1. Umgebungsvariablen des Servers (bevorzugt, siehe unten)
  *  2. EINE EBENE ÜBER DEM WEBROOT:      ../saugy-solutions-config.php
  *     -> empfohlen, weil die Datei dann gar nicht über das Web erreichbar ist
+ *     -> bei Hostpoint: /home/<benutzer>/saugy-solutions-config.php
+ *        (das Webroot ist dort der Ordner `www`)
  *  3. Innerhalb des Webroots:           /api/config/config.php
  *     -> nur verwenden, wenn (2) beim Hosting nicht möglich ist. Der Zugriff
  *        wird über die .htaccess im Ordner /api/config/ gesperrt.
@@ -81,11 +83,17 @@ return [
      * false = Versand über die PHP-Funktion mail() (nur als Notlösung)
      */
     'use_smtp'      => true,
-    'smtp_host'     => 'smtp.example.ch',
+
+    /**
+     * Werte für Hostpoint (aktuelle Angaben im Control Panel unter
+     * E-Mail -> Konto -> Servereinstellungen).
+     */
+    'smtp_host'     => 'asmtp.mail.hostpoint.ch',
     'smtp_port'     => 587,
     /** 'tls' für Port 587 (STARTTLS), 'ssl' für Port 465, '' für unverschlüsselt. */
     'smtp_security' => 'tls',
     'smtp_auth'     => true,
+    /** Vollständige E-Mail-Adresse des Postfachs, nicht nur der Benutzername. */
     'smtp_user'     => 'formular@saugy-solutions.ch',
     'smtp_pass'     => '',
 

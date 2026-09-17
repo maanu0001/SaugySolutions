@@ -13,7 +13,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
 import LegalValue from '../components/LegalValue.astro';
-import { LEGAL, CONTACT, SITE } from '../data/site.mjs';
+import { LEGAL, CONTACT, SITE, addressLines } from '../data/site.mjs';
 
 const title = 'Datenschutzerklärung | Saugy Solutions';
 const description =
@@ -42,7 +42,11 @@ const description =
           </div>
           <div>
             <dt>Adresse</dt>
-            <dd><LegalValue value={LEGAL.address} /></dd>
+            <dd>
+              {addressLines().map((line) => (
+                <span class="legal__line">{line}</span>
+              ))}
+            </dd>
           </div>
           <div>
             <dt>E-Mail</dt>
@@ -211,6 +215,10 @@ const description =
   .legal__meta {
     margin: var(--sp-3) 0 var(--sp-7);
     color: var(--c-text-muted);
+  }
+
+  .legal__line {
+    display: block;
   }
 
   .legal__updated {

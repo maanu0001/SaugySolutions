@@ -82,18 +82,78 @@ export const LEGAL = {
   /** Verantwortliche und datenschutzrechtlich zuständige Person. */
   responsible: 'Manuel Saugy',
 
-  // --- Noch zu bestätigende Angaben --------------------------------------
-  address: pending('Geschäftsadresse', 'Strasse, Nr., PLZ und Ort des Anbieters'),
-  legalForm: pending('Rechtsform', 'z. B. Einzelunternehmen'),
-  uid: pending('UID / MWST-Nummer', 'nur angeben, falls tatsächlich vorhanden'),
-  hostingProvider: pending('Hostinganbieter', 'Name und Sitz des Webhosters'),
-  hostingLocation: pending('Serverstandort', 'Land, in dem die Website gehostet wird'),
-  mailProvider: pending('SMTP-/E-Mail-Anbieter', 'Anbieter für den Versand der Formularnachrichten'),
-  // -----------------------------------------------------------------------
+  /**
+   * Geschäftsadresse, strukturiert hinterlegt. Die einzelnen Felder werden
+   * sowohl für die Anzeige im Impressum als auch für die strukturierten Daten
+   * (schema.org PostalAddress) verwendet.
+   */
+  address: {
+    name: 'Manuel Saugy',
+    street: 'Bücklirain 8b',
+    postalCode: '5312',
+    locality: 'Döttingen',
+    country: 'Schweiz',
+    countryCode: 'CH',
+  },
+
+  /**
+   * Rechtsform.
+   *
+   * Hinweis: Wer in der Schweiz als natürliche Person selbstständig eine
+   * Erwerbstätigkeit ausübt – auch nebenberuflich –, führt von Gesetzes wegen
+   * ein Einzelunternehmen. Ein Eintrag im Handelsregister ist erst ab einem
+   * Jahresumsatz von 100 000 CHF Pflicht. „Keine Rechtsform“ gibt es rechtlich
+   * nicht; der Zusatz stellt klar, dass kein Registereintrag besteht.
+   */
+  legalForm: 'Einzelunternehmen (nicht im Handelsregister eingetragen)',
+
+  /**
+   * UID bzw. MWST-Nummer. `null` bedeutet: nicht vorhanden. Die Zeile wird
+   * im Impressum dann gar nicht ausgegeben – eine nicht existierende Nummer
+   * muss nicht angegeben werden.
+   */
+  uid: null,
+
+  /** Webhosting. */
+  hostingProvider: 'Hostpoint AG, Rapperswil-Jona, Schweiz',
+  hostingLocation: 'Schweiz',
+
+  /** Anbieter für den Versand der Formularnachrichten. */
+  mailProvider: 'Hostpoint AG, Rapperswil-Jona, Schweiz',
 
   /** Datum der letzten inhaltlichen Überarbeitung der Rechtstexte. */
-  lastUpdated: '2026-09-16',
+  lastUpdated: '2026-09-17',
 };
+
+/**
+ * Setzt die Adresse zu einer einzeiligen Schreibweise zusammen.
+ * Beispiel: „Manuel Saugy, Bücklirain 8b, 5312 Döttingen, Schweiz“
+ */
+export function formatAddress(address = LEGAL.address) {
+  return [
+    address.name,
+    address.street,
+    `${address.postalCode} ${address.locality}`,
+    address.country,
+  ]
+    .filter(Boolean)
+    .join(', ');
+}
+
+/**
+ * Liefert die Adresse als Zeilen – für die mehrzeilige Darstellung im
+ * Impressum und in der Datenschutzerklärung.
+ *
+ * @returns {string[]}
+ */
+export function addressLines(address = LEGAL.address) {
+  return [
+    address.name,
+    address.street,
+    `${address.postalCode} ${address.locality}`,
+    address.country,
+  ].filter(Boolean);
+}
 
 // ---------------------------------------------------------------------------
 //  Social Media

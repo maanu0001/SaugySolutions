@@ -6,7 +6,7 @@
  * Open-Graph-Daten und strukturierte Daten werden hier zentral erzeugt, damit
  * sie nicht auf jeder Seite wiederholt werden müssen.
  */
-import { SITE, CONTACT, LEGAL, isPending } from '../data/site.mjs';
+import { SITE, CONTACT, LEGAL } from '../data/site.mjs';
 
 interface Props {
   title: string;
@@ -28,8 +28,7 @@ const ogImage = new URL(image ?? SITE.ogImage, SITE.url).href;
 
 /**
  * Grunddaten des Unternehmens als strukturierte Daten.
- * Die Geschäftsadresse wird bewusst erst ausgegeben, wenn sie in
- * src/data/site.mjs hinterlegt ist – es wird keine Adresse erfunden.
+ * Die Angaben stammen ausschliesslich aus src/data/site.mjs.
  */
 const organisation: Record<string, unknown> = {
   '@type': 'ProfessionalService',
@@ -59,9 +58,14 @@ const organisation: Record<string, unknown> = {
   ],
 };
 
-if (!isPending(LEGAL.address)) {
-  organisation.address = { '@type': 'PostalAddress', streetAddress: LEGAL.address, addressCountry: 'CH' };
-}
+// Geschäftsadresse strukturiert ausgeben – hilft bei der lokalen Auffindbarkeit.
+organisation.address = {
+  '@type': 'PostalAddress',
+  streetAddress: LEGAL.address.street,
+  postalCode: LEGAL.address.postalCode,
+  addressLocality: LEGAL.address.locality,
+  addressCountry: LEGAL.address.countryCode,
+};
 
 const website = {
   '@type': 'WebSite',

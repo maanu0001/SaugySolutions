@@ -463,28 +463,36 @@ Darstellung – es wird also kein Screenshot vorgetäuscht.
 
 ## 12. Vor der Veröffentlichung bestätigen
 
-Die folgenden Angaben sind **nicht bekannt und wurden bewusst nicht erfunden**.
-Sie stehen als deutlich markierte Platzhalter in `src/data/site.mjs` und
-erscheinen rot umrandet auf Impressum und Datenschutzseite.
-`npm run deploy:build` listet sie bei jedem Durchlauf auf.
+### Rechtliche Angaben – vollständig hinterlegt
 
-| # | Angabe | Feld in `site.mjs` | Erscheint auf |
-|---|---|---|---|
-| 1 | **Geschäftsadresse** (Strasse, PLZ, Ort) | `LEGAL.address` | Impressum, Datenschutz, strukturierte Daten |
-| 2 | **Rechtsform** (z. B. Einzelunternehmen) | `LEGAL.legalForm` | Impressum |
-| 3 | **UID / MWST-Nummer** (nur falls vorhanden) | `LEGAL.uid` | Impressum |
-| 4 | **Hostinganbieter** (Name und Sitz) | `LEGAL.hostingProvider` | Impressum, Datenschutz |
-| 5 | **Serverstandort** (Land) | `LEGAL.hostingLocation` | Impressum, Datenschutz |
-| 6 | **SMTP-/E-Mail-Anbieter** | `LEGAL.mailProvider` | Datenschutz |
+Alle rechtlich erforderlichen Angaben sind in `src/data/site.mjs` unter `LEGAL`
+eingetragen. `npm run deploy:build` meldet keine offenen Platzhalter mehr.
 
-Ist eine Angabe nicht zutreffend (etwa keine UID vorhanden), den Platzhalter
-durch eine ehrliche Formulierung ersetzen, zum Beispiel:
+| Angabe | Wert |
+|---|---|
+| Geschäftsadresse | Manuel Saugy, Bücklirain 8b, 5312 Döttingen, Schweiz |
+| Rechtsform | Einzelunternehmen (nicht im Handelsregister eingetragen) |
+| UID / MWST-Nummer | nicht vorhanden – die Zeile entfällt im Impressum |
+| Hostinganbieter | Hostpoint AG, Rapperswil-Jona, Schweiz |
+| Serverstandort | Schweiz |
+| SMTP-Anbieter | Hostpoint AG, Rapperswil-Jona, Schweiz |
 
-```js
-uid: 'Nicht im Handelsregister eingetragen',
-```
+**Zur Rechtsform:** Wer in der Schweiz als natürliche Person selbstständig
+erwerbstätig ist – auch nebenberuflich –, führt von Gesetzes wegen ein
+**Einzelunternehmen**. Eine „keine Rechtsform“ gibt es rechtlich nicht. Ein
+Eintrag im Handelsregister ist erst ab 100 000 CHF Jahresumsatz Pflicht; der
+Klammerzusatz stellt klar, dass kein Registereintrag besteht. Das Impressum
+ergänzt dazu einen erklärenden Satz, weshalb keine UID vorhanden ist.
 
-### Weitere Punkte, die zu bestätigen sind
+**Zur Adresse:** Die angegebene Adresse erscheint öffentlich im Impressum und
+in der Datenschutzerklärung – das ist für ein Impressum so vorgesehen und
+notwendig, damit der Anbieter erreichbar ist.
+
+**Falls sich etwas ändert:** ausschliesslich `LEGAL` in `src/data/site.mjs`
+anpassen. Impressum, Datenschutzerklärung und die strukturierten Daten
+übernehmen die Werte automatisch.
+
+### Noch inhaltlich zu bestätigen
 
 * **Projektbeschreibungen** (`src/data/projects.mjs`) – sie halten sich an das,
   was auf den öffentlich erreichbaren Websites erkennbar ist. Bitte einmal
@@ -497,13 +505,42 @@ uid: 'Nicht im Handelsregister eingetragen',
 * **Social-Media-Profile** – `SOCIAL` in `site.mjs` ist leer. Nur echte,
   bestehende Profile eintragen; der Footer blendet den Bereich sonst aus.
 
+### Hostpoint-spezifische Hinweise
+
+Für die SMTP-Konfiguration (siehe [Abschnitt 7](#7-kontaktformular-einrichten-php-und-smtp))
+gelten bei Hostpoint folgende Werte:
+
+```php
+'smtp_host'     => 'asmtp.mail.hostpoint.ch',
+'smtp_port'     => 587,
+'smtp_security' => 'tls',
+'smtp_auth'     => true,
+'smtp_user'     => 'formular@saugy-solutions.ch',   // vollständige Adresse
+'smtp_pass'     => '…',                             // Passwort des Postfachs
+```
+
+Die Absenderadresse muss ein bei Hostpoint eingerichtetes Postfach der Domain
+`saugy-solutions.ch` sein. Die aktuellen Serverdaten stehen im Hostpoint
+Control Panel unter *E-Mail → Konto → Servereinstellungen*.
+
+Bei Hostpoint liegt das Webroot im Ordner `www`. Die empfohlene
+Konfigurationsdatei kommt daher **neben** diesen Ordner:
+
+```
+/home/<benutzer>/
+├── saugy-solutions-config.php     ← hierhin (nicht über das Web erreichbar)
+└── www/                           ← Inhalt von dist/ hierhin
+    ├── index.html
+    └── api/
+```
+
 ---
 
 ## 13. Go-live-Checkliste
 
 ### Vor dem Hochladen
 
-- [ ] Alle sechs Platzhalter aus [Abschnitt 12](#12-vor-der-veröffentlichung-bestätigen) ersetzt
+- [ ] Rechtliche Angaben in `LEGAL` geprüft (siehe [Abschnitt 12](#12-vor-der-veröffentlichung-bestätigen))
 - [ ] `npm run deploy:build` läuft ohne Fehler und ohne Platzhalterwarnung
 - [ ] `npm run qa` meldet keine Fehler
 - [ ] `npm run qa:browser` meldet keine Fehler

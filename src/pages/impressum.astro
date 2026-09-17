@@ -11,7 +11,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
 import LegalValue from '../components/LegalValue.astro';
-import { LEGAL, CONTACT, SITE } from '../data/site.mjs';
+import { LEGAL, CONTACT, SITE, addressLines } from '../data/site.mjs';
 
 const title = 'Impressum | Saugy Solutions';
 const description = 'Anbieterinformationen und Kontaktangaben von Saugy Solutions.';
@@ -42,17 +42,37 @@ const description = 'Anbieterinformationen und Kontaktangaben von Saugy Solution
           </div>
           <div>
             <dt>Adresse</dt>
-            <dd><LegalValue value={LEGAL.address} /></dd>
+            <dd>
+              {addressLines().map((line) => (
+                <span class="legal__line">{line}</span>
+              ))}
+            </dd>
           </div>
-          <div>
-            <dt>Land</dt>
-            <dd>Schweiz</dd>
-          </div>
-          <div>
-            <dt>UID / MWST-Nummer</dt>
-            <dd><LegalValue value={LEGAL.uid} /></dd>
-          </div>
+          {
+            /*
+              UID nur ausgeben, wenn tatsächlich eine vorhanden ist. Eine nicht
+              existierende Nummer muss nicht angegeben werden.
+            */
+            LEGAL.uid && (
+              <div>
+                <dt>UID / MWST-Nummer</dt>
+                <dd>
+                  <LegalValue value={LEGAL.uid} />
+                </dd>
+              </div>
+            )
+          }
         </dl>
+
+        {
+          !LEGAL.uid && (
+            <p>
+              Saugy Solutions wird als nebenberufliche selbstständige Tätigkeit geführt und ist
+              nicht im Handelsregister eingetragen. Eine UID beziehungsweise MWST-Nummer besteht
+              daher nicht.
+            </p>
+          )
+        }
 
         <h2>Kontakt</h2>
         <dl>
@@ -130,6 +150,11 @@ const description = 'Anbieterinformationen und Kontaktangaben von Saugy Solution
   .legal__meta {
     margin: var(--sp-3) 0 var(--sp-7);
     color: var(--c-text-muted);
+  }
+
+  /* Adresszeilen untereinander statt in einer Zeile. */
+  .legal__line {
+    display: block;
   }
 
   .legal__updated {
