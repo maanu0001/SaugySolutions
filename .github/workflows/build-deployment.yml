@@ -1,0 +1,92 @@
+# ============================================================================
+#  DEPLOYMENT-BUILD ERZEUGEN
+# ============================================================================
+#
+#  Baut die statische Website, prüft das Ergebnis und stellt den fertigen
+#  Ordner dist/ als herunterladbares Artefakt bereit.
+#
+#  Der Workflow lädt bewusst NICHTS auf den Webserver hoch und enthält keine
+#  Zugangsdaten. Das Hochladen auf den Webspace erfolgt weiterhin von Hand
+#  (siehe README, Abschnitt 6).
+#
+#  Verwendung:
+#    GitHub -> Actions -> „Deployment-Build erzeugen“ -> „Run workflow“
+#    Nach dem Durchlauf liegt unten auf der Seite das Artefakt
+#    „saugy-solutions-deployment“ zum Herunterladen bereit.
+# ============================================================================
+
+name: Deployment-Build erzeugen
+
+# Startet ausschliesslich von Hand – kein automatischer Lauf bei jedem Push.
+on:
+  workflow_dispatch:
+
+# Weniger Rechte als nötig gibt es nicht: Der Workflow liest nur das Repository.
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Statische Website bauen und prüfen
+    runs-on: ubuntu-latest
+
+    env:
+      # Sicherheitsnetz: Playwright wird nur für die optionale Browserprüfung
+      # gebraucht, nicht für Build und Qualitätskontrolle. Sollte eine künftige
+      # Version wieder Browser beim Installieren herunterladen, bleibt das hier
+      # abgeschaltet.
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Abhängigkeiten installieren
+        run: npm ci
+
+      - name: Deployment-Build erzeugen
+        # Erstellt dist/ inklusive .htaccess, PHP-Endpunkt und PHPMailer.
+        run: npm run deploy:build
+
+      - name: Qualitätskontrolle
+        # Prüft interne Links, Überschriftenstruktur, Metadaten, strukturierte
+        # Daten, Vorlagenreste und die Schweizer Schreibweise.
+        run: npm run qa
+
+      - name: Inhalt des Artefakts zusammenfassen
+        # Macht im Actions-Protokoll sichtbar, was im Artefakt landet – vor
+        # allem die versteckten Dateien, die sonst leicht übersehen werden.
+        run: |
+          {
+            echo "### Inhalt von \`dist/\`"
+            echo
+            echo "| Kennzahl | Wert |"
+            echo "| --- | --- |"
+            echo "| Dateien insgesamt | $(find dist -type f | wc -l) |"
+            echo "| HTML-Seiten | $(find dist -name '*.html' | wc -l) |"
+            echo "| Gesamtgrösse | $(du -sh dist | cut -f1) |"
+            echo
+            echo "#### Versteckte Dateien"
+            echo
+            echo '```'
+            find dist -name '.*' -type f | sort
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Deployment als Artefakt hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: saugy-solutions-deployment
+          path: dist/
+          # Zwingend: Ohne diese Einstellung fehlen .htaccess sowie die
+          # Schutzdateien in api/, api/config/ und api/var/ im Artefakt –
+          # die Website funktioniert dann auf dem Server nicht korrekt.
+          include-hidden-files: true
+          # Ein leeres Artefakt wäre ein stiller Fehlschlag.
+          if-no-files-found: error
